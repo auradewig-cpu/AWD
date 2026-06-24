@@ -20,10 +20,6 @@ function detectStatic(): boolean {
     if (conn.saveData) return true;
     if (conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g') return true;
   }
-  const memory = (navigator as any).deviceMemory;
-  if (memory && memory <= 2) return true;
-  if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) return true;
-  if (window.innerWidth <= 480) return true;
   return false;
 }
 
