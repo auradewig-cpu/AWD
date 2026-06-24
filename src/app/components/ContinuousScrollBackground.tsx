@@ -14,7 +14,17 @@ const FALLBACK_FRAME = 96;
 // even for one frame. Safe here: pure client-side Vite SPA, no SSR.
 function detectStatic(): boolean {
   if (typeof window === 'undefined') return true;
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
+  const conn = (navigator as any).connection;
+  if (conn) {
+    if (conn.saveData) return true;
+    if (conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g') return true;
+  }
+  const memory = (navigator as any).deviceMemory;
+  if (memory && memory <= 2) return true;
+  if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) return true;
+  if (window.innerWidth <= 480) return true;
+  return false;
 }
 
 /**
@@ -27,11 +37,11 @@ export function ContinuousScrollBackground() {
   const [isStatic] = useState(detectStatic);
   const [asset2Enabled, setAsset2Enabled] = useState(false);
 
-  const { images: images1, ready: ready1, progress: progress1 } = usePreloadedSequence(
+  const { images: images1, ready: ready1, progress: progress1, loadMore: loadMore1 } = usePreloadedSequence(
     ASSET1_BASE,
     !isStatic,
   );
-  const { images: images2, ready: ready2 } = usePreloadedSequence(
+  const { images: images2, ready: ready2, loadMore: loadMore2 } = usePreloadedSequence(
     ASSET2_BASE,
     !isStatic && asset2Enabled,
   );
@@ -47,6 +57,8 @@ export function ContinuousScrollBackground() {
     ready1,
     ready2,
     onNearFold: () => setAsset2Enabled(true),
+    loadMore1,
+    loadMore2,
   });
 
   // Global scrim: keeps every section's plain text readable against

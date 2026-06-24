@@ -24,29 +24,38 @@ interface PreloadState {
   images: HTMLImageElement[];
   ready: boolean;
   progress: number;
+  loadMore: (maxFrame: number) => void;
 }
 
-// Preloads a full 192-frame sequence as HTMLImageElements. Gated by
-// `enabled` so the caller controls eager (asset1) vs lazy (asset2) start.
+// Preloads a 192-frame sequence progressively. Only the first 30 frames
+// load on mount; remaining frames load on demand via `loadMore()` as the
+// user scrolls. This cuts initial payload from ~9.8MB to ~1.5MB.
 export function usePreloadedSequence(basePath: string, enabled: boolean): PreloadState {
   const imagesRef = useRef<HTMLImageElement[]>([]);
+  const loadedUpToRef = useRef(0);
   const [loaded, setLoaded] = useState(0);
   const [ready, setReady] = useState(false);
+  const basePathRef = useRef(basePath);
+  basePathRef.current = basePath;
 
   useEffect(() => {
     if (!enabled) return;
     let cancelled = false;
     let loadedCount = 0;
     const images: HTMLImageElement[] = new Array(FRAME_COUNT);
+    imagesRef.current = images;
+    loadedUpToRef.current = 0;
+    setLoaded(0);
+    setReady(false);
 
     const onSettle = () => {
       if (cancelled) return;
       loadedCount += 1;
       setLoaded(loadedCount);
-      if (loadedCount >= FRAME_COUNT) setReady(true);
+      if (loadedCount >= 30) setReady(true);
     };
 
-    for (let i = 0; i < FRAME_COUNT; i += 1) {
+    for (let i = 0; i < 30; i += 1) {
       const img = new Image();
       img.decoding = 'async';
       img.src = buildFrameUrl(basePath, i + 1);
@@ -54,7 +63,7 @@ export function usePreloadedSequence(basePath: string, enabled: boolean): Preloa
       img.onerror = onSettle;
       images[i] = img;
     }
-    imagesRef.current = images;
+    loadedUpToRef.current = 30;
 
     return () => {
       cancelled = true;
@@ -68,7 +77,23 @@ export function usePreloadedSequence(basePath: string, enabled: boolean): Preloa
     };
   }, [basePath, enabled]);
 
-  return { images: imagesRef.current, ready, progress: loaded / FRAME_COUNT };
+  const loadMore = (maxFrame: number) => {
+    if (maxFrame <= loadedUpToRef.current) return;
+    const images = imagesRef.current;
+    if (!images || images.length === 0) return;
+    const start = loadedUpToRef.current + 1;
+    for (let i = start; i <= maxFrame; i++) {
+      const idx = i - 1;
+      if (images[idx]) continue;
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = buildFrameUrl(basePathRef.current, i);
+      images[idx] = img;
+    }
+    loadedUpToRef.current = maxFrame;
+  };
+
+  return { images: imagesRef.current, ready, progress: loaded / FRAME_COUNT, loadMore };
 }
 
 function drawFrame(canvas: HTMLCanvasElement, img: HTMLImageElement | undefined) {
@@ -98,6 +123,10 @@ interface DriveOptions {
   /** Fired once when scroll progress nears the 50% fold, to trigger asset2 preload. */
   onNearFold: () => void;
   nearFoldThreshold?: number;
+  /** Progressive frame loader for asset1 — called when scroll reaches each threshold. */
+  loadMore1?: (maxFrame: number) => void;
+  /** Progressive frame loader for asset2 — called when scroll reaches each threshold. */
+  loadMore2?: (maxFrame: number) => void;
 }
 
 // Drives both canvases off whole-document scroll progress: maps the first
@@ -113,6 +142,8 @@ export function useContinuousScrollDrive({
   ready2,
   onNearFold,
   nearFoldThreshold = 0.35,
+  loadMore1,
+  loadMore2,
 }: DriveOptions): void {
   const lastDrawn1 = useRef(-1);
   const lastDrawn2 = useRef(-1);
@@ -126,8 +157,10 @@ export function useContinuousScrollDrive({
     if (!canvas1 || !canvas2) return;
 
     const resizeCanvas = (canvas: HTMLCanvasElement) => {
-      const isMobile = window.innerWidth < 768;
-      const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 2);
+      const isMobileDevice = window.innerWidth <= 768;
+      const dpr = isMobileDevice
+        ? 1
+        : Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = Math.round(window.innerWidth * dpr);
       canvas.height = Math.round(window.innerHeight * dpr);
     };
@@ -151,6 +184,19 @@ export function useContinuousScrollDrive({
       if (!nearFoldFiredRef.current && p >= nearFoldThreshold) {
         nearFoldFiredRef.current = true;
         onNearFold();
+      }
+
+      // Progressive frame loading — only fetch what's needed for current scroll
+      if (loadMore1) {
+        if (p > 0.08) loadMore1(80);
+        if (p > 0.20) loadMore1(150);
+        if (p > 0.35) loadMore1(192);
+      }
+      if (loadMore2 && ready2) {
+        const p2 = (p - HALF) / HALF;
+        if (p2 > 0.15) loadMore2(80);
+        if (p2 > 0.40) loadMore2(150);
+        if (p2 > 0.70) loadMore2(192);
       }
 
       const idx1 = frameFromT(p / HALF);
