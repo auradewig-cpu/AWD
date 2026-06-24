@@ -123,6 +123,7 @@ export function Navbar() {
             <button
               className="md:hidden"
               onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label={mobileOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi'}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#FAFAFA', padding: 4 }}
             >
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}

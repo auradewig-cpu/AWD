@@ -126,10 +126,18 @@ export function useContinuousScrollDrive({
     if (!canvas1 || !canvas2) return;
 
     const resizeCanvas = (canvas: HTMLCanvasElement) => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const isMobile = window.innerWidth < 768;
+      const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 2);
       canvas.width = Math.round(window.innerWidth * dpr);
       canvas.height = Math.round(window.innerHeight * dpr);
     };
+
+    const $body = document.body;
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) {
+      $body.style.overscrollBehavior = 'none';
+      $body.style.WebkitOverflowScrolling = 'auto';
+    }
 
     function getProgress(): number {
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -212,6 +220,10 @@ export function useContinuousScrollDrive({
       window.removeEventListener('resize', resizeAll);
       ro.disconnect();
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+      if (isTouchDevice) {
+        $body.style.overscrollBehavior = '';
+        $body.style.WebkitOverflowScrolling = '';
+      }
     };
   }, [canvas1Ref, canvas2Ref, images1, images2, ready1, ready2, onNearFold, nearFoldThreshold]);
 }

@@ -14,8 +14,7 @@ const FALLBACK_FRAME = 96;
 // even for one frame. Safe here: pure client-side Vite SPA, no SSR.
 function detectStatic(): boolean {
   if (typeof window === 'undefined') return true;
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  return reduced || window.innerWidth < 768;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 /**
