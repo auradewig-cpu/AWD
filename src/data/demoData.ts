@@ -1,3 +1,5 @@
+export const DEMO_DATA_VERSION = 2
+
 export const DEMO_DATA: Record<string, {
   id: number
   tier: string
