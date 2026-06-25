@@ -1,4 +1,4 @@
-export const DEMO_DATA_VERSION = 2
+export const DEMO_DATA_VERSION = 3
 
 export const DEMO_DATA: Record<string, {
   id: number
@@ -25,7 +25,7 @@ export const DEMO_DATA: Record<string, {
       adminUrl: 'https://demo-lumina-hotel.vercel.app/admin/login',
       adminUser: 'admin@lumina.id',
       adminPass: 'lumina123',
-      thumbnail: '',
+      thumbnail: 'https://res.cloudinary.com/dr0xe0tgr/image/upload/v1782188487/lumina_zt0log.webp',
       status: 'active',
       order: 0,
     },
@@ -39,7 +39,7 @@ export const DEMO_DATA: Record<string, {
       adminUrl: 'https://demo-forma-studio.vercel.app/admin/login',
       adminUser: 'admin@formastudio.id',
       adminPass: 'forma123',
-      thumbnail: '',
+      thumbnail: 'https://res.cloudinary.com/dr0xe0tgr/image/upload/v1782188487/forma_u5wclp.webp',
       status: 'active',
       order: 1,
     },
@@ -53,7 +53,7 @@ export const DEMO_DATA: Record<string, {
       adminUrl: 'https://demo-lume-klinik.vercel.app/admin/login',
       adminUser: 'admin@lume.id',
       adminPass: 'lume123',
-      thumbnail: '',
+      thumbnail: 'https://res.cloudinary.com/dr0xe0tgr/image/upload/v1782284790/Screenshot_2026-06-24_140550_euhkf0.webp',
       status: 'active',
       order: 2,
     },
