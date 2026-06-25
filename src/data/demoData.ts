@@ -38,7 +38,7 @@ export const DEMO_DATA: Record<string, {
       adminUser: 'admin@kliniksehat.id',
       adminPass: 'klinik123',
       thumbnail: '',
-      status: 'active',
+      status: 'draft',
       order: 1,
     },
   ],
