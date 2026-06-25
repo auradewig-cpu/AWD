@@ -11,6 +11,7 @@ import {
   type DemoCategory,
   type DemoEntry,
 } from '@/admin/storage';
+import { DEMO_DATA } from '@/data/demoData';
 
 const WA_NUMBER = '6281234567890';
 
@@ -45,7 +46,25 @@ export function DemoTierPage() {
   const isValid = !!tier && VALID_TIERS.includes(tier as DemoTier);
   const tierId = tier as DemoTier;
 
-  const allEntries = useMemo(() => loadDemoData().entries, []);
+  const allEntries = useMemo(() => {
+    const stored = loadDemoData().entries;
+    if (stored.length > 0) return stored;
+    return (DEMO_DATA[tierId] || []).map((d) => ({
+      id: String(d.id),
+      tier: d.tier as DemoTier,
+      name: d.name,
+      category: d.category as DemoCategory,
+      thumbnailUrl: d.thumbnail,
+      demoUrl: d.url,
+      hasAdmin: !!d.adminUrl,
+      adminUrl: d.adminUrl,
+      adminUsername: d.adminUser,
+      adminPassword: d.adminPass,
+      description: d.description,
+      status: d.status as 'active' | 'draft',
+      order: d.order ?? 0,
+    }));
+  }, [tierId]);
 
   const visibleEntries = useMemo(() => {
     if (!isValid) return [];
