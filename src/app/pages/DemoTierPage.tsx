@@ -47,8 +47,9 @@ export function DemoTierPage() {
   const tierId = tier as DemoTier;
 
   const allEntries = useMemo(() => {
-    const stored = loadDemoData().entries;
-    if (stored.length > 0) return stored;
+    const allStored = loadDemoData().entries;
+    const storedForTier = allStored.filter((e) => e.tier === tierId);
+    if (storedForTier.length > 0) return storedForTier;
     return (DEMO_DATA[tierId] || []).map((d) => ({
       id: String(d.id),
       tier: d.tier as DemoTier,
