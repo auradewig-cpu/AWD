@@ -14,26 +14,33 @@ export const STORAGE_KEYS = {
   DEMO: 'awd_demo_data',
 } as const;
 
-export function loadFromStorage<T>(key: string, fallback: T): T {
+export function loadFromStorage<T>(key: string, defaultValue: T): T {
   try {
-    const raw = localStorage.getItem(key);
-    if (raw === null) return fallback;
-    return JSON.parse(raw) as T;
+    const item = localStorage.getItem(key);
+    if (!item) return defaultValue;
+    return JSON.parse(item) as T;
   } catch {
-    return fallback;
+    console.warn('[storage] Failed to load:', key);
+    return defaultValue;
   }
 }
 
-export function saveToStorage<T>(key: string, value: T): void {
+export function saveToStorage<T>(key: string, value: T): boolean {
   try {
     localStorage.setItem(key, JSON.stringify(value));
+    return true;
   } catch {
-    // storage full or unavailable — silently ignore in this demo context
+    console.warn('[storage] Failed to save:', key);
+    return false;
   }
 }
 
 export function resetStorage(key: string): void {
-  localStorage.removeItem(key);
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    console.warn('[storage] Failed to reset:', key);
+  }
 }
 
 // ─── Content type interfaces ──────────────────────────────────────────────────

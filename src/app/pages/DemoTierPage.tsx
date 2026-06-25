@@ -47,13 +47,22 @@ export function DemoTierPage() {
   const tierId = tier as DemoTier;
 
   const allEntries = useMemo(() => {
-    const CURRENT_VERSION = 2;
-    const storedVersion = parseInt(
-      localStorage.getItem('awd_demo_version') || '0'
-    );
+    const CURRENT_VERSION = 3;
+    let storedVersion = 0;
+    try {
+      storedVersion = parseInt(
+        localStorage.getItem('awd_demo_version') || '0', 10
+      );
+    } catch {
+      // localStorage unavailable — use static data
+    }
     if (storedVersion < CURRENT_VERSION) {
-      localStorage.removeItem('awd_demo_data');
-      localStorage.setItem('awd_demo_version', String(CURRENT_VERSION));
+      try {
+        localStorage.removeItem('awd_demo_data');
+        localStorage.setItem('awd_demo_version', String(CURRENT_VERSION));
+      } catch {
+        // localStorage unavailable — use static data anyway
+      }
       return (DEMO_DATA[tierId] || []).map((d) => ({
         id: String(d.id),
         tier: d.tier as DemoTier,

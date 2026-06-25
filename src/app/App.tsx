@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router';
 import { AuthProvider, useAdminAuth } from '@/admin/AuthContext';
 import { ProtectedRoute } from '@/admin/ProtectedRoute';
@@ -5,15 +6,16 @@ import { AdminLayout } from '@/admin/AdminLayout';
 import { HomePage } from './pages/HomePage';
 import { DemoTierPage } from './pages/DemoTierPage';
 import { AdminLogin } from './pages/AdminLogin';
-import { AdminDashboard } from './pages/AdminDashboard';
-import { AdminHero } from './pages/admin/AdminHero';
-import { AdminPricing } from './pages/admin/AdminPricing';
-import { AdminProcess } from './pages/admin/AdminProcess';
-import { AdminFAQ } from './pages/admin/AdminFAQ';
-import { AdminContact } from './pages/admin/AdminContact';
-import { AdminTrust } from './pages/admin/AdminTrust';
-import { AdminWhy } from './pages/admin/AdminWhy';
-import { AdminDemo } from './pages/admin/AdminDemo';
+
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminHero = lazy(() => import('./pages/admin/AdminHero'));
+const AdminPricing = lazy(() => import('./pages/admin/AdminPricing'));
+const AdminProcess = lazy(() => import('./pages/admin/AdminProcess'));
+const AdminFAQ = lazy(() => import('./pages/admin/AdminFAQ'));
+const AdminContact = lazy(() => import('./pages/admin/AdminContact'));
+const AdminTrust = lazy(() => import('./pages/admin/AdminTrust'));
+const AdminWhy = lazy(() => import('./pages/admin/AdminWhy'));
+const AdminDemo = lazy(() => import('./pages/admin/AdminDemo'));
 
 function AdminIndexRedirect() {
   const { isAuthenticated } = useAdminAuth();
@@ -32,24 +34,39 @@ export default function App() {
           path="/admin/*"
           element={
             <AuthProvider>
-              <Routes>
-                <Route path="login" element={<AdminLogin />} />
-                <Route index element={<AdminIndexRedirect />} />
-                <Route element={<ProtectedRoute />}>
-                  <Route element={<AdminLayout />}>
-                    <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="hero" element={<AdminHero />} />
-                    <Route path="pricing" element={<AdminPricing />} />
-                    <Route path="process" element={<AdminProcess />} />
-                    <Route path="faq" element={<AdminFAQ />} />
-                    <Route path="contact" element={<AdminContact />} />
-                    <Route path="demo" element={<AdminDemo />} />
-                    <Route path="trust" element={<AdminTrust />} />
-                    <Route path="why" element={<AdminWhy />} />
-                    <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+              <Suspense fallback={
+                <div style={{
+                  minHeight: '100vh',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#0a0a0a',
+                  color: '#888',
+                  fontSize: 14,
+                  fontFamily: 'sans-serif',
+                }}>
+                  Memuat panel admin...
+                </div>
+              }>
+                <Routes>
+                  <Route path="login" element={<AdminLogin />} />
+                  <Route index element={<AdminIndexRedirect />} />
+                  <Route element={<ProtectedRoute />}>
+                    <Route element={<AdminLayout />}>
+                      <Route path="dashboard" element={<AdminDashboard />} />
+                      <Route path="hero" element={<AdminHero />} />
+                      <Route path="pricing" element={<AdminPricing />} />
+                      <Route path="process" element={<AdminProcess />} />
+                      <Route path="faq" element={<AdminFAQ />} />
+                      <Route path="contact" element={<AdminContact />} />
+                      <Route path="demo" element={<AdminDemo />} />
+                      <Route path="trust" element={<AdminTrust />} />
+                      <Route path="why" element={<AdminWhy />} />
+                      <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+                    </Route>
                   </Route>
-                </Route>
-              </Routes>
+                </Routes>
+              </Suspense>
             </AuthProvider>
           }
         />

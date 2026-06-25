@@ -2,6 +2,14 @@ import { FileText, Globe, CheckCircle2, Circle } from 'lucide-react';
 import { AdminCard } from '@/admin/components';
 import { STORAGE_KEYS, loadFromStorage, type DemoData } from '@/admin/storage';
 
+function hasStorageItem(key: string): boolean {
+  try {
+    return localStorage.getItem(key) !== null;
+  } catch {
+    return false;
+  }
+}
+
 const CONTENT_SECTIONS: { key: string; label: string }[] = [
   { key: STORAGE_KEYS.HERO, label: 'Hero' },
   { key: STORAGE_KEYS.PRICING, label: 'Paket & Harga' },
@@ -15,7 +23,7 @@ const CONTENT_SECTIONS: { key: string; label: string }[] = [
 export function AdminDashboard() {
   const sectionStatus = CONTENT_SECTIONS.map((s) => ({
     label: s.label,
-    custom: localStorage.getItem(s.key) !== null,
+    custom: hasStorageItem(s.key),
   }));
   const customCount = sectionStatus.filter((s) => s.custom).length;
   const demoCount = loadFromStorage<DemoData>(STORAGE_KEYS.DEMO, { entries: [] }).entries.length;
