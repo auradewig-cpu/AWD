@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router';
 import { motion } from 'motion/react';
-import { ExternalLink, ImageOff, Rocket } from 'lucide-react';
+import { ExternalLink, Rocket } from 'lucide-react';
 import { Navbar } from '@/app/components/Navbar';
 import { Footer } from '@/app/components/Footer';
 import {
@@ -49,7 +49,7 @@ export function DemoTierPage() {
   const tierId = tier as DemoTier;
 
   const allEntries = useMemo(() => {
-    const CURRENT_VERSION = 4;
+    const CURRENT_VERSION = 5;
     let storedVersion = 0;
     try {
       storedVersion = parseInt(
@@ -258,10 +258,9 @@ export function DemoTierPage() {
           <EmptyState />
         ) : (
           <div
-            className="demo-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
               gap: 24,
             }}
           >
@@ -273,17 +272,12 @@ export function DemoTierPage() {
       </main>
 
       <Footer />
-
-      <style>{`
-        @media (min-width: 768px) {
-          .demo-grid { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-      `}</style>
     </div>
   );
 }
 
 function DemoCard({ entry, index }: { entry: DemoEntry; index: number }) {
+  const thumbSrc = entry.thumbnailUrl || `https://placehold.co/600x400/0d0d0d/C6FF4A?text=${encodeURIComponent(entry.name)}`;
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -300,45 +294,11 @@ function DemoCard({ entry, index }: { entry: DemoEntry; index: number }) {
     >
       {/* Thumbnail */}
       <div style={{ position: 'relative', aspectRatio: '16 / 10', background: '#0D0F0D' }}>
-        {entry.thumbnailUrl ? (
-          <img
-            src={entry.thumbnailUrl}
-            alt={entry.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          />
-        ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 10,
-            }}
-          >
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                background: '#C6FF4A',
-                borderRadius: 8,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, fontSize: 16, color: '#07080A' }}>
-                A
-              </span>
-            </div>
-            <ImageOff size={20} style={{ color: 'rgba(255,255,255,0.3)' }} />
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>
-              Preview tidak tersedia
-            </span>
-          </div>
-        )}
+        <img
+          src={thumbSrc}
+          alt={entry.name}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
       </div>
 
       {/* Body */}

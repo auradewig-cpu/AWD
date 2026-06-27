@@ -1,4 +1,4 @@
-export const DEMO_DATA_VERSION = 4
+export const DEMO_DATA_VERSION = 5
 
 export const DEMO_DATA: Record<string, {
   id: number
@@ -74,7 +74,22 @@ export const DEMO_DATA: Record<string, {
       order: 0,
     },
   ],
-  ignite: [],
+  ignite: [
+    {
+      id: 2,
+      tier: 'ignite',
+      name: 'GRAHA Studio v2',
+      category: 'Properti & Interior',
+      description: 'Demo website arsitektur premium dengan scroll-scrubbing + Pioneer-style section animations. Paket IGNITE.',
+      url: 'https://demo-graha-v2.vercel.app',
+      adminUrl: '',
+      adminUser: 'admin@graha.id',
+      adminPass: 'graha123',
+      thumbnail: '',
+      status: 'active',
+      order: 0,
+    },
+  ],
   'blazeplus': [],
   apex: [],
 }
