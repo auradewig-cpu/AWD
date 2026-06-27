@@ -6,6 +6,8 @@ import { Navbar } from '@/app/components/Navbar';
 import { Footer } from '@/app/components/Footer';
 import {
   loadDemoData,
+  saveToStorage,
+  STORAGE_KEYS,
   DEMO_CATEGORIES,
   type DemoTier,
   type DemoCategory,
@@ -57,13 +59,7 @@ export function DemoTierPage() {
       // localStorage unavailable — use static data
     }
     if (storedVersion < CURRENT_VERSION) {
-      try {
-        localStorage.removeItem('awd_demo_data');
-        localStorage.setItem('awd_demo_version', String(CURRENT_VERSION));
-      } catch {
-        // localStorage unavailable — use static data anyway
-      }
-      return (DEMO_DATA[tierId] || []).map((d) => ({
+      const allStaticEntries: DemoEntry[] = Object.values(DEMO_DATA).flat().map((d) => ({
         id: String(d.id),
         tier: d.tier as DemoTier,
         name: d.name,
@@ -78,6 +74,13 @@ export function DemoTierPage() {
         status: d.status as 'active' | 'draft',
         order: d.order ?? 0,
       }));
+      try {
+        localStorage.setItem('awd_demo_version', String(CURRENT_VERSION));
+      } catch {
+        // localStorage unavailable — use static data anyway
+      }
+      saveToStorage(STORAGE_KEYS.DEMO, { entries: allStaticEntries });
+      return allStaticEntries.filter((e) => e.tier === tierId);
     }
     const allStored = loadDemoData().entries;
     const storedForTier = allStored.filter((e) => e.tier === tierId);
