@@ -49,7 +49,7 @@ export function DemoTierPage() {
   const tierId = tier as DemoTier;
 
   const allEntries = useMemo(() => {
-    const CURRENT_VERSION = 3;
+    const CURRENT_VERSION = 4;
     let storedVersion = 0;
     try {
       storedVersion = parseInt(

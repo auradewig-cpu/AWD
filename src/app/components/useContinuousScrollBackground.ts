@@ -156,6 +156,17 @@ export function useContinuousScrollDrive({
     const canvas2 = canvas2Ref.current;
     if (!canvas1 || !canvas2) return;
 
+    // Force GPU compositing layer so iOS Safari repaints canvas every frame,
+    // not only after scroll momentum ends.
+    [canvas1, canvas2].forEach((c) => {
+      const s = c.style as CSSStyleDeclaration & { webkitTransform: string; webkitBackfaceVisibility: string };
+      s.transform = 'translateZ(0)';
+      s.webkitTransform = 'translateZ(0)';
+      s.willChange = 'transform';
+      s.backfaceVisibility = 'hidden';
+      s.webkitBackfaceVisibility = 'hidden';
+    });
+
     const resizeCanvas = (canvas: HTMLCanvasElement) => {
       const isMobileDevice = window.innerWidth <= 768;
       const dpr = isMobileDevice
@@ -169,7 +180,6 @@ export function useContinuousScrollDrive({
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice) {
       $body.style.overscrollBehavior = 'none';
-      $body.style.WebkitOverflowScrolling = 'auto';
     }
 
     function getProgress(): number {
@@ -248,7 +258,24 @@ export function useContinuousScrollDrive({
     }
 
     resizeAll();
-    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // On iOS Safari, scroll events do not drive fixed-canvas repaints reliably.
+    // A continuous RAF loop reads window.scrollY directly every frame instead.
+    const isMobileUA = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    let mobileRafActive = false;
+    let mobileRafId: number | null = null;
+
+    if (isMobileUA) {
+      mobileRafActive = true;
+      const tick = () => {
+        if (!mobileRafActive) return;
+        render();
+        mobileRafId = requestAnimationFrame(tick);
+      };
+      mobileRafId = requestAnimationFrame(tick);
+    } else {
+      window.addEventListener('scroll', onScroll, { passive: true });
+    }
     window.addEventListener('resize', resizeAll);
 
     // Document height changes whenever content above/below the fold
@@ -262,13 +289,14 @@ export function useContinuousScrollDrive({
     ro.observe(document.body);
 
     return () => {
+      mobileRafActive = false;
+      if (mobileRafId != null) cancelAnimationFrame(mobileRafId);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', resizeAll);
       ro.disconnect();
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
       if (isTouchDevice) {
         $body.style.overscrollBehavior = '';
-        $body.style.WebkitOverflowScrolling = '';
       }
     };
   }, [canvas1Ref, canvas2Ref, images1, images2, ready1, ready2, onNearFold, nearFoldThreshold]);

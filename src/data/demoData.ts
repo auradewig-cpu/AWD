@@ -1,4 +1,4 @@
-export const DEMO_DATA_VERSION = 3
+export const DEMO_DATA_VERSION = 4
 
 export const DEMO_DATA: Record<string, {
   id: number
@@ -58,7 +58,22 @@ export const DEMO_DATA: Record<string, {
       order: 2,
     },
   ],
-  spark: [],
+  spark: [
+    {
+      id: 1,
+      tier: 'spark',
+      name: 'GRAHA Studio',
+      category: 'Properti & Interior',
+      description: 'Demo website firma arsitektur premium dengan scroll-scrubbing cinematic konstruksi bangunan.',
+      url: 'https://demo-graha.vercel.app',
+      adminUrl: '',
+      adminUser: 'admin@graha.id',
+      adminPass: 'graha123',
+      thumbnail: '',
+      status: 'active',
+      order: 0,
+    },
+  ],
   ignite: [],
   'blazeplus': [],
   apex: [],
