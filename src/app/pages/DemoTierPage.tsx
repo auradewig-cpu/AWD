@@ -49,58 +49,50 @@ export function DemoTierPage() {
   const tierId = tier as DemoTier;
 
   const allEntries = useMemo(() => {
-    const CURRENT_VERSION = 5;
-    let storedVersion = 0;
+    // Coba baca dari localStorage dulu — data admin adalah source of truth
     try {
-      storedVersion = parseInt(
-        localStorage.getItem('awd_demo_version') || '0', 10
-      );
-    } catch {
-      // localStorage unavailable — use static data
-    }
-    if (storedVersion < CURRENT_VERSION) {
-      const allStaticEntries: DemoEntry[] = Object.values(DEMO_DATA).flat().map((d) => ({
-        id: String(d.id),
-        tier: d.tier as DemoTier,
-        name: d.name,
-        category: d.category as DemoCategory,
-        thumbnailUrl: d.thumbnail,
-        demoUrl: d.url,
-        hasAdmin: !!d.adminUrl,
-        adminUrl: d.adminUrl,
-        adminUsername: d.adminUser,
-        adminPassword: d.adminPass,
-        description: d.description,
-        status: d.status as 'active' | 'draft',
-        order: d.order ?? 0,
-      }));
-      try {
-        localStorage.setItem('awd_demo_version', String(CURRENT_VERSION));
-      } catch {
-        // localStorage unavailable — use static data anyway
+      const stored = loadDemoData();
+      const entries = stored?.entries ?? [];
+      if (entries.length > 0) {
+        return entries;
       }
-      saveToStorage(STORAGE_KEYS.DEMO, { entries: allStaticEntries });
-      return allStaticEntries.filter((e) => e.tier === tierId);
+    } catch {
+      // localStorage error → fallback ke static
     }
-    const allStored = loadDemoData().entries;
-    const storedForTier = allStored.filter((e) => e.tier === tierId);
-    if (storedForTier.length > 0) return storedForTier;
-    return (DEMO_DATA[tierId] || []).map((d) => ({
-      id: String(d.id),
-      tier: d.tier as DemoTier,
-      name: d.name,
-      category: d.category as DemoCategory,
-      thumbnailUrl: d.thumbnail,
-      demoUrl: d.url,
-      hasAdmin: !!d.adminUrl,
-      adminUrl: d.adminUrl,
-      adminUsername: d.adminUser,
-      adminPassword: d.adminPass,
-      description: d.description,
-      status: d.status as 'active' | 'draft',
-      order: d.order ?? 0,
-    }));
-  }, [tierId]);
+
+    // Hanya pakai static data kalau localStorage BENAR-BENAR kosong
+    // (pertama kali buka di browser baru, sebelum admin input apapun)
+    const staticEntries: DemoEntry[] = [];
+    const allTiers = Object.entries(DEMO_DATA) as [string, any[]][];
+
+    for (const [tierKey, tierItems] of allTiers) {
+      for (const d of tierItems) {
+        staticEntries.push({
+          id: String(d.id),
+          tier: tierKey as DemoTier,
+          name: d.name,
+          category: d.category as DemoCategory,
+          description: d.description || '',
+          demoUrl: d.url || d.demoUrl || '',
+          hasAdmin: !!d.adminUrl,
+          adminUrl: d.adminUrl || '',
+          adminUsername: d.adminUser || d.adminUsername || '',
+          adminPassword: d.adminPass || d.adminPassword || '',
+          thumbnailUrl: d.thumbnail || d.thumbnailUrl || '',
+          status: (d.status || 'active') as 'active' | 'draft',
+          order: d.order ?? 0,
+        });
+      }
+    }
+
+    if (staticEntries.length > 0) {
+      try {
+        saveToStorage(STORAGE_KEYS.DEMO, { entries: staticEntries });
+      } catch {}
+    }
+
+    return staticEntries;
+  }, []); // run sekali saat mount — localStorage adalah source of truth
 
   const visibleEntries = useMemo(() => {
     if (!isValid) return [];
