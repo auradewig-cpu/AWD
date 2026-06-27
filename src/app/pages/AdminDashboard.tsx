@@ -108,3 +108,4 @@ function SummaryStat({ icon, value, label }: { icon: React.ReactNode; value: str
     </div>
   );
 }
+export default AdminDashboard;

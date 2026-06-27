@@ -163,3 +163,4 @@ const dangerBtn: React.CSSProperties = {
   color: '#ff6b6b', cursor: 'pointer',
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
 };
+export default AdminWhy;

@@ -135,3 +135,4 @@ export function AdminContact() {
     </div>
   );
 }
+export default AdminContact;

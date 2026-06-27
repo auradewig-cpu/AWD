@@ -51,3 +51,4 @@ export function AdminTrust() {
     </div>
   );
 }
+export default AdminTrust;

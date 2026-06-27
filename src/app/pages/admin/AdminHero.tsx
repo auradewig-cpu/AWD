@@ -97,3 +97,4 @@ export function AdminHero() {
     </div>
   );
 }
+export default AdminHero;
