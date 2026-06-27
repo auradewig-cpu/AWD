@@ -138,13 +138,61 @@ export function AdminDemo() {
           fontFamily: 'Inter, sans-serif',
           fontSize: 14,
           color: 'rgba(255,255,255,0.55)',
-          margin: '0 0 24px',
+          margin: '0 0 16px',
           lineHeight: 1.6,
         }}
       >
         Kelola contoh website demo per paket. Demo dengan status <strong style={{ color: '#FFD147' }}>Draft</strong> tidak
         tampil di halaman publik — ubah ke <strong style={{ color: '#C6FF4A' }}>Aktif</strong> setelah lengkap.
       </p>
+
+      <button
+        onClick={() => {
+          const entries = data.entries;
+
+          const grouped: Record<string, any[]> = {};
+          entries.forEach((e) => {
+            if (!grouped[e.tier]) grouped[e.tier] = [];
+            grouped[e.tier].push({
+              id: e.id,
+              tier: e.tier,
+              name: e.name,
+              category: e.category,
+              description: e.description,
+              url: e.demoUrl,
+              adminUrl: e.adminUrl || '',
+              adminUser: e.adminUsername,
+              adminPass: e.adminPassword,
+              thumbnail: e.thumbnailUrl || '',
+              status: e.status,
+              order: e.order,
+            });
+          });
+
+          const lines = Object.entries(grouped)
+            .map(
+              ([tier, items]) =>
+                `  ${tier}: ${JSON.stringify(items, null, 4).split('\n').join('\n  ')},`
+            )
+            .join('\n');
+
+          const output = `// Copy paste ke src/data/demoData.ts\n${lines}`;
+          navigator.clipboard.writeText(output);
+          alert('Data berhasil di-copy! Paste ke demoData.ts');
+        }}
+        style={{
+          background: '#C6FF4A',
+          color: '#000',
+          border: 'none',
+          padding: '8px 16px',
+          borderRadius: '6px',
+          fontWeight: 600,
+          cursor: 'pointer',
+          marginBottom: '16px',
+        }}
+      >
+        📋 Export Data ke Code
+      </button>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
         {TIERS.map((tier) => {
