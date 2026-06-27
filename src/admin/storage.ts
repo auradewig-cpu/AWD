@@ -2,6 +2,8 @@
 // Every content type and storage key lives here so swapping localStorage for a
 // real backend API later only requires touching this one file.
 
+import { DEMO_DATA, DEMO_DATA_VERSION } from '@/data/demoData';
+
 export const STORAGE_KEYS = {
   ADMIN_AUTH: 'awd_admin_auth',
   HERO: 'awd_content_hero',
@@ -201,5 +203,29 @@ export function loadDemoData(): DemoData {
     return entry;
   });
   if (migrated) saveToStorage(STORAGE_KEYS.DEMO, { entries });
+
+  if (entries.length === 0) {
+    const seeded: DemoEntry[] = Object.values(DEMO_DATA).flat().map((d) => ({
+      id: String(d.id),
+      tier: d.tier as DemoTier,
+      name: d.name,
+      category: d.category as DemoCategory,
+      thumbnailUrl: d.thumbnail,
+      demoUrl: d.url,
+      hasAdmin: !!d.adminUrl,
+      adminUrl: d.adminUrl,
+      adminUsername: d.adminUser,
+      adminPassword: d.adminPass,
+      description: d.description,
+      status: d.status as 'active' | 'draft',
+      order: d.order ?? 0,
+    }));
+    if (seeded.length > 0) {
+      saveToStorage(STORAGE_KEYS.DEMO, { entries: seeded });
+      try { localStorage.setItem('awd_demo_version', String(DEMO_DATA_VERSION)); } catch {}
+      return { entries: seeded };
+    }
+  }
+
   return { entries };
 }
