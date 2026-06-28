@@ -308,7 +308,17 @@ function PricingCard({ tier, withAdmin }: { tier: PricingTier; withAdmin: boolea
 export function PricingSection() {
   const [withAdmin, setWithAdmin] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
-  const content = loadFromStorage(STORAGE_KEYS.PRICING, DEFAULT_PRICING);
+  const [content, setContent] = useState(() => loadFromStorage(STORAGE_KEYS.PRICING, DEFAULT_PRICING));
+
+  useEffect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.key === STORAGE_KEYS.PRICING) {
+        setContent(loadFromStorage(STORAGE_KEYS.PRICING, DEFAULT_PRICING));
+      }
+    }
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   useEffect(() => {
     let ctx: any;
