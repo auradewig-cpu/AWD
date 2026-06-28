@@ -70,18 +70,10 @@ export function usePreloadedSequence(basePath: string, enabled: boolean): Preloa
       loadedUpToRef.current = INITIAL_BATCH;
     };
 
-    let cancelIdleId: number | undefined;
-    let fallbackTimeoutId: ReturnType<typeof setTimeout> | undefined;
-    if ('requestIdleCallback' in window) {
-      cancelIdleId = (window as any).requestIdleCallback(startLoading, { timeout: 2000 });
-    } else {
-      fallbackTimeoutId = setTimeout(startLoading, 100);
-    }
+    startLoading();
 
     return () => {
       cancelled = true;
-      if (cancelIdleId !== undefined) (window as any).cancelIdleCallback(cancelIdleId);
-      if (fallbackTimeoutId !== undefined) clearTimeout(fallbackTimeoutId);
       for (const img of images) {
         if (!img) continue;
         img.onload = null;

@@ -476,3 +476,5 @@ function EmptyState() {
     </div>
   );
 }
+
+export default DemoTierPage;

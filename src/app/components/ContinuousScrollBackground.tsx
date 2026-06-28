@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   buildFrameUrl,
   usePreloadedSequence,
@@ -44,6 +44,14 @@ export function ContinuousScrollBackground() {
 
   const canvas1Ref = useRef<HTMLCanvasElement>(null);
   const canvas2Ref = useRef<HTMLCanvasElement>(null);
+  const fallbackImgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (ready1 && fallbackImgRef.current) {
+      fallbackImgRef.current.style.opacity = '0';
+      fallbackImgRef.current.style.zIndex = '-1';
+    }
+  }, [ready1]);
 
   useContinuousScrollDrive({
     canvas1Ref,
@@ -126,9 +134,10 @@ export function ContinuousScrollBackground() {
           }}
         />
 
-        {/* LCP anchor: visible immediately from preloaded frame, fades once canvas takes over */}
+        {/* LCP anchor: always rendered, hidden via ref once canvas is ready */}
         <img
-          src={buildFrameUrl(ASSET1_BASE, 1)}
+          ref={fallbackImgRef}
+          src="/sequences/asset1/hero-sequence-0001.webp"
           alt=""
           aria-hidden="true"
           fetchPriority="high"
@@ -138,9 +147,9 @@ export function ContinuousScrollBackground() {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            zIndex: ready1 ? -1 : 1,
-            opacity: ready1 ? 0 : 1,
-            transition: 'opacity 0.3s ease',
+            zIndex: 1,
+            opacity: 1,
+            transition: 'opacity 0.5s ease',
             pointerEvents: 'none',
           }}
         />
