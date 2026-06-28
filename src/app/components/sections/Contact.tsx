@@ -1,10 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { MessageCircle } from 'lucide-react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { STORAGE_KEYS, loadFromStorage, type ContactContent } from '@/admin/storage';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export const DEFAULT_CONTACT: ContactContent = {
   headline: 'Siap Mulai?',
@@ -47,36 +43,52 @@ export function Contact() {
   const content = loadFromStorage(STORAGE_KEYS.CONTACT, DEFAULT_CONTACT);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
+    let ctx: any;
+    let cancelled = false;
+
+    const run = async () => {
+      if (cancelled) return;
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+      if (cancelled) return;
+      ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+        mm.add('(prefers-reduced-motion: no-preference)', () => {
+          const tl = gsap.timeline({
+            scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
+          });
+
+          tl.from('[data-contact-headline]', {
+            opacity: 0,
+            scale: 0.9,
+            duration: 0.8,
+            ease: 'power2.out',
+          })
+            .from('[data-contact-field]', {
+              opacity: 0,
+              y: 24,
+              duration: 0.5,
+              ease: 'power2.out',
+              stagger: 0.1,
+            }, 0.3)
+            .from('[data-contact-submit]', {
+              opacity: 0,
+              y: 16,
+              duration: 0.5,
+              ease: 'power2.out',
+            }, '>0.2');
         });
+      }, sectionRef);
+    };
 
-        tl.from('[data-contact-headline]', {
-          opacity: 0,
-          scale: 0.9,
-          duration: 0.8,
-          ease: 'power2.out',
-        })
-          .from('[data-contact-field]', {
-            opacity: 0,
-            y: 24,
-            duration: 0.5,
-            ease: 'power2.out',
-            stagger: 0.1,
-          }, 0.3)
-          .from('[data-contact-submit]', {
-            opacity: 0,
-            y: 16,
-            duration: 0.5,
-            ease: 'power2.out',
-          }, '>0.2');
-      });
-    }, sectionRef);
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(run, { timeout: 1500 });
+    } else {
+      setTimeout(run, 500);
+    }
 
-    return () => ctx.revert();
+    return () => { cancelled = true; ctx?.revert(); };
   }, []);
 
   function handleFocus(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {

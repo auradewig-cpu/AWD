@@ -1,14 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   MessageSquare, MessageCircle, Figma, Palette, Code2, RotateCcw, Rocket,
   CheckCircle, FileText, Search, Settings,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { STORAGE_KEYS, loadFromStorage, type ProcessContent } from '@/admin/storage';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export const PROCESS_ICON_MAP: Record<string, LucideIcon> = {
   MessageSquare,
@@ -91,9 +87,18 @@ export function ProcessSteps() {
     .sort((a, b) => a.order - b.order);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
+    let ctx: any;
+    let cancelled = false;
+
+    const run = async () => {
+      if (cancelled) return;
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+      if (cancelled) return;
+      ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+        mm.add('(prefers-reduced-motion: no-preference)', () => {
         const isMobile = window.innerWidth < 768;
         const stepStagger = isMobile ? 0.075 : 0.15;
         const iconToText = isMobile ? 0.04 : 0.08;
@@ -165,8 +170,15 @@ export function ProcessSteps() {
         });
       });
     }, sectionRef);
+    };
 
-    return () => ctx.revert();
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(run, { timeout: 1500 });
+    } else {
+      setTimeout(run, 500);
+    }
+
+    return () => { cancelled = true; ctx?.revert(); };
   }, []);
 
   return (

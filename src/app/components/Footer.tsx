@@ -1,10 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { Instagram, Youtube, MessageCircle } from 'lucide-react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const WA_NUMBER = '6281234567890';
 
@@ -13,20 +9,36 @@ export function Footer() {
   const footerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
-        gsap.from(footerRef.current, {
-          opacity: 0,
-          y: 24,
-          duration: 0.4,
-          ease: 'power2.out',
-          scrollTrigger: { trigger: footerRef.current, start: 'top 90%', once: true },
-        });
-      });
-    }, footerRef);
+    let ctx: any;
+    let cancelled = false;
 
-    return () => ctx.revert();
+    const run = async () => {
+      if (cancelled) return;
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+      if (cancelled) return;
+      ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+        mm.add('(prefers-reduced-motion: no-preference)', () => {
+          gsap.from(footerRef.current, {
+            opacity: 0,
+            y: 24,
+            duration: 0.4,
+            ease: 'power2.out',
+            scrollTrigger: { trigger: footerRef.current, start: 'top 90%', once: true },
+          });
+        });
+      }, footerRef);
+    };
+
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(run, { timeout: 1500 });
+    } else {
+      setTimeout(run, 500);
+    }
+
+    return () => { cancelled = true; ctx?.revert(); };
   }, []);
 
   return (

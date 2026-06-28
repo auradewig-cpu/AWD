@@ -1,39 +1,51 @@
 import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SplitText } from 'gsap/SplitText';
-
-gsap.registerPlugin(ScrollTrigger, SplitText);
 
 export function BehindTheScenes() {
   const sectionRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
-        const split = new SplitText(headlineRef.current, { type: 'words' });
+    let ctx: any;
+    let cancelled = false;
 
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 70%', once: true },
+    const run = async () => {
+      if (cancelled) return;
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      const { SplitText } = await import('gsap/SplitText');
+      gsap.registerPlugin(ScrollTrigger, SplitText);
+      if (cancelled) return;
+      ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+        mm.add('(prefers-reduced-motion: no-preference)', () => {
+          const split = new SplitText(headlineRef.current, { type: 'words' });
+
+          const tl = gsap.timeline({
+            scrollTrigger: { trigger: sectionRef.current, start: 'top 70%', once: true },
+          });
+
+          tl.from('[data-bts-eyebrow]', { opacity: 0, y: 16, duration: 0.5, ease: 'power2.out' })
+            .from(split.words, {
+              opacity: 0,
+              y: 24,
+              duration: 0.5,
+              ease: 'power2.out',
+              stagger: 0.05,
+            }, 0.1)
+            .from('[data-bts-sub]', { opacity: 0, y: 20, duration: 0.6, ease: 'power2.out' }, '<0.3');
+
+          return () => split.revert();
         });
+      }, sectionRef);
+    };
 
-        tl.from('[data-bts-eyebrow]', { opacity: 0, y: 16, duration: 0.5, ease: 'power2.out' })
-          .from(split.words, {
-            opacity: 0,
-            y: 24,
-            duration: 0.5,
-            ease: 'power2.out',
-            stagger: 0.05,
-          }, 0.1)
-          .from('[data-bts-sub]', { opacity: 0, y: 20, duration: 0.6, ease: 'power2.out' }, '<0.3');
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(run, { timeout: 1500 });
+    } else {
+      setTimeout(run, 500);
+    }
 
-        return () => split.revert();
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
+    return () => { cancelled = true; ctx?.revert(); };
   }, []);
 
   return (

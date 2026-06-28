@@ -1,10 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Check, X, Gauge } from 'lucide-react';
 import { STORAGE_KEYS, loadFromStorage, type WhyContent } from '@/admin/storage';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export const DEFAULT_WHY: WhyContent = {
   col1Header: 'FITUR',
@@ -32,9 +28,18 @@ export function WhyAWD() {
   const rows = content.rows.slice().sort((a, b) => a.order - b.order);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
+    let ctx: any;
+    let cancelled = false;
+
+    const run = async () => {
+      if (cancelled) return;
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+      if (cancelled) return;
+      ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+        mm.add('(prefers-reduced-motion: no-preference)', () => {
         const isMobile = window.innerWidth < 768;
         const rowStagger = isMobile ? 0.04 : 0.08;
         const iconOffset = isMobile ? 0.06 : 0.12;
@@ -114,8 +119,15 @@ export function WhyAWD() {
         );
       });
     }, sectionRef);
+    };
 
-    return () => ctx.revert();
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(run, { timeout: 1500 });
+    } else {
+      setTimeout(run, 500);
+    }
+
+    return () => { cancelled = true; ctx?.revert(); };
   }, []);
 
   return (

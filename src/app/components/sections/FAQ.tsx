@@ -1,11 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown } from 'lucide-react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { STORAGE_KEYS, loadFromStorage, type FaqContent } from '@/admin/storage';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export const DEFAULT_FAQ: FaqContent = {
   items: [
@@ -78,20 +74,36 @@ export function FAQ() {
     .sort((a, b) => a.order - b.order);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
-        gsap.from('[data-faq-header]', {
-          opacity: 0,
-          y: 24,
-          duration: 0.5,
-          ease: 'power2.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true },
-        });
-      });
-    }, sectionRef);
+    let ctx: any;
+    let cancelled = false;
 
-    return () => ctx.revert();
+    const run = async () => {
+      if (cancelled) return;
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+      if (cancelled) return;
+      ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+        mm.add('(prefers-reduced-motion: no-preference)', () => {
+          gsap.from('[data-faq-header]', {
+            opacity: 0,
+            y: 24,
+            duration: 0.5,
+            ease: 'power2.out',
+            scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true },
+          });
+        });
+      }, sectionRef);
+    };
+
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(run, { timeout: 1500 });
+    } else {
+      setTimeout(run, 500);
+    }
+
+    return () => { cancelled = true; ctx?.revert(); };
   }, []);
 
   return (

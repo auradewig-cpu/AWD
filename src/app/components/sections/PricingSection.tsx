@@ -1,10 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Check, MessageCircle, ExternalLink } from 'lucide-react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { STORAGE_KEYS, loadFromStorage, type PricingContent, type PricingTier } from '@/admin/storage';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const WA_NUMBER = '6281234567890';
 
@@ -315,9 +311,18 @@ export function PricingSection() {
   const content = loadFromStorage(STORAGE_KEYS.PRICING, DEFAULT_PRICING);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
+    let ctx: any;
+    let cancelled = false;
+
+    const run = async () => {
+      if (cancelled) return;
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+      if (cancelled) return;
+      ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+        mm.add('(prefers-reduced-motion: no-preference)', () => {
         const isMobile = window.innerWidth < 768;
         const toggleLead = isMobile ? 0.075 : 0.15;
         const cardsLead = isMobile ? 0.1 : 0.2;
@@ -370,8 +375,15 @@ export function PricingSection() {
         });
       });
     }, sectionRef);
+    };
 
-    return () => ctx.revert();
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(run, { timeout: 1500 });
+    } else {
+      setTimeout(run, 500);
+    }
+
+    return () => { cancelled = true; ctx?.revert(); };
   }, []);
 
   return (

@@ -1,9 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { STORAGE_KEYS, loadFromStorage, type TrustContent } from '@/admin/storage';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export const DEFAULT_TRUST: TrustContent = {
   text: 'Dipercaya pemilik klinik, arsitek, dan bisnis premium di Yogyakarta & sekitarnya.',
@@ -15,25 +11,41 @@ export function TrustBar() {
   const content = loadFromStorage(STORAGE_KEYS.TRUST, DEFAULT_TRUST);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
-        gsap.from('[data-reveal-word]', {
-          opacity: 0,
-          x: -12,
-          duration: 0.4,
-          ease: 'power2.out',
-          stagger: 0.8 / 8,
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 85%',
-            once: true,
-          },
-        });
-      });
-    }, sectionRef);
+    let ctx: any;
+    let cancelled = false;
 
-    return () => ctx.revert();
+    const run = async () => {
+      if (cancelled) return;
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+      if (cancelled) return;
+      ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+        mm.add('(prefers-reduced-motion: no-preference)', () => {
+          gsap.from('[data-reveal-word]', {
+            opacity: 0,
+            x: -12,
+            duration: 0.4,
+            ease: 'power2.out',
+            stagger: 0.8 / 8,
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 85%',
+              once: true,
+            },
+          });
+        });
+      }, sectionRef);
+    };
+
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(run, { timeout: 1500 });
+    } else {
+      setTimeout(run, 500);
+    }
+
+    return () => { cancelled = true; ctx?.revert(); };
   }, []);
 
   if (!content.visible) return null;
