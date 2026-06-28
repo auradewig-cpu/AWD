@@ -126,6 +126,25 @@ export function ContinuousScrollBackground() {
           }}
         />
 
+        {/* LCP anchor: visible immediately from preloaded frame, fades once canvas takes over */}
+        <img
+          src={buildFrameUrl(ASSET1_BASE, 1)}
+          alt=""
+          aria-hidden="true"
+          fetchPriority="high"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: ready1 ? -1 : 1,
+            opacity: ready1 ? 0 : 1,
+            transition: 'opacity 0.3s ease',
+            pointerEvents: 'none',
+          }}
+        />
+
         {!ready1 && (
           <div
             style={{
@@ -134,7 +153,6 @@ export function ContinuousScrollBackground() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: '#07080A',
               zIndex: 2,
             }}
           >

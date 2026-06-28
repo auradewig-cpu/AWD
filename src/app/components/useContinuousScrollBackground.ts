@@ -27,9 +27,11 @@ interface PreloadState {
   loadMore: (maxFrame: number) => void;
 }
 
-// Preloads a 192-frame sequence progressively. Only the first 30 frames
-// load on mount; remaining frames load on demand via `loadMore()` as the
-// user scrolls. This cuts initial payload from ~9.8MB to ~1.5MB.
+const INITIAL_BATCH = 8;
+
+// Preloads a 192-frame sequence progressively. Only the first 8 frames
+// load on mount (deferred to browser idle); remaining frames load on
+// demand via `loadMore()` as the user scrolls.
 export function usePreloadedSequence(basePath: string, enabled: boolean): PreloadState {
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const loadedUpToRef = useRef(0);
@@ -52,21 +54,34 @@ export function usePreloadedSequence(basePath: string, enabled: boolean): Preloa
       if (cancelled) return;
       loadedCount += 1;
       setLoaded(loadedCount);
-      if (loadedCount >= 30) setReady(true);
+      if (loadedCount >= INITIAL_BATCH) setReady(true);
     };
 
-    for (let i = 0; i < 30; i += 1) {
-      const img = new Image();
-      img.decoding = 'async';
-      img.src = buildFrameUrl(basePath, i + 1);
-      img.onload = onSettle;
-      img.onerror = onSettle;
-      images[i] = img;
+    const startLoading = () => {
+      if (cancelled) return;
+      for (let i = 0; i < INITIAL_BATCH; i += 1) {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = buildFrameUrl(basePath, i + 1);
+        img.onload = onSettle;
+        img.onerror = onSettle;
+        images[i] = img;
+      }
+      loadedUpToRef.current = INITIAL_BATCH;
+    };
+
+    let cancelIdleId: number | undefined;
+    let fallbackTimeoutId: ReturnType<typeof setTimeout> | undefined;
+    if ('requestIdleCallback' in window) {
+      cancelIdleId = (window as any).requestIdleCallback(startLoading, { timeout: 2000 });
+    } else {
+      fallbackTimeoutId = setTimeout(startLoading, 100);
     }
-    loadedUpToRef.current = 30;
 
     return () => {
       cancelled = true;
+      if (cancelIdleId !== undefined) (window as any).cancelIdleCallback(cancelIdleId);
+      if (fallbackTimeoutId !== undefined) clearTimeout(fallbackTimeoutId);
       for (const img of images) {
         if (!img) continue;
         img.onload = null;
@@ -93,7 +108,7 @@ export function usePreloadedSequence(basePath: string, enabled: boolean): Preloa
     loadedUpToRef.current = maxFrame;
   };
 
-  return { images: imagesRef.current, ready, progress: loaded / FRAME_COUNT, loadMore };
+  return { images: imagesRef.current, ready, progress: Math.min(loaded / INITIAL_BATCH, 1), loadMore };
 }
 
 function drawFrame(canvas: HTMLCanvasElement, img: HTMLImageElement | undefined) {

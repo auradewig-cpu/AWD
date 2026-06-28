@@ -4,8 +4,9 @@ import { AuthProvider, useAdminAuth } from '@/admin/AuthContext';
 import { ProtectedRoute } from '@/admin/ProtectedRoute';
 import { AdminLayout } from '@/admin/AdminLayout';
 import { HomePage } from './pages/HomePage';
-import { DemoTierPage } from './pages/DemoTierPage';
 import { AdminLogin } from './pages/AdminLogin';
+
+const DemoTierPage = lazy(() => import('./pages/DemoTierPage'));
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const AdminHero = lazy(() => import('./pages/admin/AdminHero'));
@@ -27,7 +28,7 @@ export default function App() {
     <HashRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/demo/:tier" element={<DemoTierPage />} />
+        <Route path="/demo/:tier" element={<Suspense fallback={null}><DemoTierPage /></Suspense>} />
 
         {/* All admin routes share the AuthProvider */}
         <Route
