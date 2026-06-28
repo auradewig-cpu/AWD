@@ -58,7 +58,7 @@ export function Navbar() {
           {/* Logo */}
           <Link to="/" style={{ textDecoration: 'none' }}>
             <img
-              src="https://res.cloudinary.com/dwovnb9hh/image/upload/v1782636367/buatkan_saya_logo_yang_lebih_202606281544_typtxg.webp"
+              src="https://res.cloudinary.com/dwovnb9hh/image/upload/v1782637687/r-removebg-preview_upscayl_2x_ultrasharp-4x_ecsalz.webp"
               alt="AWD Logo"
               style={{ height: 40, width: 'auto', display: 'block' }}
             />
