@@ -57,21 +57,11 @@ export function Navbar() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
           {/* Logo */}
           <Link to="/" style={{ textDecoration: 'none' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{
-                width: 32, height: 32,
-                background: '#C6FF4A',
-                borderRadius: 6,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, fontSize: 14, color: '#07080A' }}>
-                  A
-                </span>
-              </div>
-              <span style={{ fontFamily: 'Inter Tight, sans-serif', fontWeight: 800, fontSize: 18, color: '#FAFAFA', letterSpacing: '-0.02em' }}>
-                AWD
-              </span>
-            </div>
+            <img
+              src="https://res.cloudinary.com/dwovnb9hh/image/upload/v1782636367/buatkan_saya_logo_yang_lebih_202606281544_typtxg.webp"
+              alt="AWD Logo"
+              style={{ height: 40, width: 'auto', display: 'block' }}
+            />
           </Link>
 
           {/* Desktop Nav */}
