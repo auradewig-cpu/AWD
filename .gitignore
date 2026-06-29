@@ -6,3 +6,10 @@ dist
 *.log
 .DS_Store
 Thumbs.db
+
+# AWD Frame Assets (raw + compressed, tidak perlu di repo)
+asset/
+
+# Script utility
+compress.mjs
+copyFrames.mjs

@@ -8,12 +8,14 @@ import { WhyAWD } from '../components/sections/WhyAWD';
 import { FAQ } from '../components/sections/FAQ';
 import { Contact } from '../components/sections/Contact';
 import { Footer } from '../components/Footer';
-import { ContinuousScrollBackground } from '../components/ContinuousScrollBackground';
+// import { ContinuousScrollBackground } from '../components/ContinuousScrollBackground';
+import { ScrollScrubContainer } from '@/components/scroll/ScrollScrubContainer';
 
 export function HomePage() {
   return (
     <div style={{ position: 'relative', minHeight: '100vh' }}>
-      <ContinuousScrollBackground />
+      {/* <ContinuousScrollBackground /> */}
+      <ScrollScrubContainer />
       <div style={{ position: 'relative', zIndex: 2 }}>
         <Navbar />
         <Hero />

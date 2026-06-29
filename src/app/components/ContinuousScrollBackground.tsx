@@ -140,7 +140,7 @@ export function ContinuousScrollBackground() {
           src="/sequences/asset1/hero-sequence-0001.webp"
           alt=""
           aria-hidden="true"
-          fetchPriority="high"
+          fetchpriority="high"
           style={{
             position: 'absolute',
             inset: 0,
