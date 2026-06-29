@@ -10,10 +10,12 @@ function padIndex(i: number): string {
 export function ScrollScrubMobile() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
+  const imgRef = useRef<HTMLImageElement>(null);
   const rafRef = useRef(0);
   const isTouching = useRef(false);
   const lastY = useRef(0);
   const accumulated = useRef(0);
+  const frameDrawn = useRef(false);
   const [loaded, setLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
 
@@ -34,8 +36,20 @@ export function ScrollScrubMobile() {
   }, []);
 
   useEffect(() => {
-    if (!loaded) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -43,14 +57,6 @@ export function ScrollScrubMobile() {
 
     const images = imagesRef.current;
     let currentFrame = 0;
-
-    function resize() {
-      const dpr = window.devicePixelRatio || 1;
-      canvas!.width = window.innerWidth * dpr;
-      canvas!.height = window.innerHeight * dpr;
-    }
-    resize();
-    window.addEventListener('resize', resize);
 
     function onTouchStart(e: TouchEvent) {
       isTouching.current = true;
@@ -88,12 +94,19 @@ export function ScrollScrubMobile() {
         const w = window.innerWidth;
         const h = window.innerHeight;
         const dpr = window.devicePixelRatio || 1;
-        if (canvas!.width !== w * dpr || canvas!.height !== h * dpr) {
-          canvas!.width = w * dpr;
-          canvas!.height = h * dpr;
+        if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+          canvas.width = w * dpr;
+          canvas.height = h * dpr;
         }
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.drawImage(img, 0, 0, w, h);
+
+        if (!frameDrawn.current) {
+          frameDrawn.current = true;
+          if (imgRef.current) {
+            imgRef.current.style.opacity = '0';
+          }
+        }
       }
 
       rafRef.current = requestAnimationFrame(render);
@@ -103,23 +116,62 @@ export function ScrollScrubMobile() {
 
     return () => {
       cancelAnimationFrame(rafRef.current);
-      window.removeEventListener('resize', resize);
       document.removeEventListener('touchstart', onTouchStart);
       document.removeEventListener('touchmove', onTouchMove);
       document.removeEventListener('touchend', onTouchEnd);
       document.removeEventListener('touchcancel', onTouchEnd);
     };
-  }, [loaded]);
+  }, []);
 
-  if (!loaded) {
-    return (
+  return (
+    <div style={{ position: 'relative', height: 0, zIndex: 1 }}>
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          display: 'block',
+        }}
+      />
+
+      <img
+        ref={imgRef}
+        src="/frames/mobile/hero-sequence-0001.webp"
+        alt=""
+        aria-hidden="true"
+        fetchpriority="high"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: 0,
+          pointerEvents: 'none',
+          transition: 'opacity 0.3s ease',
+        }}
+      />
+
       <div
         style={{
-          height: '100vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           background: '#0A0A0A',
+          zIndex: 2,
+          opacity: loaded ? 0 : 1,
+          pointerEvents: loaded ? 'none' : 'auto',
+          transition: 'opacity 0.5s ease',
         }}
       >
         <div
@@ -141,23 +193,6 @@ export function ScrollScrubMobile() {
           />
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div style={{ position: 'relative', height: 0, zIndex: 1 }}>
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          display: 'block',
-        }}
-      />
     </div>
   );
 }

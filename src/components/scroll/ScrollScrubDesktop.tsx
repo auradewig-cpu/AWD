@@ -12,7 +12,9 @@ export function ScrollScrubDesktop() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
+  const imgRef = useRef<HTMLImageElement>(null);
   const rafRef = useRef(0);
+  const frameDrawn = useRef(false);
   const [loaded, setLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
 
@@ -33,8 +35,20 @@ export function ScrollScrubDesktop() {
   }, []);
 
   useEffect(() => {
-    if (!loaded) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -42,14 +56,6 @@ export function ScrollScrubDesktop() {
 
     const images = imagesRef.current;
     let currentFrame = 0;
-
-    function resize() {
-      const dpr = window.devicePixelRatio || 1;
-      canvas!.width = window.innerWidth * dpr;
-      canvas!.height = window.innerHeight * dpr;
-    }
-    resize();
-    window.addEventListener('resize', resize);
 
     function render() {
       const section = sectionRef.current;
@@ -68,34 +74,78 @@ export function ScrollScrubDesktop() {
         const w = window.innerWidth;
         const h = window.innerHeight;
         const dpr = window.devicePixelRatio || 1;
-        if (canvas!.width !== w * dpr || canvas!.height !== h * dpr) {
-          canvas!.width = w * dpr;
-          canvas!.height = h * dpr;
+        if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+          canvas.width = w * dpr;
+          canvas.height = h * dpr;
         }
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.drawImage(img, 0, 0, w, h);
+
+        if (!frameDrawn.current) {
+          frameDrawn.current = true;
+          if (imgRef.current) {
+            imgRef.current.style.opacity = '0';
+          }
+        }
       }
 
       rafRef.current = requestAnimationFrame(render);
     }
 
     rafRef.current = requestAnimationFrame(render);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []);
 
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      window.removeEventListener('resize', resize);
-    };
-  }, [loaded]);
+  return (
+    <div ref={sectionRef} style={{ height: SCROLL_HEIGHT, position: 'relative' }}>
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          display: 'block',
+          zIndex: 1,
+        }}
+      />
 
-  if (!loaded) {
-    return (
+      <img
+        ref={imgRef}
+        src="/frames/desktop/hero-sequence-0001.webp"
+        alt=""
+        aria-hidden="true"
+        fetchpriority="high"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: 0,
+          pointerEvents: 'none',
+          transition: 'opacity 0.3s ease',
+        }}
+      />
+
       <div
         style={{
-          height: '100vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           background: '#0A0A0A',
+          zIndex: 2,
+          opacity: loaded ? 0 : 1,
+          pointerEvents: loaded ? 'none' : 'auto',
+          transition: 'opacity 0.5s ease',
         }}
       >
         <div
@@ -117,24 +167,6 @@ export function ScrollScrubDesktop() {
           />
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div ref={sectionRef} style={{ height: SCROLL_HEIGHT, position: 'relative' }}>
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          display: 'block',
-          zIndex: 1,
-        }}
-      />
     </div>
   );
 }
