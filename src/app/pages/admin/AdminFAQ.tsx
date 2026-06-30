@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ExternalLink, Plus, ChevronUp, ChevronDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { AdminInput, AdminTextarea, AdminButton, AdminToggle, AdminSaveBar } from '@/admin/components';
-import { STORAGE_KEYS, loadFromStorage, saveToStorage, resetStorage, type FaqContent, type FaqItem } from '@/admin/storage';
+import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage, type FaqContent, type FaqItem } from '@/admin/storage';
+import { ADMIN_CREDENTIALS } from '@/admin/config';
 import { DEFAULT_FAQ } from '@/app/components/sections/FAQ';
 
 function withSequentialOrder(items: FaqItem[]): FaqItem[] {
@@ -16,10 +17,13 @@ export function AdminFAQ() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   function markDirty() {
     setDirty(true);
     setSaved(false);
+    setSaveError(null);
   }
 
   function updateItem(id: string, patch: Partial<FaqItem>) {
@@ -51,12 +55,21 @@ export function AdminFAQ() {
     markDirty();
   }
 
-  function handleSave() {
+  async function handleSave() {
+    setSaving(true);
+    setSaveError(null);
     const content: FaqContent = { items: withSequentialOrder(items) };
-    saveToStorage(STORAGE_KEYS.FAQ, content);
-    setDirty(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    const ok = await saveToServer(STORAGE_KEYS.FAQ, content, ADMIN_CREDENTIALS.password);
+    if (ok) {
+      saveToStorage(STORAGE_KEYS.FAQ, content);
+      window.dispatchEvent(new Event('awd-faq-updated'));
+      setDirty(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } else {
+      setSaveError('Gagal menyimpan ke server. Periksa koneksi atau coba lagi.');
+    }
+    setSaving(false);
   }
 
   function handleReset() {
@@ -130,7 +143,17 @@ export function AdminFAQ() {
         </AdminButton>
       </div>
 
+      {saveError && (
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ff6b6b', textAlign: 'right', margin: '8px 0 0' }}>
+          {saveError}
+        </p>
+      )}
       <AdminSaveBar dirty={dirty} saved={saved} onSave={handleSave} onReset={handleReset} />
+      {saving && (
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.6)', textAlign: 'right', margin: '8px 0 0' }}>
+          Menyimpan...
+        </p>
+      )}
     </div>
   );
 }

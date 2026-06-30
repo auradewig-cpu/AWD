@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown } from 'lucide-react';
-import { STORAGE_KEYS, loadFromStorage, type FaqContent } from '@/admin/storage';
+import { STORAGE_KEYS, loadFromServer, type FaqContent } from '@/admin/storage';
 
 export const DEFAULT_FAQ: FaqContent = {
   items: [
@@ -67,7 +67,20 @@ export const DEFAULT_FAQ: FaqContent = {
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
-  const content = loadFromStorage(STORAGE_KEYS.FAQ, DEFAULT_FAQ);
+  const [content, setContent] = useState<FaqContent>(DEFAULT_FAQ);
+
+  useEffect(() => {
+    loadFromServer(STORAGE_KEYS.FAQ, DEFAULT_FAQ).then(setContent);
+  }, []);
+
+  useEffect(() => {
+    function handleUpdate() {
+      loadFromServer(STORAGE_KEYS.FAQ, DEFAULT_FAQ).then(setContent);
+    }
+    window.addEventListener('awd-faq-updated', handleUpdate);
+    return () => window.removeEventListener('awd-faq-updated', handleUpdate);
+  }, []);
+
   const faqs = content.items
     .filter((f) => f.active)
     .slice()

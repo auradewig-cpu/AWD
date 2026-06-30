@@ -1,25 +1,38 @@
 import { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { AdminCard, AdminTextarea, AdminButton, AdminToggle, AdminSaveBar } from '@/admin/components';
-import { STORAGE_KEYS, loadFromStorage, saveToStorage, resetStorage, type TrustContent } from '@/admin/storage';
+import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage, type TrustContent } from '@/admin/storage';
+import { ADMIN_CREDENTIALS } from '@/admin/config';
 import { DEFAULT_TRUST } from '@/app/components/sections/TrustBar';
 
 export function AdminTrust() {
   const [form, setForm] = useState<TrustContent>(() => loadFromStorage(STORAGE_KEYS.TRUST, DEFAULT_TRUST));
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   function set<K extends keyof TrustContent>(key: K, value: TrustContent[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
     setDirty(true);
     setSaved(false);
+    setSaveError(null);
   }
 
-  function handleSave() {
-    saveToStorage(STORAGE_KEYS.TRUST, form);
-    setDirty(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  async function handleSave() {
+    setSaving(true);
+    setSaveError(null);
+    const ok = await saveToServer(STORAGE_KEYS.TRUST, form, ADMIN_CREDENTIALS.password);
+    if (ok) {
+      saveToStorage(STORAGE_KEYS.TRUST, form);
+      window.dispatchEvent(new Event('awd-trust-updated'));
+      setDirty(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } else {
+      setSaveError('Gagal menyimpan ke server. Periksa koneksi atau coba lagi.');
+    }
+    setSaving(false);
   }
 
   function handleReset() {
@@ -47,7 +60,17 @@ export function AdminTrust() {
         </div>
       </AdminCard>
 
+      {saveError && (
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ff6b6b', textAlign: 'right', margin: '8px 0 0' }}>
+          {saveError}
+        </p>
+      )}
       <AdminSaveBar dirty={dirty} saved={saved} onSave={handleSave} onReset={handleReset} />
+      {saving && (
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.6)', textAlign: 'right', margin: '8px 0 0' }}>
+          Menyimpan...
+        </p>
+      )}
     </div>
   );
 }

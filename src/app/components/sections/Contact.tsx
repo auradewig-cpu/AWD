@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { MessageCircle } from 'lucide-react';
-import { STORAGE_KEYS, loadFromStorage, type ContactContent } from '@/admin/storage';
+import { STORAGE_KEYS, loadFromServer, type ContactContent } from '@/admin/storage';
 
 export const DEFAULT_CONTACT: ContactContent = {
   headline: 'Siap Mulai?',
@@ -40,7 +40,19 @@ const inputStyle: React.CSSProperties = {
 export function Contact() {
   const [form, setForm] = useState({ nama: '', bisnis: '', budget: '', pesan: '' });
   const sectionRef = useRef<HTMLElement>(null);
-  const content = loadFromStorage(STORAGE_KEYS.CONTACT, DEFAULT_CONTACT);
+  const [content, setContent] = useState<ContactContent>(DEFAULT_CONTACT);
+
+  useEffect(() => {
+    loadFromServer(STORAGE_KEYS.CONTACT, DEFAULT_CONTACT).then(setContent);
+  }, []);
+
+  useEffect(() => {
+    function handleUpdate() {
+      loadFromServer(STORAGE_KEYS.CONTACT, DEFAULT_CONTACT).then(setContent);
+    }
+    window.addEventListener('awd-contact-updated', handleUpdate);
+    return () => window.removeEventListener('awd-contact-updated', handleUpdate);
+  }, []);
 
   useEffect(() => {
     let ctx: any;

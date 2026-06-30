@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { Star, Zap } from 'lucide-react';
-import { STORAGE_KEYS, loadFromStorage, type HeroContent } from '@/admin/storage';
+import { STORAGE_KEYS, loadFromServer, type HeroContent } from '@/admin/storage';
 
 export const DEFAULT_HERO: HeroContent = {
   eyebrow: 'BERBASIS REACT • BUKAN TEMPLATE',
@@ -145,7 +145,19 @@ function PhoneMockup({ tilt, badge1Text, badge2Text }: { tilt: { x: number; y: n
 export function Hero() {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const heroRef = useRef<HTMLDivElement>(null);
-  const content = loadFromStorage(STORAGE_KEYS.HERO, DEFAULT_HERO);
+  const [content, setContent] = useState<HeroContent>(DEFAULT_HERO);
+
+  useEffect(() => {
+    loadFromServer(STORAGE_KEYS.HERO, DEFAULT_HERO).then(setContent);
+  }, []);
+
+  useEffect(() => {
+    function handleUpdate() {
+      loadFromServer(STORAGE_KEYS.HERO, DEFAULT_HERO).then(setContent);
+    }
+    window.addEventListener('awd-hero-updated', handleUpdate);
+    return () => window.removeEventListener('awd-hero-updated', handleUpdate);
+  }, []);
 
   useEffect(() => {
     const handleMouse = (e: MouseEvent) => {

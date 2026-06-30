@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   MessageSquare, MessageCircle, Figma, Palette, Code2, RotateCcw, Rocket,
   CheckCircle, FileText, Search, Settings,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { STORAGE_KEYS, loadFromStorage, type ProcessContent } from '@/admin/storage';
+import { STORAGE_KEYS, loadFromServer, type ProcessContent } from '@/admin/storage';
 
 export const PROCESS_ICON_MAP: Record<string, LucideIcon> = {
   MessageSquare,
@@ -80,7 +80,20 @@ const STEP_PALETTE = [
 
 export function ProcessSteps() {
   const sectionRef = useRef<HTMLElement>(null);
-  const content = loadFromStorage(STORAGE_KEYS.PROCESS, DEFAULT_PROCESS);
+  const [content, setContent] = useState<ProcessContent>(DEFAULT_PROCESS);
+
+  useEffect(() => {
+    loadFromServer(STORAGE_KEYS.PROCESS, DEFAULT_PROCESS).then(setContent);
+  }, []);
+
+  useEffect(() => {
+    function handleUpdate() {
+      loadFromServer(STORAGE_KEYS.PROCESS, DEFAULT_PROCESS).then(setContent);
+    }
+    window.addEventListener('awd-process-updated', handleUpdate);
+    return () => window.removeEventListener('awd-process-updated', handleUpdate);
+  }, []);
+
   const steps = content.steps
     .filter((s) => s.active)
     .slice()

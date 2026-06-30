@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ExternalLink, Plus, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { AdminCard, AdminInput, AdminTextarea, AdminButton, AdminToggle, AdminSaveBar } from '@/admin/components';
-import { STORAGE_KEYS, loadFromStorage, saveToStorage, resetStorage, type WhyContent, type WhyRow } from '@/admin/storage';
+import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage, type WhyContent, type WhyRow } from '@/admin/storage';
+import { ADMIN_CREDENTIALS } from '@/admin/config';
 import { DEFAULT_WHY } from '@/app/components/sections/WhyAWD';
 
 function withSequentialOrder(rows: WhyRow[]): WhyRow[] {
@@ -15,10 +16,13 @@ export function AdminWhy() {
   });
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   function markDirty() {
     setDirty(true);
     setSaved(false);
+    setSaveError(null);
   }
 
   function set<K extends keyof WhyContent>(key: K, value: WhyContent[K]) {
@@ -55,11 +59,21 @@ export function AdminWhy() {
     markDirty();
   }
 
-  function handleSave() {
-    saveToStorage(STORAGE_KEYS.WHY, { ...form, rows: withSequentialOrder(form.rows) });
-    setDirty(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  async function handleSave() {
+    setSaving(true);
+    setSaveError(null);
+    const data = { ...form, rows: withSequentialOrder(form.rows) };
+    const ok = await saveToServer(STORAGE_KEYS.WHY, data, ADMIN_CREDENTIALS.password);
+    if (ok) {
+      saveToStorage(STORAGE_KEYS.WHY, data);
+      window.dispatchEvent(new Event('awd-why-updated'));
+      setDirty(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } else {
+      setSaveError('Gagal menyimpan ke server. Periksa koneksi atau coba lagi.');
+    }
+    setSaving(false);
   }
 
   function handleReset() {
@@ -142,7 +156,17 @@ export function AdminWhy() {
         </AdminCard>
       </div>
 
+      {saveError && (
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ff6b6b', textAlign: 'right', margin: '8px 0 0' }}>
+          {saveError}
+        </p>
+      )}
       <AdminSaveBar dirty={dirty} saved={saved} onSave={handleSave} onReset={handleReset} />
+      {saving && (
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.6)', textAlign: 'right', margin: '8px 0 0' }}>
+          Menyimpan...
+        </p>
+      )}
     </div>
   );
 }

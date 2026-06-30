@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, X, Gauge } from 'lucide-react';
-import { STORAGE_KEYS, loadFromStorage, type WhyContent } from '@/admin/storage';
+import { STORAGE_KEYS, loadFromServer, type WhyContent } from '@/admin/storage';
 
 export const DEFAULT_WHY: WhyContent = {
   col1Header: 'FITUR',
@@ -24,7 +24,20 @@ export const DEFAULT_WHY: WhyContent = {
 
 export function WhyAWD() {
   const sectionRef = useRef<HTMLElement>(null);
-  const content = loadFromStorage(STORAGE_KEYS.WHY, DEFAULT_WHY);
+  const [content, setContent] = useState<WhyContent>(DEFAULT_WHY);
+
+  useEffect(() => {
+    loadFromServer(STORAGE_KEYS.WHY, DEFAULT_WHY).then(setContent);
+  }, []);
+
+  useEffect(() => {
+    function handleUpdate() {
+      loadFromServer(STORAGE_KEYS.WHY, DEFAULT_WHY).then(setContent);
+    }
+    window.addEventListener('awd-why-updated', handleUpdate);
+    return () => window.removeEventListener('awd-why-updated', handleUpdate);
+  }, []);
+
   const rows = content.rows.slice().sort((a, b) => a.order - b.order);
 
   useEffect(() => {

@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { STORAGE_KEYS, loadFromStorage, type TrustContent } from '@/admin/storage';
+import { useEffect, useRef, useState } from 'react';
+import { STORAGE_KEYS, loadFromServer, type TrustContent } from '@/admin/storage';
 
 export const DEFAULT_TRUST: TrustContent = {
   text: 'Dipercaya pemilik klinik, arsitek, dan bisnis premium di Yogyakarta & sekitarnya.',
@@ -8,7 +8,19 @@ export const DEFAULT_TRUST: TrustContent = {
 
 export function TrustBar() {
   const sectionRef = useRef<HTMLElement>(null);
-  const content = loadFromStorage(STORAGE_KEYS.TRUST, DEFAULT_TRUST);
+  const [content, setContent] = useState<TrustContent>(DEFAULT_TRUST);
+
+  useEffect(() => {
+    loadFromServer(STORAGE_KEYS.TRUST, DEFAULT_TRUST).then(setContent);
+  }, []);
+
+  useEffect(() => {
+    function handleUpdate() {
+      loadFromServer(STORAGE_KEYS.TRUST, DEFAULT_TRUST).then(setContent);
+    }
+    window.addEventListener('awd-trust-updated', handleUpdate);
+    return () => window.removeEventListener('awd-trust-updated', handleUpdate);
+  }, []);
 
   useEffect(() => {
     let ctx: any;
