@@ -12,6 +12,7 @@ export function ScrollScrubMobile() {
   const imgRef = useRef<HTMLImageElement>(null);
   const rafRef = useRef(0);
   const frameDrawn = useRef(false);
+  const scrollableRef = useRef(0);
   const [loaded, setLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
 
@@ -54,10 +55,17 @@ export function ScrollScrubMobile() {
     const images = imagesRef.current;
     let currentFrame = 0;
 
+    function updateScrollable() {
+      scrollableRef.current = document.documentElement.scrollHeight - window.innerHeight;
+    }
+    updateScrollable();
+    window.addEventListener('resize', updateScrollable);
+    window.addEventListener('orientationchange', updateScrollable);
+
     function render() {
-      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const p = scrollableHeight > 0
-        ? Math.max(0, Math.min(1, window.scrollY / scrollableHeight))
+      const scrollable = scrollableRef.current;
+      const p = scrollable > 0
+        ? Math.max(0, Math.min(1, window.scrollY / scrollable))
         : 0;
       const targetFrame = Math.round(p * (TOTAL_FRAMES - 1));
 
@@ -88,7 +96,11 @@ export function ScrollScrubMobile() {
     }
 
     rafRef.current = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(rafRef.current);
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('resize', updateScrollable);
+      window.removeEventListener('orientationchange', updateScrollable);
+    };
   }, []);
 
   return (
