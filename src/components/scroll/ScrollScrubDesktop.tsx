@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 const TOTAL_FRAMES = 193;
-const PX_PER_FRAME = 20;
-const SCROLL_HEIGHT = TOTAL_FRAMES * PX_PER_FRAME;
 
 function padIndex(i: number): string {
   return String(i + 1).padStart(4, '0');
@@ -10,7 +8,6 @@ function padIndex(i: number): string {
 
 export function ScrollScrubDesktop() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const sectionRef = useRef<HTMLDivElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const imgRef = useRef<HTMLImageElement>(null);
   const rafRef = useRef(0);
@@ -58,12 +55,10 @@ export function ScrollScrubDesktop() {
     let currentFrame = 0;
 
     function render() {
-      const section = sectionRef.current;
-      if (!section) { rafRef.current = requestAnimationFrame(render); return; }
-
-      const rect = section.getBoundingClientRect();
-      const scrollable = rect.height - window.innerHeight;
-      const p = scrollable > 0 ? Math.max(0, Math.min(1, -rect.top / scrollable)) : 0;
+      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const p = scrollableHeight > 0
+        ? Math.max(0, Math.min(1, window.scrollY / scrollableHeight))
+        : 0;
       const targetFrame = Math.round(p * (TOTAL_FRAMES - 1));
 
       currentFrame += (targetFrame - currentFrame) * 0.1;
@@ -97,7 +92,7 @@ export function ScrollScrubDesktop() {
   }, []);
 
   return (
-    <div ref={sectionRef} style={{ height: SCROLL_HEIGHT, position: 'relative' }}>
+    <div style={{ height: 0, position: 'relative' }}>
       <canvas
         ref={canvasRef}
         aria-hidden="true"

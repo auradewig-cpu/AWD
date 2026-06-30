@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 const TOTAL_FRAMES = 193;
-const SWIPE_SENSITIVITY = 400;
 
 function padIndex(i: number): string {
   return String(i + 1).padStart(4, '0');
@@ -12,9 +11,6 @@ export function ScrollScrubMobile() {
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const imgRef = useRef<HTMLImageElement>(null);
   const rafRef = useRef(0);
-  const isTouching = useRef(false);
-  const lastY = useRef(0);
-  const accumulated = useRef(0);
   const frameDrawn = useRef(false);
   const [loaded, setLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
@@ -58,33 +54,12 @@ export function ScrollScrubMobile() {
     const images = imagesRef.current;
     let currentFrame = 0;
 
-    function onTouchStart(e: TouchEvent) {
-      isTouching.current = true;
-      lastY.current = e.touches[0].clientY;
-    }
-
-    function onTouchMove(e: TouchEvent) {
-      if (!isTouching.current) return;
-      e.preventDefault();
-      const y = e.touches[0].clientY;
-      const delta = lastY.current - y;
-      lastY.current = y;
-      accumulated.current += delta;
-      accumulated.current = Math.max(0, Math.min(accumulated.current, SWIPE_SENSITIVITY));
-    }
-
-    function onTouchEnd() {
-      isTouching.current = false;
-    }
-
-    document.addEventListener('touchstart', onTouchStart, { passive: true });
-    document.addEventListener('touchmove', onTouchMove, { passive: false });
-    document.addEventListener('touchend', onTouchEnd, { passive: true });
-    document.addEventListener('touchcancel', onTouchEnd, { passive: true });
-
     function render() {
-      const targetRaw = (accumulated.current / SWIPE_SENSITIVITY) * (TOTAL_FRAMES - 1);
-      const targetFrame = Math.max(0, Math.min(TOTAL_FRAMES - 1, Math.round(targetRaw)));
+      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const p = scrollableHeight > 0
+        ? Math.max(0, Math.min(1, window.scrollY / scrollableHeight))
+        : 0;
+      const targetFrame = Math.round(p * (TOTAL_FRAMES - 1));
 
       currentFrame += (targetFrame - currentFrame) * 0.1;
       const frameIndex = Math.min(TOTAL_FRAMES - 1, Math.max(0, Math.round(currentFrame)));
@@ -113,18 +88,11 @@ export function ScrollScrubMobile() {
     }
 
     rafRef.current = requestAnimationFrame(render);
-
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      document.removeEventListener('touchstart', onTouchStart);
-      document.removeEventListener('touchmove', onTouchMove);
-      document.removeEventListener('touchend', onTouchEnd);
-      document.removeEventListener('touchcancel', onTouchEnd);
-    };
+    return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
   return (
-    <div style={{ position: 'relative', height: 0, zIndex: 1 }}>
+    <div style={{ height: 0, position: 'relative' }}>
       <canvas
         ref={canvasRef}
         aria-hidden="true"
