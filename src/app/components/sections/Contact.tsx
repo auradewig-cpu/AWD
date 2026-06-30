@@ -71,13 +71,7 @@ export function Contact() {
               duration: 0.5,
               ease: 'power2.out',
               stagger: 0.1,
-            }, 0.3)
-            .from('[data-contact-submit]', {
-              opacity: 0,
-              y: 16,
-              duration: 0.5,
-              ease: 'power2.out',
-            }, '>0.2');
+            }, 0.3);
         });
       }, sectionRef);
     };
@@ -224,19 +218,29 @@ export function Contact() {
             type="submit"
             data-contact-submit
             style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              background: '#00C853', color: '#000000',
-              borderRadius: 999, padding: '16px 32px',
-              fontSize: 16, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-              border: 'none', cursor: 'pointer', transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
               width: '100%',
-              boxShadow: '0 0 32px rgba(0,200,83,0.3)',
+              padding: '16px 32px',
+              marginTop: 8,
+              backgroundColor: '#00C853',
+              color: '#000000',
+              fontSize: 16,
+              fontWeight: 700,
+              fontFamily: 'Inter, sans-serif',
+              border: '2px solid #00C853',
+              borderRadius: 999,
+              cursor: 'pointer',
+              boxShadow: '0 0 32px rgba(0,200,83,0.4)',
+              transition: 'background-color 0.2s',
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.background = '#00E060';
+              e.currentTarget.style.backgroundColor = '#00E060';
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.background = '#00C853';
+              e.currentTarget.style.backgroundColor = '#00C853';
             }}
           >
             <MessageCircle size={17} />
