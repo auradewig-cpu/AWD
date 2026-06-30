@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { AdminCard, AdminInput, AdminButton, AdminSaveBar } from '@/admin/components';
-import { STORAGE_KEYS, loadFromStorage, saveToStorage, resetStorage, type PricingContent, type PricingTier } from '@/admin/storage';
+import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage, type PricingContent, type PricingTier } from '@/admin/storage';
+import { ADMIN_CREDENTIALS } from '@/admin/config';
 import { DEFAULT_PRICING } from '@/app/components/sections/PricingSection';
 import { AdminPricingTierEditor } from './AdminPricingTierEditor';
 
@@ -10,10 +11,13 @@ export function AdminPricing() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   function markDirty() {
     setDirty(true);
     setSaved(false);
+    setSaveError(null);
   }
 
   function setLabel<K extends keyof PricingContent>(key: K, value: PricingContent[K]) {
@@ -37,12 +41,20 @@ export function AdminPricing() {
     markDirty();
   }
 
-  function handleSave() {
-    saveToStorage(STORAGE_KEYS.PRICING, form);
-    window.dispatchEvent(new Event('awd-pricing-updated'));
-    setDirty(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  async function handleSave() {
+    setSaving(true);
+    setSaveError(null);
+    const ok = await saveToServer(STORAGE_KEYS.PRICING, form, ADMIN_CREDENTIALS.password);
+    if (ok) {
+      saveToStorage(STORAGE_KEYS.PRICING, form);
+      window.dispatchEvent(new Event('awd-pricing-updated'));
+      setDirty(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } else {
+      setSaveError('Gagal menyimpan ke server. Periksa koneksi atau coba lagi.');
+    }
+    setSaving(false);
   }
 
   function handleReset() {
@@ -85,7 +97,17 @@ export function AdminPricing() {
         </div>
       </div>
 
+      {saveError && (
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ff6b6b', textAlign: 'right', margin: '8px 0 0' }}>
+          {saveError}
+        </p>
+      )}
       <AdminSaveBar dirty={dirty} saved={saved} onSave={handleSave} onReset={handleReset} />
+      {saving && (
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.6)', textAlign: 'right', margin: '8px 0 0' }}>
+          Menyimpan...
+        </p>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Check, MessageCircle, ExternalLink } from 'lucide-react';
-import { STORAGE_KEYS, loadFromStorage, type PricingContent, type PricingTier } from '@/admin/storage';
+import { STORAGE_KEYS, loadFromStorage, loadFromServer, type PricingContent, type PricingTier } from '@/admin/storage';
 
 const WA_NUMBER = '6285286427559';
 
@@ -308,11 +308,15 @@ function PricingCard({ tier, withAdmin }: { tier: PricingTier; withAdmin: boolea
 export function PricingSection() {
   const [withAdmin, setWithAdmin] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
-  const [content, setContent] = useState(() => loadFromStorage(STORAGE_KEYS.PRICING, DEFAULT_PRICING));
+  const [content, setContent] = useState<PricingContent>(DEFAULT_PRICING);
+
+  useEffect(() => {
+    loadFromServer(STORAGE_KEYS.PRICING, DEFAULT_PRICING).then(setContent);
+  }, []);
 
   useEffect(() => {
     function handleUpdate() {
-      setContent(loadFromStorage(STORAGE_KEYS.PRICING, DEFAULT_PRICING));
+      loadFromServer(STORAGE_KEYS.PRICING, DEFAULT_PRICING).then(setContent);
     }
     function onStorage(e: StorageEvent) {
       if (e.key === STORAGE_KEYS.PRICING) {

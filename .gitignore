@@ -13,3 +13,5 @@ asset/
 # Script utility
 compress.mjs
 copyFrames.mjs
+.vercel
+.env*

@@ -45,6 +45,38 @@ export function resetStorage(key: string): void {
   }
 }
 
+export async function loadFromServer<T>(key: string, fallback: T): Promise<T> {
+  try {
+    const res = await fetch(`/api/content?key=${key}`);
+    const data = await res.json();
+    if (data.value !== null && data.value !== undefined) {
+      saveToStorage(key, data.value as T);
+      return data.value as T;
+    }
+    return loadFromStorage(key, fallback);
+  } catch {
+    return loadFromStorage(key, fallback);
+  }
+}
+
+export async function saveToServer<T>(key: string, value: T, password: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/content?key=${key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value, password }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      saveToStorage(key, value);
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 // ─── Content type interfaces ──────────────────────────────────────────────────
 
 export interface HeroContent {
