@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { Instagram, Youtube, MessageCircle } from 'lucide-react';
 
-const WA_NUMBER = '6281234567890';
+const WA_NUMBER = '6285286427559';
 
 export function Footer() {
   const year = new Date().getFullYear();

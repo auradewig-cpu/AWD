@@ -15,7 +15,7 @@ import {
 } from '@/admin/storage';
 import { DEMO_DATA } from '@/data/demoData';
 
-const WA_NUMBER = '6281234567890';
+const WA_NUMBER = '6285286427559';
 
 const TIER_META: Record<DemoTier, { name: string; subtitle: string }> = {
   spark: { name: 'SPARK', subtitle: 'Landing Page / Promosi Awal' },

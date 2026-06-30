@@ -125,7 +125,7 @@ export function AdminContact() {
 
         <AdminCard title="WhatsApp & Tombol">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <AdminInput label="Nomor WhatsApp" value={form.waNumber} onChange={(v) => set('waNumber', v)} placeholder="6281234567890" />
+            <AdminInput label="Nomor WhatsApp" value={form.waNumber} onChange={(v) => set('waNumber', v)} placeholder="6285286427559" />
             <AdminInput label="Teks Tombol Submit" value={form.submitButtonText} onChange={(v) => set('submitButtonText', v)} />
           </div>
         </AdminCard>

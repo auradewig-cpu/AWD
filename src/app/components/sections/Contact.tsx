@@ -19,7 +19,7 @@ export const DEFAULT_CONTACT: ContactContent = {
     'Di atas Rp 20jt',
     'Belum tahu / minta rekomendasi',
   ],
-  waNumber: '6281234567890',
+  waNumber: '6285286427559',
   submitButtonText: 'Kirim via WhatsApp →',
 };
 

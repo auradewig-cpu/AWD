@@ -79,7 +79,7 @@ export function AdminHero() {
         <AdminCard title="Tombol CTA">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <AdminInput label="Teks CTA Utama" value={form.ctaPrimaryText} onChange={(v) => update('ctaPrimaryText', v)} />
-            <AdminInput label="Nomor WhatsApp CTA Utama" value={form.ctaPrimaryWaNumber} onChange={(v) => update('ctaPrimaryWaNumber', v)} placeholder="6281234567890" />
+            <AdminInput label="Nomor WhatsApp CTA Utama" value={form.ctaPrimaryWaNumber} onChange={(v) => update('ctaPrimaryWaNumber', v)} placeholder="6285286427559" />
             <AdminInput label="Teks CTA Sekunder" value={form.ctaSecondaryText} onChange={(v) => update('ctaSecondaryText', v)} />
           </div>
         </AdminCard>

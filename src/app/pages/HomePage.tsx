@@ -20,7 +20,7 @@ const HERO_CONTENT = {
   headlineLine2: 'Kualitas Bisnismu.',
   subheadline: 'Website profesional mulai Rp999rb. Cepat, aman, desain custom — tanpa beban harga agency besar.',
   ctaPrimaryText: 'Konsultasi Gratis →',
-  ctaPrimaryWaNumber: '6281234567890',
+  ctaPrimaryWaNumber: '6285286427559',
   ctaSecondaryText: 'Lihat Paket Harga',
 };
 

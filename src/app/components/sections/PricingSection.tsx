@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Check, MessageCircle, ExternalLink } from 'lucide-react';
 import { STORAGE_KEYS, loadFromStorage, type PricingContent, type PricingTier } from '@/admin/storage';
 
-const WA_NUMBER = '6281234567890';
+const WA_NUMBER = '6285286427559';
 
 export const DEFAULT_PRICING: PricingContent = {
   labelNoAdmin: 'Tanpa Admin Panel',

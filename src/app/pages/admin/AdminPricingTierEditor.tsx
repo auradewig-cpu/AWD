@@ -128,7 +128,7 @@ export function AdminPricingTierEditor({ tier, open, onToggleOpen, onChange, onR
           </div>
 
           <AdminInput label="Teks Tombol CTA" value={tier.ctaText} onChange={(v) => set('ctaText', v)} />
-          <AdminInput label="Nomor WhatsApp" value={tier.waNumber} onChange={(v) => set('waNumber', v)} placeholder="6281234567890" />
+          <AdminInput label="Nomor WhatsApp" value={tier.waNumber} onChange={(v) => set('waNumber', v)} placeholder="6285286427559" />
           <AdminTextarea
             label="Template Pesan WhatsApp ({name} & {subtitle} otomatis diganti)"
             value={tier.waMessageTemplate}

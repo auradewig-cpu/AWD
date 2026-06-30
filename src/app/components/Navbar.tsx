@@ -11,7 +11,7 @@ const navLinks = [
   { label: 'Kontak', href: '#kontak' },
 ];
 
-const WA_NUMBER = '6281234567890';
+const WA_NUMBER = '6285286427559';
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
