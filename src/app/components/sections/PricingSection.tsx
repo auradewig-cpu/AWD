@@ -311,13 +311,20 @@ export function PricingSection() {
   const [content, setContent] = useState(() => loadFromStorage(STORAGE_KEYS.PRICING, DEFAULT_PRICING));
 
   useEffect(() => {
+    function handleUpdate() {
+      setContent(loadFromStorage(STORAGE_KEYS.PRICING, DEFAULT_PRICING));
+    }
     function onStorage(e: StorageEvent) {
       if (e.key === STORAGE_KEYS.PRICING) {
-        setContent(loadFromStorage(STORAGE_KEYS.PRICING, DEFAULT_PRICING));
+        handleUpdate();
       }
     }
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    window.addEventListener('awd-pricing-updated', handleUpdate);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('awd-pricing-updated', handleUpdate);
+    };
   }, []);
 
   useEffect(() => {

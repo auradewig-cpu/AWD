@@ -39,6 +39,7 @@ export function AdminPricing() {
 
   function handleSave() {
     saveToStorage(STORAGE_KEYS.PRICING, form);
+    window.dispatchEvent(new Event('awd-pricing-updated'));
     setDirty(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
