@@ -50,15 +50,13 @@ export function Footer() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, marginBottom: 48 }}>
           {/* Brand */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-              <div style={{
-                width: 32, height: 32, background: '#C6FF4A', borderRadius: 6,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, fontSize: 14, color: '#07080A' }}>A</span>
-              </div>
-              <span style={{ fontFamily: 'Inter Tight, sans-serif', fontWeight: 800, fontSize: 18, color: '#FAFAFA' }}>AWD</span>
-            </div>
+            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, textDecoration: 'none' }}>
+              <img
+                src="https://res.cloudinary.com/dr0xe0tgr/image/upload/v1782786746/buat_logo_ini_dalam_format_202606300931_o4tdgb.webp"
+                alt="AWD Logo"
+                style={{ height: 32, width: 'auto', display: 'block' }}
+              />
+            </Link>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, fontFamily: 'Inter, sans-serif', lineHeight: 1.6, maxWidth: 240 }}>
               Jasa pembuatan website & aplikasi web berbasis React/Next.js. Kualitas premium, harga transparan.
             </p>
