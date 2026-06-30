@@ -25,11 +25,11 @@ export const DEFAULT_CONTACT: ContactContent = {
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.08)',
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.12)',
   borderRadius: 10,
-  padding: '12px 16px',
-  color: '#FAFAFA',
+  padding: '14px 16px',
+  color: '#FFFFFF',
   fontSize: 15,
   fontFamily: 'Inter, sans-serif',
   outline: 'none',
@@ -92,11 +92,11 @@ export function Contact() {
   }, []);
 
   function handleFocus(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
-    e.target.style.borderColor = '#C6FF4A';
-    e.target.style.boxShadow = '0 0 0 2px rgba(198,255,74,0.15)';
+    e.target.style.borderColor = '#00C853';
+    e.target.style.boxShadow = '0 0 0 2px rgba(0,200,83,0.15)';
   }
   function handleBlur(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
-    e.target.style.borderColor = 'rgba(255,255,255,0.08)';
+    e.target.style.borderColor = 'rgba(255,255,255,0.12)';
     e.target.style.boxShadow = 'none';
   }
 
@@ -108,7 +108,7 @@ export function Contact() {
 
   return (
     <section ref={sectionRef} id="kontak" style={{ padding: '100px 24px' }}>
-      <div style={{ maxWidth: 640, margin: '0 auto' }}>
+      <div style={{ maxWidth: 700, margin: '0 auto' }}>
         {/* Header */}
         <div
           data-contact-headline
@@ -141,14 +141,16 @@ export function Contact() {
         <form
           onSubmit={handleSubmit}
           style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 20, padding: '32px',
+            background: 'rgba(10,10,10,0.80)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: 20, padding: '48px 40px',
             display: 'flex', flexDirection: 'column', gap: 20,
           }}
         >
           <div data-contact-field>
-            <label htmlFor="nama" style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)', marginBottom: 8 }}>
+            <label htmlFor="nama" style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 500, color: '#FFFFFF', marginBottom: 8 }}>
               {content.fieldLabels.name}
             </label>
             <input
@@ -165,7 +167,7 @@ export function Contact() {
           </div>
 
           <div data-contact-field>
-            <label htmlFor="bisnis" style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)', marginBottom: 8 }}>
+            <label htmlFor="bisnis" style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 500, color: '#FFFFFF', marginBottom: 8 }}>
               {content.fieldLabels.business}
             </label>
             <input
@@ -182,7 +184,7 @@ export function Contact() {
           </div>
 
           <div data-contact-field>
-            <label htmlFor="budget" style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)', marginBottom: 8 }}>
+            <label htmlFor="budget" style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 500, color: '#FFFFFF', marginBottom: 8 }}>
               {content.fieldLabels.budget}
             </label>
             <select
@@ -190,7 +192,7 @@ export function Contact() {
               required
               value={form.budget}
               onChange={e => setForm({ ...form, budget: e.target.value })}
-              style={{ ...inputStyle, appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}
+              style={{ ...inputStyle, background: 'rgba(20,20,20,0.95)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', borderRadius: 10, padding: '14px 16px', appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}
               onFocus={handleFocus}
               onBlur={handleBlur}
             >
@@ -202,7 +204,7 @@ export function Contact() {
           </div>
 
           <div data-contact-field>
-            <label htmlFor="pesan" style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)', marginBottom: 8 }}>
+            <label htmlFor="pesan" style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 500, color: '#FFFFFF', marginBottom: 8 }}>
               {content.fieldLabels.message}
             </label>
             <textarea
@@ -223,19 +225,18 @@ export function Contact() {
             data-contact-submit
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              background: '#C6FF4A', color: '#07080A',
-              borderRadius: 10, padding: '14px',
-              fontSize: 15, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+              background: '#00C853', color: '#000000',
+              borderRadius: 999, padding: '16px 32px',
+              fontSize: 16, fontWeight: 700, fontFamily: 'Inter, sans-serif',
               border: 'none', cursor: 'pointer', transition: 'all 0.2s',
-              boxShadow: '0 0 30px rgba(198,255,74,0.15)',
+              width: '100%',
+              boxShadow: '0 0 32px rgba(0,200,83,0.3)',
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.filter = 'brightness(1.08)';
-              e.currentTarget.style.transform = 'scale(1.01)';
+              e.currentTarget.style.background = '#00E060';
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.filter = 'brightness(1)';
-              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.background = '#00C853';
             }}
           >
             <MessageCircle size={17} />

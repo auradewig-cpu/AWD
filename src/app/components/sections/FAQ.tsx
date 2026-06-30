@@ -108,28 +108,36 @@ export function FAQ() {
 
   return (
     <section ref={sectionRef} id="faq" style={{ padding: '100px 24px' }}>
-      <div style={{ maxWidth: 780, margin: '0 auto' }}>
-        {/* Header */}
-        <div
-          data-faq-header
-          style={{ textAlign: 'center', marginBottom: 56 }}
-        >
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
-            color: '#C6FF4A', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 16,
-          }}>
-            <div style={{ width: 20, height: 1, background: '#C6FF4A' }} />
-            FAQ
-            <div style={{ width: 20, height: 1, background: '#C6FF4A' }} />
+      <div style={{ maxWidth: 860, margin: '0 auto' }}>
+        <div style={{
+          background: 'rgba(10,10,10,0.75)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.06)',
+          borderRadius: 20,
+          padding: '40px 36px',
+        }}>
+          {/* Header */}
+          <div
+            data-faq-header
+            style={{ textAlign: 'center', marginBottom: 48 }}
+          >
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+              color: '#C6FF4A', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 16,
+            }}>
+              <div style={{ width: 20, height: 1, background: '#C6FF4A' }} />
+              FAQ
+              <div style={{ width: 20, height: 1, background: '#C6FF4A' }} />
+            </div>
+            <h2 style={{
+              fontFamily: 'Inter Tight, sans-serif', fontSize: 'clamp(28px, 4vw, 40px)',
+              fontWeight: 700, color: '#FAFAFA', letterSpacing: '-0.02em',
+            }}>
+              Pertanyaan yang Sering Muncul
+            </h2>
           </div>
-          <h2 style={{
-            fontFamily: 'Inter Tight, sans-serif', fontSize: 'clamp(28px, 4vw, 40px)',
-            fontWeight: 700, color: '#FAFAFA', letterSpacing: '-0.02em',
-          }}>
-            Pertanyaan yang Sering Muncul
-          </h2>
-        </div>
 
         {/* Accordion */}
         <div>
@@ -141,8 +149,11 @@ export function FAQ() {
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.05 }}
               style={{
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
-                marginBottom: 0,
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 10,
+                marginBottom: 8,
+                padding: '16px 20px',
               }}
             >
               <button
@@ -157,7 +168,7 @@ export function FAQ() {
               >
                 <span style={{
                   fontFamily: 'Inter, sans-serif', fontSize: 16, fontWeight: 600,
-                  color: openIndex === i ? '#C6FF4A' : '#FAFAFA',
+                  color: '#FFFFFF',
                   transition: 'color 0.2s', lineHeight: 1.4,
                 }}>
                   {faq.question}
@@ -167,7 +178,7 @@ export function FAQ() {
                   transition={{ duration: 0.25 }}
                   style={{ flexShrink: 0 }}
                 >
-                  <ChevronDown size={18} color={openIndex === i ? '#C6FF4A' : 'rgba(255,255,255,0.4)'} />
+                  <ChevronDown size={18} color={openIndex === i ? '#00C853' : 'rgba(255,255,255,0.4)'} />
                 </motion.div>
               </button>
 
@@ -184,7 +195,7 @@ export function FAQ() {
                   >
                     <p style={{
                       fontFamily: 'Inter, sans-serif', fontSize: 15,
-                      color: 'rgba(255,255,255,0.6)', lineHeight: 1.7,
+                      color: 'rgba(255,255,255,0.75)', lineHeight: 1.7,
                       paddingBottom: 20,
                     }}>
                       {faq.answer}
@@ -194,6 +205,7 @@ export function FAQ() {
               </AnimatePresence>
             </motion.div>
           ))}
+        </div>
         </div>
       </div>
     </section>
