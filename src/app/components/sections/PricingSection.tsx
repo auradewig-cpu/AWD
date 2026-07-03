@@ -6,19 +6,15 @@ import { SpeedGuaranteeBadge } from '../ui/SpeedGuaranteeBadge';
 const WA_NUMBER = '6285286427559';
 
 export const DEFAULT_PRICING: PricingContent = {
-  labelNoAdmin: 'Tanpa Admin Panel',
-  labelWithAdmin: '+ Admin Panel',
   tiers: [
     {
       id: 'starter',
       name: 'STARTER',
       subtitle: 'Landing page + admin panel',
-      priceNoAdmin: 2500000,
-      priceNoAdminOriginal: 5000000,
-      priceWithAdmin: null,
-      priceWithAdminOriginal: null,
-      showAdminOption: false,
+      price: 'Rp 2.500.000',
+      originalPrice: 'Rp 5.000.000',
       recommended: false,
+      showDemoButton: false,
       features: [
         'Website Next.js custom (bukan template)',
         'Admin panel: edit teks, logo, warna, kontak',
@@ -27,21 +23,15 @@ export const DEFAULT_PRICING: PricingContent = {
         'Deploy ke Vercel + domain .com 1 tahun',
         '2 putaran revisi',
       ],
-      ctaText: 'Konsultasi Sekarang',
-      waNumber: WA_NUMBER,
-      waMessageTemplate: 'Halo Aldi, saya tertarik dengan paket {name} ({subtitle}). Boleh konsultasi lebih lanjut?',
-      showDemoButton: true,
     },
     {
       id: 'business',
       name: 'BUSINESS',
       subtitle: 'Company profile + blog + admin panel',
-      priceNoAdmin: 5000000,
-      priceNoAdminOriginal: 10000000,
-      priceWithAdmin: null,
-      priceWithAdminOriginal: null,
-      showAdminOption: false,
+      price: 'Rp 5.000.000',
+      originalPrice: 'Rp 10.000.000',
       recommended: true,
+      showDemoButton: false,
       features: [
         'Semua fitur STARTER',
         'Hingga 5 halaman',
@@ -50,21 +40,15 @@ export const DEFAULT_PRICING: PricingContent = {
         'Formulir kontak + notifikasi email',
         '3 putaran revisi',
       ],
-      ctaText: 'Konsultasi Sekarang',
-      waNumber: WA_NUMBER,
-      waMessageTemplate: 'Halo Aldi, saya tertarik dengan paket {name} ({subtitle}). Boleh konsultasi lebih lanjut?',
-      showDemoButton: true,
     },
     {
       id: 'store',
       name: 'STORE',
       subtitle: 'Toko online + sistem pesanan',
-      priceNoAdmin: 10000000,
-      priceNoAdminOriginal: 18000000,
-      priceWithAdmin: null,
-      priceWithAdminOriginal: null,
-      showAdminOption: false,
+      price: 'Rp 10.000.000',
+      originalPrice: 'Rp 18.000.000',
       recommended: false,
+      showDemoButton: false,
       features: [
         'Semua fitur BUSINESS',
         'Katalog produk (tambah/edit/hapus)',
@@ -73,21 +57,15 @@ export const DEFAULT_PRICING: PricingContent = {
         'Upload foto produk',
         '4 putaran revisi',
       ],
-      ctaText: 'Konsultasi Sekarang',
-      waNumber: WA_NUMBER,
-      waMessageTemplate: 'Halo Aldi, saya tertarik dengan paket {name} ({subtitle}). Boleh konsultasi lebih lanjut?',
-      showDemoButton: true,
     },
     {
       id: 'pro',
       name: 'PRO',
       subtitle: 'Web app + database + payment gateway',
-      priceNoAdmin: 18000000,
-      priceNoAdminOriginal: 30000000,
-      priceWithAdmin: null,
-      priceWithAdminOriginal: null,
-      showAdminOption: false,
+      price: 'Rp 18.000.000',
+      originalPrice: 'Rp 30.000.000',
       recommended: false,
+      showDemoButton: false,
       features: [
         'Semua fitur STORE',
         'Database + authentication',
@@ -96,29 +74,12 @@ export const DEFAULT_PRICING: PricingContent = {
         'Dashboard analitik',
         'SLA support 30 hari',
       ],
-      ctaText: 'Konsultasi Sekarang',
-      waNumber: WA_NUMBER,
-      waMessageTemplate: 'Halo Aldi, saya tertarik dengan paket {name} ({subtitle}). Boleh konsultasi lebih lanjut?',
-      showDemoButton: true,
     },
   ],
 };
 
-function formatRp(amount: number) {
-  if (amount >= 1000000) {
-    const jt = amount / 1000000;
-    return `Rp ${jt % 1 === 0 ? jt : jt.toFixed(1)}jt`;
-  }
-  return `Rp ${(amount / 1000).toFixed(0)}rb`;
-}
-
-function PricingCard({ tier, withAdmin }: { tier: PricingTier; withAdmin: boolean }) {
-  const usesAdminPrice = withAdmin && tier.showAdminOption && tier.priceWithAdmin !== null;
-  const price = usesAdminPrice ? (tier.priceWithAdmin as number) : tier.priceNoAdmin;
-  const originalPrice = usesAdminPrice ? (tier.priceWithAdminOriginal as number) : tier.priceNoAdminOriginal;
-  const waMessage = tier.waMessageTemplate
-    .replace(/\{name\}/g, tier.name)
-    .replace(/\{subtitle\}/g, tier.subtitle);
+function PricingCard({ tier }: { tier: PricingTier }) {
+  const waMessage = 'Halo Aldi, saya tertarik dengan paket ' + tier.name + ' (' + tier.subtitle + '). Boleh konsultasi lebih lanjut?';
 
   return (
     <div
@@ -171,20 +132,15 @@ function PricingCard({ tier, withAdmin }: { tier: PricingTier; withAdmin: boolea
             fontWeight: 700, color: tier.recommended ? '#C6FF4A' : '#FAFAFA',
             letterSpacing: '-0.02em',
           }}>
-            {formatRp(price)}
+            {tier.price}
           </span>
           <span style={{
             fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
             color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through',
           }}>
-            {formatRp(originalPrice)}
+            {tier.originalPrice}
           </span>
         </div>
-        {(withAdmin && !tier.showAdminOption) && (
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
-            Paket ini tidak termasuk admin panel
-          </p>
-        )}
       </div>
 
       {/* Features */}
@@ -214,7 +170,7 @@ function PricingCard({ tier, withAdmin }: { tier: PricingTier; withAdmin: boolea
       {/* CTAs */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <a
-          href={`https://wa.me/${tier.waNumber}?text=${encodeURIComponent(waMessage)}`}
+          href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waMessage)}`}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -234,7 +190,7 @@ function PricingCard({ tier, withAdmin }: { tier: PricingTier; withAdmin: boolea
           }}
         >
           <MessageCircle size={15} />
-          {tier.ctaText}
+          Konsultasi Sekarang
         </a>
 
         {tier.showDemoButton && (
@@ -269,7 +225,6 @@ function PricingCard({ tier, withAdmin }: { tier: PricingTier; withAdmin: boolea
 }
 
 export function PricingSection() {
-  const [withAdmin, setWithAdmin] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const [content, setContent] = useState<PricingContent>(DEFAULT_PRICING);
 
@@ -308,7 +263,6 @@ export function PricingSection() {
         const mm = gsap.matchMedia();
         mm.add('(prefers-reduced-motion: no-preference)', () => {
         const isMobile = window.innerWidth < 768;
-        const toggleLead = isMobile ? 0.075 : 0.15;
         const cardsLead = isMobile ? 0.1 : 0.2;
         const cardStagger = isMobile ? 0.05 : 0.1;
 
@@ -321,13 +275,7 @@ export function PricingSection() {
           y: 20,
           duration: 0.5,
           ease: 'power2.out',
-        })
-          .from('[data-pricing-toggle]', {
-            opacity: 0,
-            y: 10,
-            duration: 0.5,
-            ease: 'power2.out',
-          }, toggleLead);
+        });
 
         const cards = gsap.utils.toArray<HTMLElement>('[data-pricing-card]');
         tl.from(cards, {
@@ -398,46 +346,13 @@ export function PricingSection() {
           </h2>
         </div>
 
-        {/* Toggle */}
-        <div data-pricing-toggle style={{ textAlign: 'center', marginBottom: 48 }}>
-          <div style={{
-            display: 'inline-flex',
-            background: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 999, padding: 4,
-            gap: 4,
-          }}>
-            {[
-              { label: content.labelNoAdmin, value: false },
-              { label: content.labelWithAdmin, value: true },
-            ].map(opt => (
-              <button
-                key={String(opt.value)}
-                role="button"
-                aria-pressed={withAdmin === opt.value}
-                onClick={() => setWithAdmin(opt.value)}
-                style={{
-                  borderRadius: 999, padding: '8px 20px',
-                  fontSize: 14, fontWeight: 600, fontFamily: 'Inter, sans-serif',
-                  border: 'none', cursor: 'pointer', transition: 'all 0.2s',
-                  background: withAdmin === opt.value ? '#C6FF4A' : 'transparent',
-                  color: withAdmin === opt.value ? '#07080A' : 'rgba(255,255,255,0.6)',
-                }}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Cards */}
         <div
           className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3"
           style={{ alignItems: 'start', width: '100%' }}
         >
           {content.tiers.map((tier) => (
-            <PricingCard key={tier.id} tier={tier} withAdmin={withAdmin} />
+            <PricingCard key={tier.id} tier={tier} />
           ))}
         </div>
       </div>

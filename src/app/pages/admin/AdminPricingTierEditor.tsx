@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
-import { AdminInput, AdminTextarea, AdminButton, AdminToggle } from '@/admin/components';
+import { AdminInput, AdminButton, AdminToggle } from '@/admin/components';
 import type { PricingTier } from '@/admin/storage';
 
 interface Props {
@@ -13,11 +13,6 @@ interface Props {
 export function AdminPricingTierEditor({ tier, open, onToggleOpen, onChange, onRecommend }: Props) {
   function set<K extends keyof PricingTier>(key: K, value: PricingTier[K]) {
     onChange({ ...tier, [key]: value });
-  }
-
-  function setNumber<K extends keyof PricingTier>(key: K, raw: string) {
-    const n = Number(raw.replace(/[^0-9]/g, ''));
-    onChange({ ...tier, [key]: (Number.isNaN(n) ? 0 : n) as PricingTier[K] });
   }
 
   function updateFeature(index: number, value: string) {
@@ -69,22 +64,9 @@ export function AdminPricingTierEditor({ tier, open, onToggleOpen, onChange, onR
           <AdminInput label="Subtitle" value={tier.subtitle} onChange={(v) => set('subtitle', v)} />
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <AdminInput label="Harga (Tanpa Admin)" value={String(tier.priceNoAdmin)} onChange={(v) => setNumber('priceNoAdmin', v)} />
-            <AdminInput label="Harga Coret (Tanpa Admin)" value={String(tier.priceNoAdminOriginal)} onChange={(v) => setNumber('priceNoAdminOriginal', v)} />
+            <AdminInput label="Harga" value={tier.price} onChange={(v) => set('price', v)} placeholder="Rp 2.500.000" />
+            <AdminInput label="Harga Coret" value={tier.originalPrice} onChange={(v) => set('originalPrice', v)} placeholder="Rp 5.000.000" />
           </div>
-
-          <AdminToggle
-            checked={tier.showAdminOption}
-            onChange={(v) => set('showAdminOption', v)}
-            label="Tawarkan opsi + Admin Panel"
-          />
-
-          {tier.showAdminOption && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <AdminInput label="Harga (+ Admin)" value={String(tier.priceWithAdmin ?? 0)} onChange={(v) => setNumber('priceWithAdmin', v)} />
-              <AdminInput label="Harga Coret (+ Admin)" value={String(tier.priceWithAdminOriginal ?? 0)} onChange={(v) => setNumber('priceWithAdminOriginal', v)} />
-            </div>
-          )}
 
           <div>
             <label style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.65)', marginBottom: 8 }}>
@@ -126,15 +108,6 @@ export function AdminPricingTierEditor({ tier, open, onToggleOpen, onChange, onR
               </AdminButton>
             </div>
           </div>
-
-          <AdminInput label="Teks Tombol CTA" value={tier.ctaText} onChange={(v) => set('ctaText', v)} />
-          <AdminInput label="Nomor WhatsApp" value={tier.waNumber} onChange={(v) => set('waNumber', v)} placeholder="6285286427559" />
-          <AdminTextarea
-            label="Template Pesan WhatsApp ({name} & {subtitle} otomatis diganti)"
-            value={tier.waMessageTemplate}
-            onChange={(v) => set('waMessageTemplate', v)}
-            rows={3}
-          />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 4 }}>
             <AdminToggle checked={tier.showDemoButton} onChange={(v) => set('showDemoButton', v)} label="Tampilkan tombol 'Lihat Demo'" />

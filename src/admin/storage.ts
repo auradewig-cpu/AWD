@@ -95,25 +95,17 @@ export interface HeroContent {
 }
 
 export interface PricingTier {
-  id: string; // 'spark' | 'ignite' | 'blaze' | 'blazeplus' | 'apex'
+  id: string;
   name: string;
   subtitle: string;
-  priceNoAdmin: number;
-  priceNoAdminOriginal: number;
-  priceWithAdmin: number | null;
-  priceWithAdminOriginal: number | null;
-  showAdminOption: boolean;
+  price: string;
+  originalPrice: string;
   recommended: boolean;
-  features: string[];
-  ctaText: string;
-  waNumber: string;
-  waMessageTemplate: string;
   showDemoButton: boolean;
+  features: string[];
 }
 
 export interface PricingContent {
-  labelNoAdmin: string;
-  labelWithAdmin: string;
   tiers: PricingTier[];
 }
 

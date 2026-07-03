@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ExternalLink } from 'lucide-react';
-import { AdminCard, AdminInput, AdminButton, AdminSaveBar } from '@/admin/components';
+import { ExternalLink, RotateCcw } from 'lucide-react';
+import { AdminButton, AdminSaveBar } from '@/admin/components';
 import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage, type PricingContent, type PricingTier } from '@/admin/storage';
 import { ADMIN_CREDENTIALS } from '@/admin/config';
 import { DEFAULT_PRICING } from '@/app/components/sections/PricingSection';
@@ -18,11 +18,6 @@ export function AdminPricing() {
     setDirty(true);
     setSaved(false);
     setSaveError(null);
-  }
-
-  function setLabel<K extends keyof PricingContent>(key: K, value: PricingContent[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-    markDirty();
   }
 
   function updateTier(next: PricingTier) {
@@ -64,6 +59,28 @@ export function AdminPricing() {
     setSaved(false);
   }
 
+  async function handleServerReset() {
+    if (!confirm('Reset semua data pricing ke default? Data di server dan local akan dihapus.')) return;
+    try {
+      await fetch('/api/content?key=pricing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: null, password: 'Surakarta93' }),
+      });
+    } catch {}
+    location.reload();
+  }
+
+  async function resetPricingToDefault() {
+    const ok = await saveToServer(STORAGE_KEYS.PRICING, DEFAULT_PRICING, ADMIN_CREDENTIALS.password);
+    if (ok) {
+      saveToStorage(STORAGE_KEYS.PRICING, DEFAULT_PRICING);
+      setForm(DEFAULT_PRICING);
+      window.dispatchEvent(new Event('awd-pricing-updated'));
+      alert('Pricing berhasil direset ke default baru.');
+    }
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
@@ -76,13 +93,6 @@ export function AdminPricing() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <AdminCard title="Label Toggle">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <AdminInput label="Label Tanpa Admin" value={form.labelNoAdmin} onChange={(v) => setLabel('labelNoAdmin', v)} />
-            <AdminInput label="Label + Admin Panel" value={form.labelWithAdmin} onChange={(v) => setLabel('labelWithAdmin', v)} />
-          </div>
-        </AdminCard>
-
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {form.tiers.map((tier) => (
             <AdminPricingTierEditor
@@ -102,7 +112,45 @@ export function AdminPricing() {
           {saveError}
         </p>
       )}
-      <AdminSaveBar dirty={dirty} saved={saved} onSave={handleSave} onReset={handleReset} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4, gap: 12 }}>
+        <AdminSaveBar dirty={dirty} saved={saved} onSave={handleSave} onReset={handleReset} />
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={resetPricingToDefault}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'rgba(198,255,74,0.1)',
+              border: '1px solid rgba(198,255,74,0.25)',
+              borderRadius: 10, padding: '10px 18px',
+              fontSize: 13, fontWeight: 600, fontFamily: 'Inter, sans-serif',
+              color: '#C6FF4A', cursor: 'pointer', transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(198,255,74,0.2)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(198,255,74,0.1)'; }}
+          >
+            <RotateCcw size={14} />
+            Reset ke Default Baru
+          </button>
+          <button
+            onClick={handleServerReset}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'rgba(255,107,107,0.1)',
+              border: '1px solid rgba(255,107,107,0.25)',
+              borderRadius: 10, padding: '10px 18px',
+              fontSize: 13, fontWeight: 600, fontFamily: 'Inter, sans-serif',
+              color: '#ff6b6b', cursor: 'pointer', transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,107,0.2)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,107,107,0.1)'; }}
+          >
+            <RotateCcw size={14} />
+            Reset ke Default
+          </button>
+        </div>
+      </div>
       {saving && (
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.6)', textAlign: 'right', margin: '8px 0 0' }}>
           Menyimpan...
