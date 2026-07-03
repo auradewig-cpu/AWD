@@ -181,7 +181,7 @@ function PromoCard({ data, onDaftar }: { data: PromoData; onDaftar: () => void }
 
       <SlotProgressBar registered={data.registered} quota={data.quota} />
 
-      <div style={{ margin: '16px 0', padding: '12px 16px', background: 'rgba(239,68,68,0.06)', borderRadius: 12, border: '1px solid rgba(239,68,68,0.12)' }}>
+      <div style={{ margin: '16px 0', padding: '12px 16px', background: 'rgba(0,0,0,0.6)', borderRadius: 12, border: '1px solid rgba(239,68,68,0.6)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
           <Gift size={13} color="#EF4444" />
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600, color: '#EF4444', letterSpacing: '0.03em' }}>EARLY BIRD BONUS</span>
@@ -191,7 +191,7 @@ function PromoCard({ data, onDaftar }: { data: PromoData; onDaftar: () => void }
           return (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, opacity: isActive ? 1 : 0.5 }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: isActive ? '#C6FF4A' : 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: isActive ? '#C6FF4A' : 'rgba(255,255,255,0.4)' }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: isActive ? '#C6FF4A' : '#ffffff' }}>
                 Slot #{t.min}-{t.max}: {t.bonus}
               </span>
             </div>
