@@ -349,7 +349,7 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
         <div style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 12, padding: '16px', marginBottom: 20, textAlign: 'left' }}>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 700, color: '#EF4444', margin: '0 0 8px' }}>Syarat & Ketentuan:</p>
           <ol style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.6)', margin: 0, paddingLeft: 16, lineHeight: 1.7 }}>
-            {['Follow + like + share akun IG/TikTok/FB AWD', 'Screenshot dan kirim ke WA AWD', 'Wajib berikan ulasan Google sebelum website live', 'Post sosmed dengan template yang kami kirim via WA'].map((s, i) => (
+            {['Follow + Like + Share + Save 3 post terbaru AWD di semua medsos (IG/TikTok/FB/YouTube)', 'Screenshot bukti dan kirim ke WA AWD', 'Wajib berikan ulasan Google positif sebelum website live', 'Post sosmed dengan template yang kami kirim via WA', '⚠️ Pertahankan follow minimal 3 bulan agar paket tetap aktif'].map((s, i) => (
               <li key={i}>{s}</li>
             ))}
           </ol>
