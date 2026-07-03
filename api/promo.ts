@@ -150,5 +150,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.json({ registrant: reg[0] });
   }
 
+  if (req.method === 'POST' && action === 'seed') {
+    const { password } = req.body;
+    if (password !== process.env.ADMIN_PASSWORD) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    await sql`DELETE FROM promos`;
+    await sql`
+      INSERT INTO promos (name, package, quota, deadline, active, bonus_tiers)
+      VALUES
+        ('Promo Juli 2026', 'starter', 100, '2026-07-31 23:59:59', true,
+         '{"tiers":[
+           {"min":1,"max":10,"bonus":"Domain .com 2 tahun"},
+           {"min":11,"max":30,"bonus":"Domain .com 1 tahun"},
+           {"min":31,"max":50,"bonus":"Setup Google Business"},
+           {"min":51,"max":100,"bonus":"Harga promo saja"}
+         ]}'::jsonb),
+        ('Promo Juli 2026', 'business', 50, '2026-07-31 23:59:59', true,
+         '{"tiers":[
+           {"min":1,"max":10,"bonus":"Domain .com 2 tahun"},
+           {"min":11,"max":25,"bonus":"Domain .com 1 tahun"},
+           {"min":26,"max":50,"bonus":"Harga promo saja"}
+         ]}'::jsonb)
+    `;
+    return res.json({ success: true, message: 'Promo seeded' });
+  }
+
   return res.status(405).json({ error: 'Method not allowed' });
 }
