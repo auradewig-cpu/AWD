@@ -145,22 +145,25 @@ function PromoCard({ data, onDaftar }: { data: PromoData; onDaftar: () => void }
       display: 'flex', flexDirection: 'column',
     }}>
       <div style={{
-        position: 'absolute', top: 0, right: 0,
-        overflow: 'hidden', width: 100, height: 100,
-        pointerEvents: 'none',
+        position: 'absolute',
+        top: 0,
+        right: 20,
+        zIndex: 10,
+        filter: 'drop-shadow(0 4px 12px rgba(239,68,68,0.6))',
       }}>
         <div style={{
-          position: 'absolute', top: 22, right: -28,
-          width: 120,
-          background: 'linear-gradient(135deg, #f97316, #ef4444)',
-          color: 'white', fontSize: 10, fontWeight: 700,
-          textAlign: 'center', padding: '4px 0',
-          transform: 'rotate(45deg)',
-          boxShadow: '0 2px 8px rgba(239,68,68,0.5)',
+          background: 'linear-gradient(180deg, #ef4444, #b91c1c)',
+          color: 'white',
+          width: 56,
+          padding: '12px 4px 20px',
+          textAlign: 'center',
+          fontSize: 11,
+          fontWeight: 800,
           lineHeight: 1.4,
+          clipPath: 'polygon(0 0, 100% 0, 100% 88%, 50% 100%, 0 88%)',
         }}>
-          🔥 PROMO<br/>
-          <span style={{ fontSize: 8 }}>s/d 31 Juli</span>
+          🔥<br/>PROMO<br/>
+          <span style={{fontSize:9}}>s/d<br/>31 Juli</span>
         </div>
       </div>
 
