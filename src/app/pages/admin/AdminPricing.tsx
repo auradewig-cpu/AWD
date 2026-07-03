@@ -1,13 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ExternalLink, RotateCcw } from 'lucide-react';
 import { AdminButton, AdminSaveBar } from '@/admin/components';
-import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage, type PricingContent, type PricingTier } from '@/admin/storage';
+import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, loadFromServer, resetStorage, type PricingContent, type PricingTier } from '@/admin/storage';
 import { ADMIN_CREDENTIALS } from '@/admin/config';
 import { DEFAULT_PRICING } from '@/app/components/sections/PricingSection';
 import { AdminPricingTierEditor } from './AdminPricingTierEditor';
 
 export function AdminPricing() {
-  const [form, setForm] = useState<PricingContent>(() => loadFromStorage(STORAGE_KEYS.PRICING, DEFAULT_PRICING));
+  const [form, setForm] = useState<PricingContent>(DEFAULT_PRICING);
+
+  useEffect(() => {
+    loadFromServer(STORAGE_KEYS.PRICING, DEFAULT_PRICING).then(result => {
+      if (result?.tiers?.length) {
+        setForm(result);
+      } else {
+        setForm(DEFAULT_PRICING);
+      }
+    });
+  }, []);
   const [openId, setOpenId] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
