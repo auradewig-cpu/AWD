@@ -16,6 +16,17 @@ export const STORAGE_KEYS = {
   DEMO: 'awd_demo_data',
 } as const;
 
+const STORAGE_VERSION = '2.0';
+(() => {
+  try {
+    const savedVersion = localStorage.getItem('awd_storage_version');
+    if (savedVersion !== STORAGE_VERSION) {
+      localStorage.clear();
+      localStorage.setItem('awd_storage_version', STORAGE_VERSION);
+    }
+  } catch {}
+})();
+
 export function loadFromStorage<T>(key: string, defaultValue: T): T {
   try {
     const item = localStorage.getItem(key);
