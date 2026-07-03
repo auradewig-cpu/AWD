@@ -230,9 +230,12 @@ export function PricingSection() {
 
   useEffect(() => {
     loadFromServer(STORAGE_KEYS.PRICING, DEFAULT_PRICING).then(result => {
+      console.log('[PRICING DEBUG] from server:', JSON.stringify(result));
       if (!result?.tiers?.length) {
+        console.log('[PRICING DEBUG] fallback to DEFAULT');
         setContent(DEFAULT_PRICING);
       } else {
+        console.log('[PRICING DEBUG] using server data, tiers:', result.tiers.map(t=>t.name));
         setContent(result);
       }
     });
@@ -241,9 +244,12 @@ export function PricingSection() {
   useEffect(() => {
     function handleUpdate() {
       loadFromServer(STORAGE_KEYS.PRICING, DEFAULT_PRICING).then(result => {
+        console.log('[PRICING DEBUG] from server:', JSON.stringify(result));
         if (!result?.tiers?.length) {
+          console.log('[PRICING DEBUG] fallback to DEFAULT');
           setContent(DEFAULT_PRICING);
         } else {
+          console.log('[PRICING DEBUG] using server data, tiers:', result.tiers.map(t=>t.name));
           setContent(result);
         }
       });
