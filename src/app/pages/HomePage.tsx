@@ -5,6 +5,7 @@ import { ProcessSteps } from '../components/sections/ProcessSteps';
 import { BehindTheScenes } from '../components/sections/BehindTheScenes';
 import { PricingSection } from '../components/sections/PricingSection';
 import { SpeedScanSection } from '../components/sections/SpeedScanSection';
+import { WhyReactSection } from '../components/sections/WhyReactSection';
 import { WhyAWD } from '../components/sections/WhyAWD';
 import { FAQ } from '../components/sections/FAQ';
 import { Contact } from '../components/sections/Contact';
@@ -129,6 +130,7 @@ export function HomePage() {
         <TrustBar />
         <PricingSection />
         <SpeedScanSection />
+        <WhyReactSection />
         <ProcessSteps />
         <BehindTheScenes />
         <WhyAWD />
