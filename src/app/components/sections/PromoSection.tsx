@@ -81,7 +81,7 @@ function SlotProgressBar({ registered, quota }: { registered: number; quota: num
       <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'Inter, sans-serif', fontSize: 13, marginBottom: 6 }}>
         <span style={{ color: 'rgba(255,255,255,0.6)' }}>
           <Users size={13} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
-          <span style={{ verticalAlign: 'middle' }}>{quota - registered} / {quota} slot tersisa</span>
+          <span style={{ verticalAlign: 'middle' }}>{registered} / {quota} slot terisi</span>
         </span>
         <span style={{ color: '#EF4444', fontWeight: 700 }}>{pct >= 80 ? '⚠️ Hampir penuh!' : ''}</span>
       </div>
