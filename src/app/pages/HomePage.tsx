@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Navbar } from '../components/Navbar';
 import { TrustBar } from '../components/sections/TrustBar';
+import { PromoSection } from '../components/sections/PromoSection';
 import { ProcessSteps } from '../components/sections/ProcessSteps';
 import { BehindTheScenes } from '../components/sections/BehindTheScenes';
 import { PricingSection } from '../components/sections/PricingSection';
@@ -127,6 +128,7 @@ export function HomePage() {
           {isDesktop ? <HeroDesktop /> : <MobileHero />}
         </Suspense>
         <TrustBar />
+        <PromoSection />
         <PricingSection />
         <SpeedScanSection />
         <ProcessSteps />

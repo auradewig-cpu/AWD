@@ -90,7 +90,7 @@ function PricingCard({ tier }: { tier: PricingTier }) {
         backdropFilter: 'blur(16px)',
         border: tier.recommended ? '1px solid rgba(198,255,74,0.35)' : '1px solid rgba(255,255,255,0.08)',
         borderRadius: 20, padding: '28px 24px',
-        position: 'relative',
+        position: 'relative', overflow: 'visible',
         boxShadow: tier.recommended ? '0 0 40px rgba(198,255,74,0.08)' : 'none',
         display: 'flex', flexDirection: 'column',
       }}
@@ -98,13 +98,43 @@ function PricingCard({ tier }: { tier: PricingTier }) {
       {/* Recommended ribbon */}
       {tier.recommended && (
         <div style={{
-          position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
+          position: 'absolute', top: -16, left: '50%', transform: 'translateX(-50%)', zIndex: 20,
           background: '#C6FF4A', color: '#07080A',
           borderRadius: 999, padding: '4px 14px',
           fontSize: 11, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
           letterSpacing: '0.05em', whiteSpace: 'nowrap',
         }}>
           ⭐ PALING POPULER
+        </div>
+      )}
+      {(tier.id === 'starter' || tier.id === 'business') && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          right: 16,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          zIndex: 10,
+          filter: 'drop-shadow(0 4px 8px rgba(239,68,68,0.5))',
+        }}>
+          <div style={{
+            background: 'linear-gradient(180deg, #ef4444, #b91c1c)',
+            color: 'white',
+            width: 52,
+            padding: '10px 4px 16px',
+            textAlign: 'center',
+            fontSize: 10,
+            fontWeight: 800,
+            lineHeight: 1.4,
+            letterSpacing: '0.5px',
+            clipPath: 'polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%)',
+          }}>
+            🔥<br/>PROMO<br/>
+            <span style={{ fontSize: 9, fontWeight: 600 }}>
+              s/d<br/>31 Juli
+            </span>
+          </div>
         </div>
       )}
 
