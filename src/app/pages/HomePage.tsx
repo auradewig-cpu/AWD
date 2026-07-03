@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { Navbar } from '../components/Navbar';
 import { TrustBar } from '../components/sections/TrustBar';
 import { PromoSection } from '../components/sections/PromoSection';
+import { DemoShowcase } from '../components/sections/DemoShowcase';
 import { ProcessSteps } from '../components/sections/ProcessSteps';
 import { BehindTheScenes } from '../components/sections/BehindTheScenes';
 import { PricingSection } from '../components/sections/PricingSection';
@@ -129,6 +130,7 @@ export function HomePage() {
         </Suspense>
         <TrustBar />
         <PromoSection />
+        <DemoShowcase />
         <PricingSection />
         <SpeedScanSection />
         <ProcessSteps />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Check, MessageCircle, ExternalLink } from 'lucide-react';
+import { Check, MessageCircle } from 'lucide-react';
 import { STORAGE_KEYS, loadFromStorage, loadFromServer, type PricingContent, type PricingTier } from '@/admin/storage';
 import { SpeedGuaranteeBadge } from '../ui/SpeedGuaranteeBadge';
 
@@ -194,32 +194,7 @@ function PricingCard({ tier }: { tier: PricingTier }) {
           Konsultasi Sekarang
         </a>
 
-        {tier.showDemoButton && (
-          <a
-            href={`/#/demo/${tier.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              width: '100%', boxSizing: 'border-box', background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(255,255,255,0.6)', borderRadius: 10, padding: '10px',
-              fontSize: 13, fontWeight: 600, fontFamily: 'Inter, sans-serif',
-              textDecoration: 'none', transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-              e.currentTarget.style.color = '#FAFAFA';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-              e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
-            }}
-          >
-            <ExternalLink size={13} />
-            Lihat Demo
-          </a>
-        )}
+        
       </div>
     </div>
   );
