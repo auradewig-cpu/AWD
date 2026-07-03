@@ -4,11 +4,13 @@ import { TrustBar } from '../components/sections/TrustBar';
 import { ProcessSteps } from '../components/sections/ProcessSteps';
 import { BehindTheScenes } from '../components/sections/BehindTheScenes';
 import { PricingSection } from '../components/sections/PricingSection';
+import { SpeedScanSection } from '../components/sections/SpeedScanSection';
 import { WhyAWD } from '../components/sections/WhyAWD';
 import { FAQ } from '../components/sections/FAQ';
 import { Contact } from '../components/sections/Contact';
 import { Footer } from '../components/Footer';
 import { ScrollScrubContainer } from '@/components/scroll/ScrollScrubContainer';
+import { SpeedGuaranteeBadge } from '../components/ui/SpeedGuaranteeBadge';
 
 const HeroDesktop = lazy(() => import('../components/sections/Hero').then(m => ({ default: m.Hero })));
 
@@ -72,6 +74,7 @@ function MobileHero() {
           }}>
             {HERO_CONTENT.subheadline}
           </p>
+          <SpeedGuaranteeBadge />
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
             <a
               href={`https://wa.me/${HERO_CONTENT.ctaPrimaryWaNumber}?text=Halo%20Aldi%2C%20saya%20ingin%20konsultasi%20gratis%20tentang%20pembuatan%20website.`}
@@ -125,6 +128,7 @@ export function HomePage() {
         </Suspense>
         <TrustBar />
         <PricingSection />
+        <SpeedScanSection />
         <ProcessSteps />
         <BehindTheScenes />
         <WhyAWD />

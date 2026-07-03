@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { Menu, X } from 'lucide-react';
+import { SpeedGuaranteeBadge } from './ui/SpeedGuaranteeBadge';
 
 const navLinks = [
   { label: 'Beranda', href: '#beranda' },
@@ -86,6 +87,9 @@ export function Navbar() {
 
           {/* CTA */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="hidden sm:inline-flex">
+              <SpeedGuaranteeBadge size="sm" />
+            </div>
             <a
               href={`https://wa.me/${WA_NUMBER}?text=Halo%20Aldi%2C%20saya%20ingin%20konsultasi%20gratis%20tentang%20pembuatan%20website.`}
               target="_blank"

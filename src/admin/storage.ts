@@ -175,7 +175,7 @@ export interface WhyContent {
   guaranteeVisible: boolean;
 }
 
-export type DemoTier = 'spark' | 'ignite' | 'blaze' | 'blazeplus' | 'apex';
+export type DemoTier = 'starter' | 'business' | 'store' | 'pro';
 export type DemoCategory =
   | 'Klinik & Estetika'
   | 'Properti & Interior'

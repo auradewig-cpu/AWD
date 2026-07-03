@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Check, MessageCircle, ExternalLink } from 'lucide-react';
 import { STORAGE_KEYS, loadFromStorage, loadFromServer, type PricingContent, type PricingTier } from '@/admin/storage';
+import { SpeedGuaranteeBadge } from '../ui/SpeedGuaranteeBadge';
 
 const WA_NUMBER = '6285286427559';
 
@@ -9,21 +10,22 @@ export const DEFAULT_PRICING: PricingContent = {
   labelWithAdmin: '+ Admin Panel',
   tiers: [
     {
-      id: 'spark',
-      name: 'SPARK',
-      subtitle: 'Landing Page / Promosi Awal',
-      priceNoAdmin: 999000,
-      priceNoAdminOriginal: 2500000,
+      id: 'starter',
+      name: 'STARTER',
+      subtitle: 'Landing page + admin panel',
+      priceNoAdmin: 2500000,
+      priceNoAdminOriginal: 5000000,
       priceWithAdmin: null,
       priceWithAdminOriginal: null,
       showAdminOption: false,
       recommended: false,
       features: [
-        'Landing page 1 halaman',
-        'Desain custom (bukan template)',
-        'Mobile responsive',
-        'Kontak WA terintegrasi',
-        'Domain .com 1 tahun (gratis)',
+        'Website Next.js custom (bukan template)',
+        'Admin panel: edit teks, logo, warna, kontak',
+        'Mobile responsive + SEO ready',
+        'Lighthouse score 90+ garansi',
+        'Deploy ke Vercel + domain .com 1 tahun',
+        '2 putaran revisi',
       ],
       ctaText: 'Konsultasi Sekarang',
       waNumber: WA_NUMBER,
@@ -31,69 +33,22 @@ export const DEFAULT_PRICING: PricingContent = {
       showDemoButton: true,
     },
     {
-      id: 'ignite',
-      name: 'IGNITE',
-      subtitle: 'Company Profile',
-      priceNoAdmin: 3500000,
-      priceNoAdminOriginal: 6000000,
+      id: 'business',
+      name: 'BUSINESS',
+      subtitle: 'Company profile + blog + admin panel',
+      priceNoAdmin: 5000000,
+      priceNoAdminOriginal: 10000000,
       priceWithAdmin: null,
       priceWithAdminOriginal: null,
       showAdminOption: false,
-      recommended: false,
-      features: [
-        'Multi-halaman (up to 7 halaman)',
-        'Desain UI/UX custom',
-        'SEO dasar terpasang',
-        'Blog/artikel opsional',
-        'Formulir kontak + email notifikasi',
-      ],
-      ctaText: 'Konsultasi Sekarang',
-      waNumber: WA_NUMBER,
-      waMessageTemplate: 'Halo Aldi, saya tertarik dengan paket {name} ({subtitle}). Boleh konsultasi lebih lanjut?',
-      showDemoButton: true,
-    },
-    {
-      id: 'blaze',
-      name: 'BLAZE',
-      subtitle: 'Web App dengan Sistem & Database',
-      priceNoAdmin: 8000000,
-      priceNoAdminOriginal: 14000000,
-      priceWithAdmin: 12000000,
-      priceWithAdminOriginal: 20000000,
-      showAdminOption: true,
-      recommended: false,
-      features: [
-        'Sistem interaktif custom (toko online, portal listing, booking, atau web app bisnis lainnya)',
-        'Panel kelola mandiri — tambah/edit/hapus data tanpa sentuh kode',
-        'Integrasi payment gateway jika dibutuhkan (Midtrans/Xendit — VA, QRIS, kartu)',
-        'Manajemen data hingga 200 entri awal (produk, properti, jadwal, listing, dll)',
-        'Notifikasi otomatis via email (ke pemilik bisnis dan/atau pengguna)',
-        '3 putaran revisi desain',
-        'Estimasi selesai: 14–21 hari kerja',
-      ],
-      ctaText: 'Konsultasi Sekarang',
-      waNumber: WA_NUMBER,
-      waMessageTemplate: 'Halo Aldi, saya tertarik dengan paket {name} ({subtitle}). Boleh konsultasi lebih lanjut?',
-      showDemoButton: true,
-    },
-    {
-      id: 'blazeplus',
-      name: 'BLAZE+',
-      subtitle: 'Web App Lengkap + Manajemen Bisnis',
-      priceNoAdmin: 12000000,
-      priceNoAdminOriginal: 22000000,
-      priceWithAdmin: 16000000,
-      priceWithAdminOriginal: 28000000,
-      showAdminOption: true,
       recommended: true,
       features: [
-        'Semua fitur BLAZE',
-        'Multi-role pengguna: admin utama + staf/agen (hingga 5 akun)',
-        'Dashboard analitik & laporan (grafik aktivitas, ringkasan data bisnis)',
-        'Fitur relasional lanjutan — sistem poin, pipeline CRM sederhana, atau manajemen lead (dikonsultasikan sesuai kebutuhan bisnis)',
-        '1 integrasi API pihak ketiga pilihan (WhatsApp, Google Maps, kalender, atau setara)',
-        '4 putaran revisi desain',
-        'Estimasi selesai: 21–30 hari kerja',
+        'Semua fitur STARTER',
+        'Hingga 5 halaman',
+        'Blog / artikel',
+        'Galeri foto',
+        'Formulir kontak + notifikasi email',
+        '3 putaran revisi',
       ],
       ctaText: 'Konsultasi Sekarang',
       waNumber: WA_NUMBER,
@@ -101,21 +56,45 @@ export const DEFAULT_PRICING: PricingContent = {
       showDemoButton: true,
     },
     {
-      id: 'apex',
-      name: 'APEX',
-      subtitle: 'Custom Software / Web App Kompleks',
-      priceNoAdmin: 18000000,
-      priceNoAdminOriginal: 30000000,
-      priceWithAdmin: 22000000,
-      priceWithAdminOriginal: 38000000,
-      showAdminOption: true,
+      id: 'store',
+      name: 'STORE',
+      subtitle: 'Toko online + sistem pesanan',
+      priceNoAdmin: 10000000,
+      priceNoAdminOriginal: 18000000,
+      priceWithAdmin: null,
+      priceWithAdminOriginal: null,
+      showAdminOption: false,
       recommended: false,
       features: [
-        'Custom software penuh',
-        'Arsitektur microservices opsional',
-        'Integrasi sistem ERP/CRM',
-        'CI/CD pipeline setup',
-        'SLA & dedicated support',
+        'Semua fitur BUSINESS',
+        'Katalog produk (tambah/edit/hapus)',
+        'Keranjang + checkout via WhatsApp',
+        'Kelola pesanan masuk',
+        'Upload foto produk',
+        '4 putaran revisi',
+      ],
+      ctaText: 'Konsultasi Sekarang',
+      waNumber: WA_NUMBER,
+      waMessageTemplate: 'Halo Aldi, saya tertarik dengan paket {name} ({subtitle}). Boleh konsultasi lebih lanjut?',
+      showDemoButton: true,
+    },
+    {
+      id: 'pro',
+      name: 'PRO',
+      subtitle: 'Web app + database + payment gateway',
+      priceNoAdmin: 18000000,
+      priceNoAdminOriginal: 30000000,
+      priceWithAdmin: null,
+      priceWithAdminOriginal: null,
+      showAdminOption: false,
+      recommended: false,
+      features: [
+        'Semua fitur STORE',
+        'Database + authentication',
+        'Payment gateway (Midtrans/Xendit)',
+        'Multi user & role',
+        'Dashboard analitik',
+        'SLA support 30 hari',
       ],
       ctaText: 'Konsultasi Sekarang',
       waNumber: WA_NUMBER,
@@ -124,25 +103,6 @@ export const DEFAULT_PRICING: PricingContent = {
     },
   ],
 };
-
-const INTENSITY: Record<string, number> = { spark: 1, ignite: 2, blaze: 3, blazeplus: 4, apex: 5 };
-
-function IntensityIndicator({ level, total = 5 }: { level: number; total?: number }) {
-  return (
-    <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-      {Array.from({ length: total }).map((_, i) => (
-        <div
-          key={i}
-          style={{
-            width: 16, height: 4, borderRadius: 2,
-            background: i < level ? '#C6FF4A' : 'rgba(255,255,255,0.1)',
-            transition: 'background 0.3s',
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 function formatRp(amount: number) {
   if (amount >= 1000000) {
@@ -153,7 +113,6 @@ function formatRp(amount: number) {
 }
 
 function PricingCard({ tier, withAdmin }: { tier: PricingTier; withAdmin: boolean }) {
-  const intensity = INTENSITY[tier.id] ?? 1;
   const usesAdminPrice = withAdmin && tier.showAdminOption && tier.priceWithAdmin !== null;
   const price = usesAdminPrice ? (tier.priceWithAdmin as number) : tier.priceNoAdmin;
   const originalPrice = usesAdminPrice ? (tier.priceWithAdminOriginal as number) : tier.priceNoAdminOriginal;
@@ -184,7 +143,7 @@ function PricingCard({ tier, withAdmin }: { tier: PricingTier; withAdmin: boolea
           fontSize: 11, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
           letterSpacing: '0.05em', whiteSpace: 'nowrap',
         }}>
-          ⭐ PALING DIREKOMENDASIKAN
+          ⭐ PALING POPULER
         </div>
       )}
 
@@ -198,7 +157,6 @@ function PricingCard({ tier, withAdmin }: { tier: PricingTier; withAdmin: boolea
           }}>
             {tier.name}
           </span>
-          <IntensityIndicator level={intensity} />
         </div>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
           {tier.subtitle}
@@ -246,6 +204,11 @@ function PricingCard({ tier, withAdmin }: { tier: PricingTier; withAdmin: boolea
             </span>
           </div>
         ))}
+      </div>
+
+      {/* Badge */}
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}>
+        <SpeedGuaranteeBadge size="sm" />
       </div>
 
       {/* CTAs */}
@@ -470,7 +433,7 @@ export function PricingSection() {
 
         {/* Cards */}
         <div
-          className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-3"
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3"
           style={{ alignItems: 'start', width: '100%' }}
         >
           {content.tiers.map((tier) => (

@@ -18,11 +18,10 @@ import { DEMO_DATA } from '@/data/demoData';
 const WA_NUMBER = '6285286427559';
 
 const TIER_META: Record<DemoTier, { name: string; subtitle: string }> = {
-  spark: { name: 'SPARK', subtitle: 'Landing Page / Promosi Awal' },
-  ignite: { name: 'IGNITE', subtitle: 'Company Profile' },
-  blaze: { name: 'BLAZE', subtitle: 'Web App dengan Sistem & Database' },
-  blazeplus: { name: 'BLAZE+', subtitle: 'Web App Lengkap + Manajemen Bisnis' },
-  apex: { name: 'APEX', subtitle: 'Custom Software / Web App Kompleks' },
+  starter: { name: 'STARTER', subtitle: 'Landing page + admin panel' },
+  business: { name: 'BUSINESS', subtitle: 'Company profile + blog + admin panel' },
+  store: { name: 'STORE', subtitle: 'Toko online + sistem pesanan' },
+  pro: { name: 'PRO', subtitle: 'Web app + database + payment gateway' },
 };
 
 const CATEGORIES = DEMO_CATEGORIES;

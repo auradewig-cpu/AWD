@@ -21,11 +21,10 @@ import {
 } from '@/admin/storage';
 
 const TIERS: { id: DemoTier; name: string }[] = [
-  { id: 'spark', name: 'SPARK' },
-  { id: 'ignite', name: 'IGNITE' },
-  { id: 'blaze', name: 'BLAZE' },
-  { id: 'blazeplus', name: 'BLAZE+' },
-  { id: 'apex', name: 'APEX' },
+  { id: 'starter', name: 'STARTER' },
+  { id: 'business', name: 'BUSINESS' },
+  { id: 'store', name: 'STORE' },
+  { id: 'pro', name: 'PRO' },
 ];
 
 const CATEGORIES = DEMO_CATEGORIES;

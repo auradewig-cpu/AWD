@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { Star, Zap } from 'lucide-react';
 import { STORAGE_KEYS, loadFromServer, type HeroContent } from '@/admin/storage';
+import { SpeedGuaranteeBadge } from '../ui/SpeedGuaranteeBadge';
 
 export const DEFAULT_HERO: HeroContent = {
   eyebrow: 'BERBASIS REACT • BUKAN TEMPLATE',
@@ -254,6 +255,16 @@ export function Hero() {
             >
               {content.subheadline}
             </motion.p>
+
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.38 }}
+              style={{ marginBottom: 28 }}
+            >
+              <SpeedGuaranteeBadge />
+            </motion.div>
 
             {/* CTAs */}
             <motion.div
