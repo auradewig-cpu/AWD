@@ -126,15 +126,15 @@ function PricingCard({ tier }: { tier: PricingTier }) {
 
       {/* Price */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <span style={{
+        <div className="whitespace-nowrap" style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <span className="whitespace-nowrap" style={{
             fontFamily: 'JetBrains Mono, monospace', fontSize: 28,
             fontWeight: 700, color: tier.recommended ? '#C6FF4A' : '#FAFAFA',
             letterSpacing: '-0.02em',
           }}>
             {tier.price}
           </span>
-          <span style={{
+          <span className="whitespace-nowrap" style={{
             fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
             color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through',
           }}>
