@@ -229,12 +229,24 @@ export function PricingSection() {
   const [content, setContent] = useState<PricingContent>(DEFAULT_PRICING);
 
   useEffect(() => {
-    loadFromServer(STORAGE_KEYS.PRICING, DEFAULT_PRICING).then(setContent);
+    loadFromServer(STORAGE_KEYS.PRICING, DEFAULT_PRICING).then(result => {
+      if (!result?.tiers?.length) {
+        setContent(DEFAULT_PRICING);
+      } else {
+        setContent(result);
+      }
+    });
   }, []);
 
   useEffect(() => {
     function handleUpdate() {
-      loadFromServer(STORAGE_KEYS.PRICING, DEFAULT_PRICING).then(setContent);
+      loadFromServer(STORAGE_KEYS.PRICING, DEFAULT_PRICING).then(result => {
+        if (!result?.tiers?.length) {
+          setContent(DEFAULT_PRICING);
+        } else {
+          setContent(result);
+        }
+      });
     }
     function onStorage(e: StorageEvent) {
       if (e.key === STORAGE_KEYS.PRICING) {
