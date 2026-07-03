@@ -381,28 +381,99 @@ export function WhyAWD() {
           ))}
         </div>
 
-        {/* ── Bottom CTA ── */}
+        {/* ── Detailed Comparison Table ── */}
         <div
           style={{
-            textAlign: 'center',
-            marginTop: 20,
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: 16,
+            overflow: 'hidden',
+            marginTop: 40,
             marginBottom: 40,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
           }}
         >
-          <Check size={14} color="#00C853" strokeWidth={3} />
-          <span
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={{ padding: '12px 16px', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', borderBottom: '1px solid rgba(255,255,255,0.1)', textAlign: 'left' }}>FITUR</th>
+                <th style={{ padding: '12px 16px', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', borderBottom: '1px solid rgba(255,255,255,0.1)', textAlign: 'left' }}>WordPress</th>
+                <th style={{ padding: '12px 16px', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#C6FF4A', borderBottom: '1px solid rgba(255,255,255,0.1)', textAlign: 'left' }}>AWD (React/Next.js)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { fitur: 'Kecepatan load', wordpress: '4-8 detik', awd: '< 1 detik ⚡' },
+                { fitur: 'Lighthouse score', wordpress: '30-60', awd: '90-100 ✅' },
+                { fitur: 'Plugin berbayar', wordpress: 'Ya (Rp 500rb-2jt/tahun)', awd: 'Tidak ada ❌' },
+                { fitur: 'Template', wordpress: 'Sama dengan ribuan web lain', awd: 'Custom unik ✅' },
+                { fitur: 'Admin panel', wordpress: 'Plugin WooCommerce', awd: 'Milik sendiri selamanya ✅' },
+                { fitur: 'SEO', wordpress: 'Lemah', awd: 'Kuat (SSR/SSG) ✅' },
+                { fitur: 'Keamanan', wordpress: 'Rawan hack via plugin', awd: 'Lebih aman ✅' },
+                { fitur: 'Biaya tahunan', wordpress: 'Hosting+plugin+domain = mahal', awd: 'Vercel gratis ✅' },
+              ].map((row, i) => (
+                <tr key={i}>
+                  <td style={{ padding: '12px 16px', fontFamily: 'Inter, sans-serif', fontSize: 14, lineHeight: 1.4, borderBottom: '1px solid rgba(255,255,255,0.06)', fontWeight: 600, color: '#FAFAFA' }}>{row.fitur}</td>
+                  <td style={{ padding: '12px 16px', fontFamily: 'Inter, sans-serif', fontSize: 14, lineHeight: 1.4, borderBottom: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.45)' }}>{row.wordpress}</td>
+                  <td style={{ padding: '12px 16px', fontFamily: 'Inter, sans-serif', fontSize: 14, lineHeight: 1.4, borderBottom: '1px solid rgba(255,255,255,0.06)', color: '#C6FF4A' }}>{row.awd}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* ── CTA Card ── */}
+        <div
+          style={{
+            background: 'rgba(14,18,10,0.78)',
+            border: '1px solid rgba(198,255,74,0.2)',
+            borderRadius: 20,
+            padding: '40px 32px',
+            textAlign: 'center',
+            maxWidth: 600,
+            margin: '0 auto 40px',
+          }}
+        >
+          <h3
             style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: 13,
-              color: 'rgba(255,255,255,0.45)',
+              fontFamily: 'Inter Tight, sans-serif',
+              fontSize: 'clamp(20px, 3vw, 26px)',
+              fontWeight: 700,
+              color: '#FAFAFA',
+              margin: '0 0 20px',
+              letterSpacing: '-0.01em',
             }}
           >
-            Semua paket AWD menggunakan React/Next.js
-          </span>
+            Website kamu sekarang dapat nilai berapa?
+          </h3>
+          <button
+            onClick={() => document.getElementById('speed-scan')?.scrollIntoView({ behavior: 'smooth' })}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              background: '#C6FF4A',
+              color: '#07080A',
+              borderRadius: 999,
+              padding: '14px 32px',
+              fontSize: 15,
+              fontWeight: 700,
+              fontFamily: 'Inter, sans-serif',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 0 40px rgba(198,255,74,0.2)',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = 'scale(1.03)';
+              e.currentTarget.style.filter = 'brightness(1.08)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.filter = 'brightness(1)';
+            }}
+          >
+            Cek Sekarang
+          </button>
         </div>
 
         {/* ── Lighthouse Guarantee ── */}
