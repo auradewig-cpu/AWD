@@ -203,9 +203,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST' && action === 'update') {
-    const { id, quota, deadline, active, password } = req.body;
+    const { id, quota, deadline, active, bonus_tiers, password } = req.body;
     if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
-    await sql`UPDATE promos SET quota = ${quota}, deadline = ${deadline}, active = ${active} WHERE id = ${id}`;
+    if (bonus_tiers) {
+      await sql`UPDATE promos SET quota = ${quota}, deadline = ${deadline}, active = ${active}, bonus_tiers = ${JSON.stringify(bonus_tiers)}::jsonb WHERE id = ${id}`;
+    } else {
+      await sql`UPDATE promos SET quota = ${quota}, deadline = ${deadline}, active = ${active} WHERE id = ${id}`;
+    }
     return res.json({ success: true });
   }
 

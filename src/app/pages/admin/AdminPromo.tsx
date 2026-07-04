@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ExternalLink, Check, Download, Search, Plus, Trash2, RotateCcw, AlertTriangle } from 'lucide-react';
+import { ExternalLink, Check, Download, Search, Plus, Trash2, RotateCcw, AlertTriangle, X } from 'lucide-react';
 import { AdminCard, AdminButton } from '@/admin/components';
 
 interface Registrant {
@@ -27,6 +27,11 @@ export function AdminPromo() {
   const [confirmReset, setConfirmReset] = useState<number | null>(null);
 
   const [form, setForm] = useState({ name: '', package: 'starter', quota: 50, deadline: '' });
+  const [editPromo, setEditPromo] = useState<PromoRow | null>(null);
+  const [editQuota, setEditQuota] = useState(0);
+  const [editDeadline, setEditDeadline] = useState('');
+  const [editActive, setEditActive] = useState(true);
+  const [bonusTiers, setBonusTiers] = useState<Array<{min:number;max:number;bonus:string}>>([]);
 
   const fetchAll = useCallback(async () => {
     try {
@@ -58,12 +63,29 @@ export function AdminPromo() {
     setForm({ name: '', package: 'starter', quota: 50, deadline: '' });
   }
 
-  function handleUpdate(promo: PromoRow) {
-    const quota = prompt('Kuota baru:', String(promo.quota));
-    if (!quota) return;
-    const deadline = prompt('Deadline (YYYY-MM-DD HH:mm):', promo.deadline.slice(0, 19));
-    if (!deadline) return;
-    api('update', { id: promo.id, quota: parseInt(quota), deadline, active: promo.active });
+  function openEdit(promo: PromoRow) {
+    setEditPromo(promo);
+    setEditQuota(promo.quota);
+    setEditDeadline(promo.deadline.slice(0, 16));
+    setEditActive(promo.active);
+    setBonusTiers(promo.bonus_tiers?.tiers?.map((t: any) => ({ ...t })) || []);
+  }
+
+  function updateTier(i: number, key: 'min' | 'max' | 'bonus', val: any) {
+    const t = [...bonusTiers]; t[i] = { ...t[i], [key]: key === 'bonus' ? val : +val }; setBonusTiers(t);
+  }
+
+  function addTier() { setBonusTiers([...bonusTiers, { min: 0, max: 0, bonus: '' }]); }
+
+  function removeTier(i: number) { setBonusTiers(bonusTiers.filter((_, idx) => idx !== i)); }
+
+  async function saveEdit() {
+    if (!editPromo) return;
+    await api('update', {
+      id: editPromo.id, quota: editQuota, deadline: editDeadline, active: editActive,
+      bonus_tiers: { tiers: bonusTiers },
+    });
+    setEditPromo(null);
   }
 
   function handleDeletePromo(id: number) {
@@ -188,7 +210,7 @@ export function AdminPromo() {
                 <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>Kuota: {p.quota}</span>
                 <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{new Date(p.deadline).toLocaleDateString('id-ID')}</span>
                 <div style={{ display: 'flex', gap: 4 }}>
-                  <button onClick={() => handleUpdate(p)} title="Edit" style={{ padding: '4px 8px', background: 'rgba(198,255,74,0.1)', border: '1px solid rgba(198,255,74,0.2)', color: '#C6FF4A', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontFamily: 'Inter, sans-serif' }}>Edit</button>
+                  <button onClick={() => openEdit(p)} title="Edit" style={{ padding: '4px 8px', background: 'rgba(198,255,74,0.1)', border: '1px solid rgba(198,255,74,0.2)', color: '#C6FF4A', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontFamily: 'Inter, sans-serif' }}>Edit</button>
                   <button onClick={() => setConfirmReset(p.id)} title="Reset registrants" style={{ padding: '4px 8px', background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)', color: '#f97316', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontFamily: 'Inter, sans-serif' }}><RotateCcw size={12} /></button>
                   <button onClick={() => handleDeletePromo(p.id)} title="Hapus" style={{ padding: '4px 8px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontFamily: 'Inter, sans-serif' }}><Trash2 size={12} /></button>
                 </div>
@@ -207,6 +229,50 @@ export function AdminPromo() {
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
               <button onClick={() => handleResetRegistrants(confirmReset)} style={{ background: '#EF4444', color: '#FAFAFA', border: 'none', borderRadius: 8, padding: '10px 20px', fontWeight: 700, fontFamily: 'Inter, sans-serif', cursor: 'pointer', fontSize: 13 }}>Ya, Reset</button>
               <button onClick={() => setConfirmReset(null)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', borderRadius: 8, padding: '10px 20px', fontFamily: 'Inter, sans-serif', cursor: 'pointer', fontSize: 13 }}>Batal</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Promo Modal */}
+      {editPromo && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+          <div style={{ background: '#1a1d1a', border: '1px solid rgba(198,255,74,0.2)', borderRadius: 16, padding: '28px', maxWidth: 520, width: '100%', maxHeight: '90vh', overflowY: 'auto', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ fontFamily: 'Inter Tight, sans-serif', fontSize: 18, fontWeight: 700, color: '#FAFAFA', margin: 0 }}>Edit Promo: {editPromo.name}</h3>
+              <button onClick={() => setEditPromo(null)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}><X size={18} /></button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, display: 'block' }}>Kuota</label>
+                  <input type="number" value={editQuota} onChange={e => setEditQuota(+e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#FAFAFA', fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, display: 'block' }}>Deadline</label>
+                  <input type="datetime-local" value={editDeadline} onChange={e => setEditDeadline(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#FAFAFA', fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
+                </div>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.6)', cursor: 'pointer' }}>
+                <input type="checkbox" checked={editActive} onChange={e => setEditActive(e.target.checked)} style={{ accentColor: '#C6FF4A' }} />
+                Aktif
+              </label>
+              <div>
+                <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8, display: 'block' }}>Early Bird Bonus Tiers</label>
+                {bonusTiers.map((t, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                    <input placeholder="Min slot" value={t.min} onChange={e => updateTier(i, 'min', e.target.value)} style={{ width: 70, padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#FAFAFA', fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
+                    <input placeholder="Max slot" value={t.max} onChange={e => updateTier(i, 'max', e.target.value)} style={{ width: 70, padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#FAFAFA', fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
+                    <input placeholder="Bonus description" value={t.bonus} onChange={e => updateTier(i, 'bonus', e.target.value)} style={{ flex: 1, padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#FAFAFA', fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
+                    <button onClick={() => removeTier(i)} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', borderRadius: 8, cursor: 'pointer', padding: '8px 10px', fontSize: 13 }}>✕</button>
+                  </div>
+                ))}
+                <button onClick={addTier} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', border: '1px solid rgba(198,255,74,0.2)', color: '#C6FF4A', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif', cursor: 'pointer' }}>+ Tambah Tier</button>
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <button onClick={saveEdit} style={{ background: '#C6FF4A', color: '#07080A', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 700, fontFamily: 'Inter, sans-serif', cursor: 'pointer' }}>Simpan</button>
+                <button onClick={() => setEditPromo(null)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontFamily: 'Inter, sans-serif', cursor: 'pointer' }}>Batal</button>
+              </div>
             </div>
           </div>
         </div>
