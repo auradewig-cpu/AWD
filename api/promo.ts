@@ -105,10 +105,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       `;
     }
 
-    const siteUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : (process.env.SITE_URL || 'https://aldiwebdesigner.xyz');
-    const verifyUrl = `${siteUrl}/promo/status?code=${slotNumber}`;
+    const verifyUrl = `https://aldiwebdesigner.xyz/promo/status?code=${slotNumber}`;
     const qrDataUrl = await QRCode.toDataURL(verifyUrl, { width: 200 });
 
     return res.json({
