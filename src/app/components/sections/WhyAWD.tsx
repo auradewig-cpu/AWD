@@ -381,61 +381,6 @@ export function WhyAWD() {
           ))}
         </div>
 
-        {/* ── CTA Card ── */}
-        <div
-          style={{
-            background: 'rgba(14,18,10,0.78)',
-            border: '1px solid rgba(198,255,74,0.2)',
-            borderRadius: 20,
-            padding: '40px 32px',
-            textAlign: 'center',
-            maxWidth: 600,
-            margin: '40px auto 40px',
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: 'Inter Tight, sans-serif',
-              fontSize: 'clamp(20px, 3vw, 26px)',
-              fontWeight: 700,
-              color: '#FAFAFA',
-              margin: '0 0 20px',
-              letterSpacing: '-0.01em',
-            }}
-          >
-            Website kamu sekarang dapat nilai berapa?
-          </h3>
-          <button
-            onClick={() => document.getElementById('speed-scan')?.scrollIntoView({ behavior: 'smooth' })}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              background: '#C6FF4A',
-              color: '#07080A',
-              borderRadius: 999,
-              padding: '14px 32px',
-              fontSize: 15,
-              fontWeight: 700,
-              fontFamily: 'Inter, sans-serif',
-              border: 'none',
-              cursor: 'pointer',
-              boxShadow: '0 0 40px rgba(198,255,74,0.2)',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = 'scale(1.03)';
-              e.currentTarget.style.filter = 'brightness(1.08)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.filter = 'brightness(1)';
-            }}
-          >
-            Cek Sekarang
-          </button>
-        </div>
-
         {/* ── Lighthouse Guarantee ── */}
         {content.guaranteeVisible && (
           <div
