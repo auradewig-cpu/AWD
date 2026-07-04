@@ -1,47 +1,88 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ExternalLink, Check, Download, Search } from 'lucide-react';
+import { ExternalLink, Check, Download, Search, Plus, Trash2, RotateCcw, AlertTriangle } from 'lucide-react';
 import { AdminCard, AdminButton } from '@/admin/components';
 
 interface Registrant {
-  id: number;
-  slot_number: string;
-  promo_id: number;
-  name: string;
-  wa: string;
-  city: string;
-  package: string;
-  referral_code: string;
-  referred_by: string | null;
-  early_bird_tier: number;
-  status: string;
-  created_at: string;
+  id: number; slot_number: string; promo_id: number; name: string; wa: string;
+  city: string; package: string; referral_code: string; referred_by: string | null;
+  early_bird_tier: number; status: string; created_at: string;
 }
+
+interface PromoRow {
+  id: number; name: string; package: string; quota: number;
+  deadline: string; active: boolean; bonus_tiers: any;
+}
+
+const STATUSES = ['pending', 'verified', 'completed', 'rejected'];
+const STATUS_COLORS: Record<string, string> = {
+  pending: '#f97316', verified: '#C6FF4A', completed: '#00C853', rejected: '#EF4444',
+};
 
 export function AdminPromo() {
   const [registrants, setRegistrants] = useState<Registrant[]>([]);
+  const [promos, setPromos] = useState<PromoRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [showCreate, setShowCreate] = useState(false);
+  const [confirmReset, setConfirmReset] = useState<number | null>(null);
 
-  const fetchRegistrants = useCallback(async () => {
+  const [form, setForm] = useState({ name: '', package: 'starter', quota: 50, deadline: '' });
+
+  const fetchAll = useCallback(async () => {
     try {
-      const r = await fetch('/api/promo?action=registrants');
-      const d = await r.json();
-      if (d.registrants) setRegistrants(d.registrants);
+      const [r1, r2] = await Promise.all([
+        fetch('/api/promo?action=registrants').then(r => r.json()),
+        fetch('/api/promo?action=promos').then(r => r.json()),
+      ]);
+      if (r1.registrants) setRegistrants(r1.registrants);
+      if (r2.promos) setPromos(r2.promos);
     } catch {} finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { fetchRegistrants(); }, [fetchRegistrants]);
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  async function handleVerify(slotNumber: string) {
-    try {
-      const r = await fetch('/api/promo?action=verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slotNumber, password: 'awd123' }),
-      });
-      const d = await r.json();
-      if (d.success) fetchRegistrants();
-    } catch {}
+  async function api(action: string, body: any) {
+    const r = await fetch(`/api/promo?action=${action}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...body, password: 'awd123' }),
+    });
+    const d = await r.json();
+    if (d.success) fetchAll();
+    return d;
+  }
+
+  async function handleCreate() {
+    if (!form.name || !form.deadline) return;
+    await api('create', { name: form.name, package: form.package, quota: form.quota, deadline: form.deadline });
+    setShowCreate(false);
+    setForm({ name: '', package: 'starter', quota: 50, deadline: '' });
+  }
+
+  function handleUpdate(promo: PromoRow) {
+    const quota = prompt('Kuota baru:', String(promo.quota));
+    if (!quota) return;
+    const deadline = prompt('Deadline (YYYY-MM-DD HH:mm):', promo.deadline.slice(0, 19));
+    if (!deadline) return;
+    api('update', { id: promo.id, quota: parseInt(quota), deadline, active: promo.active });
+  }
+
+  function handleDeletePromo(id: number) {
+    if (!confirm('Hapus promo ini dan semua pendaftarnya?')) return;
+    api('delete', { id });
+  }
+
+  function handleResetRegistrants(promoId: number) {
+    api('reset-registrants', { promoId });
+    setConfirmReset(null);
+  }
+
+  function handleDeleteRegistrant(id: number) {
+    if (!confirm('Hapus pendaftar ini?')) return;
+    api('delete-registrant', { id });
+  }
+
+  function handleUpdateStatus(id: number, status: string) {
+    api('update-status', { id, status });
   }
 
   const stats = {
@@ -64,12 +105,10 @@ export function AdminPromo() {
       `"${r.name}","${r.wa}","${r.city}","${r.package}","${r.slot_number}","${r.status}","${r.referral_code}","${new Date(r.created_at).toLocaleDateString('id-ID')}"`
     ).join('\n');
     const blob = new Blob([header + rows], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
+    a.href = URL.createObjectURL(blob);
     a.download = `registrants-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
-    URL.revokeObjectURL(url);
   }
 
   if (loading) return null;
@@ -92,30 +131,91 @@ export function AdminPromo() {
         ))}
       </div>
 
-      {/* Search + Export */}
+      {/* Search + Actions */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
           <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
-          <input
-            placeholder="Cari nama, kota, atau slot..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={{
-              width: '100%', boxSizing: 'border-box', padding: '10px 14px 10px 36px',
-              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: 10, color: '#FAFAFA', fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none',
-            }}
-          />
+          <input placeholder="Cari nama, kota, atau slot..." value={search} onChange={e => setSearch(e.target.value)} style={{
+            width: '100%', boxSizing: 'border-box', padding: '10px 14px 10px 36px',
+            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 10, color: '#FAFAFA', fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none',
+          }} />
         </div>
-        <AdminButton variant="secondary" icon={Download} onClick={exportCsv}>
-          Export CSV
-        </AdminButton>
+        <AdminButton variant="secondary" icon={Plus} onClick={() => setShowCreate(true)}>Buat Promo</AdminButton>
+        <AdminButton variant="secondary" icon={Download} onClick={exportCsv}>Export CSV</AdminButton>
       </div>
 
-      {/* Table */}
+      {/* Create Promo Form */}
+      {showCreate && (
+        <AdminCard title="Buat Promo Baru">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <input placeholder="Nama Promo" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={{
+              padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 10, color: '#FAFAFA', fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none',
+            }} />
+            <div style={{ display: 'flex', gap: 12 }}>
+              <select value={form.package} onChange={e => setForm(f => ({ ...f, package: e.target.value }))} style={{
+                flex: 1, padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 10, color: '#FAFAFA', fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none',
+              }}>
+                <option value="starter">STARTER</option>
+                <option value="business">BUSINESS</option>
+              </select>
+              <input type="number" placeholder="Kuota" value={form.quota} onChange={e => setForm(f => ({ ...f, quota: parseInt(e.target.value) || 0 }))} style={{
+                flex: 1, padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 10, color: '#FAFAFA', fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none',
+              }} />
+            </div>
+            <input type="datetime-local" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} style={{
+              padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 10, color: '#FAFAFA', fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none',
+            }} />
+            <div style={{ display: 'flex', gap: 8 }}>
+              <AdminButton variant="primary" icon={Check} onClick={handleCreate}>Simpan</AdminButton>
+              <AdminButton variant="secondary" onClick={() => setShowCreate(false)}>Batal</AdminButton>
+            </div>
+          </div>
+        </AdminCard>
+      )}
+
+      {/* Promo List */}
+      {promos.length > 0 && (
+        <AdminCard title={`Promo Aktif (${promos.filter(p => p.active).length})`}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+            {promos.map(p => (
+              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '10px 14px' }}>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700, color: p.active ? '#C6FF4A' : 'rgba(255,255,255,0.3)', flex: 1, minWidth: 120 }}>{p.name} ({p.package})</span>
+                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>Kuota: {p.quota}</span>
+                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{new Date(p.deadline).toLocaleDateString('id-ID')}</span>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  <button onClick={() => handleUpdate(p)} title="Edit" style={{ padding: '4px 8px', background: 'rgba(198,255,74,0.1)', border: '1px solid rgba(198,255,74,0.2)', color: '#C6FF4A', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontFamily: 'Inter, sans-serif' }}>Edit</button>
+                  <button onClick={() => setConfirmReset(p.id)} title="Reset registrants" style={{ padding: '4px 8px', background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)', color: '#f97316', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontFamily: 'Inter, sans-serif' }}><RotateCcw size={12} /></button>
+                  <button onClick={() => handleDeletePromo(p.id)} title="Hapus" style={{ padding: '4px 8px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontFamily: 'Inter, sans-serif' }}><Trash2 size={12} /></button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </AdminCard>
+      )}
+
+      {/* Confirm Reset */}
+      {confirmReset !== null && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+          <div style={{ background: '#1a1d1a', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 16, padding: '24px', maxWidth: 400, textAlign: 'center' }}>
+            <AlertTriangle size={32} color="#EF4444" style={{ marginBottom: 12 }} />
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#FAFAFA', margin: '0 0 16px' }}>Hapus semua pendaftar promo ini? Tindakan ini tidak bisa dibatalkan.</p>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+              <button onClick={() => handleResetRegistrants(confirmReset)} style={{ background: '#EF4444', color: '#FAFAFA', border: 'none', borderRadius: 8, padding: '10px 20px', fontWeight: 700, fontFamily: 'Inter, sans-serif', cursor: 'pointer', fontSize: 13 }}>Ya, Reset</button>
+              <button onClick={() => setConfirmReset(null)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', borderRadius: 8, padding: '10px 20px', fontFamily: 'Inter, sans-serif', cursor: 'pointer', fontSize: 13 }}>Batal</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Registrants Table */}
       <AdminCard title={`Registrants (${filtered.length})`}>
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
             <thead>
               <tr>
                 {['Slot', 'Nama', 'WA', 'Kota', 'Paket', 'Referral', 'Status', 'Tanggal', 'Aksi'].map(h => (
@@ -135,34 +235,39 @@ export function AdminPromo() {
                   </td>
                   <td style={{ padding: '10px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.4)', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{r.referral_code}</td>
                   <td style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>
-                    <span style={{
+                    <select value={r.status} onChange={e => handleUpdateStatus(r.id, e.target.value)} style={{
                       fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 600,
-                      color: r.status === 'verified' ? '#C6FF4A' : '#f97316',
-                      background: r.status === 'verified' ? 'rgba(198,255,74,0.1)' : 'rgba(249,115,22,0.1)',
-                      borderRadius: 999, padding: '2px 10px',
+                      color: STATUS_COLORS[r.status] || '#FAFAFA', background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '4px 8px',
+                      cursor: 'pointer', outline: 'none',
                     }}>
-                      {r.status}
-                    </span>
+                      {STATUSES.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
                   </td>
                   <td style={{ padding: '10px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.4)', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{new Date(r.created_at).toLocaleDateString('id-ID')}</td>
                   <td style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>
-                    {r.status === 'pending' && (
-                      <button onClick={() => handleVerify(r.slot_number)} style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 4,
-                        background: 'rgba(198,255,74,0.1)', border: '1px solid rgba(198,255,74,0.2)',
-                        color: '#C6FF4A', borderRadius: 6, padding: '4px 10px', fontSize: 11, fontWeight: 600,
-                        fontFamily: 'Inter, sans-serif', cursor: 'pointer',
-                      }}>
-                        <Check size={12} /> Verify
-                      </button>
-                    )}
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      {r.status === 'pending' && (
+                        <button onClick={() => api('verify', { slotNumber: r.slot_number })} style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          background: 'rgba(198,255,74,0.1)', border: '1px solid rgba(198,255,74,0.2)',
+                          color: '#C6FF4A', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 600,
+                          fontFamily: 'Inter, sans-serif', cursor: 'pointer',
+                        }}><Check size={12} /></button>
+                      )}
+                      <button onClick={() => handleDeleteRegistrant(r.id)} style={{
+                        display: 'inline-flex', alignItems: 'center',
+                        background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
+                        color: '#EF4444', borderRadius: 6, padding: '4px 8px', cursor: 'pointer',
+                      }}><Trash2 size={12} /></button>
+                    </div>
                   </td>
                 </tr>
               ))}
               {!filtered.length && (
-                <tr>
-                  <td colSpan={9} style={{ padding: 24, textAlign: 'center', fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>Belum ada registrant</td>
-                </tr>
+                <tr><td colSpan={9} style={{ padding: 24, textAlign: 'center', fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>Belum ada registrant</td></tr>
               )}
             </tbody>
           </table>

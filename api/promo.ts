@@ -187,5 +187,56 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.json({ registrants: rows });
   }
 
+  if (req.method === 'GET' && action === 'promos') {
+    const rows = await sql`SELECT * FROM promos ORDER BY id DESC`;
+    return res.json({ promos: rows });
+  }
+
+  if (req.method === 'POST' && action === 'create') {
+    const { name, package: pkg, quota, deadline, password } = req.body;
+    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    await sql`
+      INSERT INTO promos (name, package, quota, deadline, active, bonus_tiers)
+      VALUES (${name}, ${pkg}, ${quota}, ${deadline}, true, '{"tiers":[]}'::jsonb)
+    `;
+    return res.json({ success: true });
+  }
+
+  if (req.method === 'POST' && action === 'update') {
+    const { id, quota, deadline, active, password } = req.body;
+    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    await sql`UPDATE promos SET quota = ${quota}, deadline = ${deadline}, active = ${active} WHERE id = ${id}`;
+    return res.json({ success: true });
+  }
+
+  if (req.method === 'POST' && action === 'delete') {
+    const { id, password } = req.body;
+    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    await sql`DELETE FROM registrants WHERE promo_id = ${id}`;
+    await sql`DELETE FROM promos WHERE id = ${id}`;
+    return res.json({ success: true });
+  }
+
+  if (req.method === 'POST' && action === 'reset-registrants') {
+    const { promoId, password } = req.body;
+    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    await sql`DELETE FROM registrants WHERE promo_id = ${promoId}`;
+    return res.json({ success: true });
+  }
+
+  if (req.method === 'POST' && action === 'delete-registrant') {
+    const { id, password } = req.body;
+    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    await sql`DELETE FROM registrants WHERE id = ${id}`;
+    return res.json({ success: true });
+  }
+
+  if (req.method === 'POST' && action === 'update-status') {
+    const { id, status, password } = req.body;
+    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    await sql`UPDATE registrants SET status = ${status} WHERE id = ${id}`;
+    return res.json({ success: true });
+  }
+
   return res.status(405).json({ error: 'Method not allowed' });
 }
