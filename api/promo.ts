@@ -34,6 +34,12 @@ function generateReferralCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
+function maskPhone(p: string | null | undefined) {
+  if (!p) return p;
+  if (p.length <= 4) return p;
+  return p.slice(0, 4) + 'x'.repeat(p.length - 4);
+}
+
 function getEarlyBirdTier(slot: number, bonusTiers: any[]) {
   if (!bonusTiers || !bonusTiers.length) return 1;
   for (let i = 0; i < bonusTiers.length; i++) {
@@ -153,7 +159,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       WHERE r.slot_number = ${code}
     `;
     if (!reg.length) return res.status(404).json({ error: 'Antrean tidak ditemukan' });
-    return res.json({ registrant: reg[0] });
+    const registrant = { ...reg[0], wa: maskPhone(reg[0].wa) };
+    return res.json({ registrant });
   }
 
   if (req.method === 'POST' && action === 'seed') {
@@ -192,7 +199,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'GET' && action === 'registrants') {
-    const rows = await sql`SELECT * FROM registrants ORDER BY created_at DESC`;
+    const isAdmin = req.query.password === process.env.ADMIN_PASSWORD;
+    if (isAdmin) {
+      const rows = await sql`SELECT * FROM registrants ORDER BY created_at DESC`;
+      return res.json({ registrants: rows });
+    }
+    const rows = await sql`
+      SELECT id, name, city, package, slot_number, promo_id,
+             early_bird_tier, status, referral_code, referred_by, created_at
+      FROM registrants ORDER BY created_at DESC
+    `;
     return res.json({ registrants: rows });
   }
 

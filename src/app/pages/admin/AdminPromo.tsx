@@ -44,7 +44,7 @@ export function AdminPromo() {
   const fetchAll = useCallback(async () => {
     try {
       const [r1, r2] = await Promise.all([
-        fetch('/api/promo?action=registrants').then(r => r.json()),
+        fetch('/api/promo?action=registrants&password=awd123').then(r => r.json()),
         fetch('/api/promo?action=promos').then(r => r.json()),
       ]);
       if (r1.registrants) setRegistrants(r1.registrants);
