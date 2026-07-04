@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router';
 import {
   LayoutDashboard, Sparkles, Tag, ListOrdered, HelpCircle, Mail,
-  Globe, MessageSquare, Zap, LogOut, Menu, ChevronLeft, ChevronRight,
+  Globe, MessageSquare, Zap, Gift, LogOut, Menu, ChevronLeft, ChevronRight,
   type LucideIcon,
 } from 'lucide-react';
 import { useAdminAuth } from './AuthContext';
@@ -23,6 +23,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/admin/demo', label: 'Demo Manager', icon: Globe },
   { to: '/admin/trust', label: 'Trust Bar', icon: MessageSquare },
   { to: '/admin/why', label: 'Kenapa AWD', icon: Zap },
+  { to: '/admin/promo', label: 'Promo Manager', icon: Gift },
 ];
 
 const ROUTE_LABELS: Record<string, string> = Object.fromEntries(

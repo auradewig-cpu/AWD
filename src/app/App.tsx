@@ -17,6 +17,7 @@ const AdminContact = lazy(() => import('./pages/admin/AdminContact'));
 const AdminTrust = lazy(() => import('./pages/admin/AdminTrust'));
 const AdminWhy = lazy(() => import('./pages/admin/AdminWhy'));
 const AdminDemo = lazy(() => import('./pages/admin/AdminDemo'));
+const AdminPromo = lazy(() => import('./pages/admin/AdminPromo'));
 
 function AdminIndexRedirect() {
   const { isAuthenticated } = useAdminAuth();
@@ -63,6 +64,7 @@ export default function App() {
                       <Route path="demo" element={<AdminDemo />} />
                       <Route path="trust" element={<AdminTrust />} />
                       <Route path="why" element={<AdminWhy />} />
+                      <Route path="promo" element={<AdminPromo />} />
                       <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
                     </Route>
                   </Route>

@@ -176,5 +176,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.json({ success: true, message: 'Promo seeded' });
   }
 
+  if (req.method === 'POST' && action === 'verify') {
+    const { slotNumber, password } = req.body;
+    if (password !== process.env.ADMIN_PASSWORD) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    await sql`UPDATE registrants SET status = 'verified' WHERE slot_number = ${slotNumber}`;
+    return res.json({ success: true, message: 'Registrant verified' });
+  }
+
+  if (req.method === 'GET' && action === 'registrants') {
+    const rows = await sql`SELECT * FROM registrants ORDER BY created_at DESC`;
+    return res.json({ registrants: rows });
+  }
+
   return res.status(405).json({ error: 'Method not allowed' });
 }
