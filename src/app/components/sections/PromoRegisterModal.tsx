@@ -145,15 +145,20 @@ function Step2Screenshot({ formValues, setVal, onNext, onBack }: {
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    console.log('file selected:', file.name, Math.round(file.size / 1024) + 'KB');
     setUploading(true);
     try {
       const webpDataUrl = await compressImage(file);
+      console.log('upload body size KB:', Math.round(webpDataUrl.length / 1024));
       const r = await fetch('/api/upload-screenshot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: webpDataUrl }),
       });
-      const d = await r.json();
+      console.log('upload response status:', r.status);
+      const text = await r.text();
+      console.log('upload response body:', text);
+      const d = JSON.parse(text);
       if (d.url) setVal('screenshot_medsos_url', d.url);
     } catch {} finally { setUploading(false); }
   }
