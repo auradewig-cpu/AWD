@@ -386,7 +386,7 @@ export function PromoSection() {
   if (!promos.length) return null;
 
   return (
-    <section style={{ padding: '80px 0', position: 'relative', overflow: 'hidden' }}>
+    <section style={{ padding: '80px 0', position: 'relative', overflow: 'hidden', minHeight: promos.length ? 'auto' : '400px' }}>
       <div className="px-4 sm:px-6 lg:px-8" style={{ maxWidth: 1200, margin: '0 auto', width: '100%', boxSizing: 'border-box', position: 'relative', zIndex: 1 }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <div style={{

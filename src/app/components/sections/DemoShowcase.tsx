@@ -77,7 +77,7 @@ function DemoCard({ demo }: { demo: typeof demos[0] }) {
     }}>
       <a href={demo.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block' }}>
         <div style={{
-          width: '100%', aspectRatio: '16/10',
+          width: '100%', height: 180, aspectRatio: '16/9',
           background: 'linear-gradient(135deg, rgba(198,255,74,0.05), rgba(0,0,0,0.4))',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           position: 'relative', overflow: 'hidden',
