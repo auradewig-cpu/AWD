@@ -1,5 +1,5 @@
 import { ExternalLink } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const demos = [
   { name: 'Demo Kira', category: 'STARTER', desc: 'Herbal brand landing page', url: 'https://demo-kira.vercel.app' },
@@ -65,10 +65,23 @@ export function DemoShowcase() {
 function DemoCard({ demo }: { demo: typeof demos[0] }) {
   const color = categoryColors[demo.category] || '#C6FF4A';
   const [imgError, setImgError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const screenshotUrl = `https://api.microlink.io?url=${encodeURIComponent(demo.url)}&screenshot=true&meta=false&embed=screenshot.url`;
 
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setLoaded(true); observer.disconnect(); } },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div style={{
+    <div ref={cardRef} style={{
       background: 'rgba(10,12,10,0.75)',
       border: '1px solid rgba(255,255,255,0.08)',
       borderRadius: 16,
@@ -84,9 +97,8 @@ function DemoCard({ demo }: { demo: typeof demos[0] }) {
         }}>
           {!imgError && (
             <img
-              src={screenshotUrl}
+              src={loaded ? screenshotUrl : undefined}
               alt={demo.name}
-              loading="lazy"
               onError={() => setImgError(true)}
               style={{
                 position: 'absolute', inset: 0,
