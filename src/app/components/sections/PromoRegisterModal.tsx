@@ -160,7 +160,7 @@ function Step2Screenshot({ formValues, setVal, onNext, onBack }: {
       console.log('upload response body:', text);
       const d = JSON.parse(text);
       if (d.url) setVal('screenshot_medsos_url', d.url);
-    } catch {} finally { setUploading(false); }
+    } catch(e) { console.error('upload error:', e); } finally { setUploading(false); }
   }
 
   return (
