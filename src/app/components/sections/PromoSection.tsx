@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Check, Gift, Share2, Clock, Users, Zap, ChevronRight, Copy } from 'lucide-react';
 import html2canvas from 'html2canvas';
+import { QRCodeCanvas } from 'qrcode.react';
 import PromoRegisterModal from './PromoRegisterModal';
 
 const WA_NUMBER = '6285286427559';
@@ -249,18 +250,10 @@ function PromoForm(props: { pkg: string; fields?: Array<{id:string;label:string;
 }
 
 function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => void }) {
-  const [qrImg, setQrImg] = useState(ticket.qrCode || '');
   const [copiedCode, setCopiedCode] = useState(false);
   const ticketRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!qrImg) {
-      import('qrcode').then((QRCode) => {
-        QRCode.toDataURL(ticket.verifyUrl, { width: 200 }).then(setQrImg);
-      });
-    }
-  }, [ticket.verifyUrl, qrImg]);
-
+  const verifyUrl = `https://wa.me/6285286427559?text=Konfirmasi%20antrean%20${ticket.slotNumber}%20-%20${ticket.name}`;
   const waShare = `Halo%20Aldi%2C%20saya%20telah%20mendaftar%20promo%20Juli%202026.%0A%0ANomor%20Antrean%3A%20${ticket.slotNumber}%0ANama%3A%20${ticket.name}%0APaket%3A%20${ticket.package.toUpperCase()}%0ABonus%3A%20${ticket.bonus}%0A%0ABerikut%20tiket%20saya%3A%20${ticket.verifyUrl}`;
 
   const copyCode = () => {
@@ -269,7 +262,8 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
 
   const handleShare = async () => {
     if (!ticketRef.current) return;
-    const canvas = await html2canvas(ticketRef.current, { backgroundColor: '#0a0a0a', scale: 2, useCORS: true, foreignObjectRendering: true });
+    await new Promise(r => setTimeout(r, 150));
+    const canvas = await html2canvas(ticketRef.current, { backgroundColor: '#0a0a0a', scale: 2, useCORS: true, allowTaint: true });
     canvas.toBlob(async (blob) => {
       if (!blob) return;
       const file = new File([blob], 'awd-ticket.png', { type: 'image/png' });
@@ -329,11 +323,9 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
           <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 36, fontWeight: 800, color: '#FAFAFA', margin: '0 0 4px', letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(198,255,74,0.08)' }}>{ticket.slotNumber}</h2>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.55)', margin: '0 0 20px' }}>{ticket.name} &middot; {ticket.city}</p>
 
-          {qrImg && (
-            <div style={{ display: 'inline-flex', padding: 6, background: '#FAFAFA', borderRadius: 14, marginBottom: 18, boxShadow: '0 0 0 1px rgba(198,255,74,0.1)' }}>
-              <img src={qrImg} alt="QR Code" style={{ width: 130, height: 130, display: 'block' }} />
-            </div>
-          )}
+          <div style={{ display: 'inline-flex', padding: 6, background: '#FAFAFA', borderRadius: 14, marginBottom: 18, boxShadow: '0 0 0 1px rgba(198,255,74,0.1)' }}>
+            <QRCodeCanvas value={verifyUrl} size={130} bgColor="#ffffff" fgColor="#000000" />
+          </div>
 
           <div style={{ background: 'linear-gradient(135deg, rgba(198,255,74,0.08), rgba(198,255,74,0.03))', border: '1px solid rgba(198,255,74,0.12)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'Inter, sans-serif', fontSize: 11, marginBottom: 4 }}>
