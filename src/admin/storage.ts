@@ -14,6 +14,7 @@ export const STORAGE_KEYS = {
   TRUST: 'awd_content_trust',
   WHY: 'awd_content_why',
   DEMO: 'awd_demo_data',
+  SOCIAL: 'awd_social_media',
 } as const;
 
 const STORAGE_VERSION = '2.0';

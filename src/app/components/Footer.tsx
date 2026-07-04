@@ -1,12 +1,25 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
-import { Instagram, Youtube, MessageCircle } from 'lucide-react';
-
-const WA_NUMBER = '6285286427559';
+import { Instagram, Youtube, MessageCircle, Music2, Facebook } from 'lucide-react';
+import { STORAGE_KEYS, loadFromServer } from '@/admin/storage';
+import { DEFAULT_SOCIAL, type SocialContent } from '@/app/pages/admin/AdminSocialMedia';
 
 export function Footer() {
+  const [social, setSocial] = useState<SocialContent>(DEFAULT_SOCIAL);
   const year = new Date().getFullYear();
   const footerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    loadFromServer(STORAGE_KEYS.SOCIAL, DEFAULT_SOCIAL).then(setSocial);
+  }, []);
+
+  useEffect(() => {
+    function handleUpdate() {
+      loadFromServer(STORAGE_KEYS.SOCIAL, DEFAULT_SOCIAL).then(setSocial);
+    }
+    window.addEventListener('awd-social-updated', handleUpdate);
+    return () => window.removeEventListener('awd-social-updated', handleUpdate);
+  }, []);
 
   useEffect(() => {
     let ctx: any;
@@ -61,28 +74,46 @@ export function Footer() {
               Jasa pembuatan website & aplikasi web berbasis React/Next.js. Kualitas premium, harga transparan.
             </p>
             <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-              <a href="#" style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#C6FF4A'}
-                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
-              >
-                <Instagram size={18} />
-              </a>
-              <a href="#" style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#C6FF4A'}
-                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
-              >
-                <Youtube size={18} />
-              </a>
-              <a
-                href={`https://wa.me/${WA_NUMBER}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#C6FF4A'}
-                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
-              >
-                <MessageCircle size={18} />
-              </a>
+              {social.instagram && (
+                <a href={social.instagram} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#C6FF4A'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                >
+                  <Instagram size={18} />
+                </a>
+              )}
+              {social.tiktok && (
+                <a href={social.tiktok} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#C6FF4A'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                >
+                  <Music2 size={18} />
+                </a>
+              )}
+              {social.youtube && (
+                <a href={social.youtube} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#C6FF4A'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                >
+                  <Youtube size={18} />
+                </a>
+              )}
+              {social.facebook && (
+                <a href={social.facebook} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#C6FF4A'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                >
+                  <Facebook size={18} />
+                </a>
+              )}
+              {social.whatsapp && (
+                <a href={`https://wa.me/${social.whatsapp}`} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#C6FF4A'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                >
+                  <MessageCircle size={18} />
+                </a>
+              )}
             </div>
           </div>
 
@@ -130,7 +161,7 @@ export function Footer() {
           <div>
             <p style={{ color: '#FAFAFA', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 16 }}>Kontak</p>
             <a
-              href={`https://wa.me/${WA_NUMBER}`}
+              href={`https://wa.me/${social.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{
