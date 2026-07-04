@@ -32,6 +32,7 @@ export function AdminPromo() {
   const [editDeadline, setEditDeadline] = useState('');
   const [editActive, setEditActive] = useState(true);
   const [bonusTiers, setBonusTiers] = useState<Array<{min:number;max:number;bonus:string}>>([]);
+  const [promoPrice, setPromoPrice] = useState('');
 
   const fetchAll = useCallback(async () => {
     try {
@@ -69,6 +70,7 @@ export function AdminPromo() {
     setEditDeadline(promo.deadline.slice(0, 16));
     setEditActive(promo.active);
     setBonusTiers(promo.bonus_tiers?.tiers?.map((t: any) => ({ ...t })) || []);
+    setPromoPrice((promo as any).promo_price || '');
   }
 
   function updateTier(i: number, key: 'min' | 'max' | 'bonus', val: any) {
@@ -84,6 +86,7 @@ export function AdminPromo() {
     await api('update', {
       id: editPromo.id, quota: editQuota, deadline: editDeadline, active: editActive,
       bonus_tiers: { tiers: bonusTiers },
+      promo_price: promoPrice,
     });
     setEditPromo(null);
   }
@@ -252,6 +255,10 @@ export function AdminPromo() {
                   <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, display: 'block' }}>Deadline</label>
                   <input type="datetime-local" value={editDeadline} onChange={e => setEditDeadline(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#FAFAFA', fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
                 </div>
+              </div>
+              <div>
+                <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, display: 'block' }}>Harga Promo</label>
+                <input value={promoPrice} onChange={e => setPromoPrice(e.target.value)} placeholder="contoh: Rp 1.500.000" style={{ width: '100%', boxSizing: 'border-box', padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#FAFAFA', fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
               </div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.6)', cursor: 'pointer' }}>
                 <input type="checkbox" checked={editActive} onChange={e => setEditActive(e.target.checked)} style={{ accentColor: '#C6FF4A' }} />

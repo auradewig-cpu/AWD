@@ -12,6 +12,7 @@ interface PromoData {
   deadline: string;
   active: boolean;
   bonus_tiers: { tiers: Array<{ min: number; max: number; bonus: string }> };
+  promo_price?: string;
   registered: number;
   remaining: number;
   latest: Array<{ name: string; city: string; package: string; created_at: string }>;
@@ -139,7 +140,7 @@ function PromoCard({ data, onDaftar }: { data: PromoData; onDaftar: () => void }
   const isStarter = data.package === 'starter';
   const pkgLabel = isStarter ? 'STARTER' : 'BUSINESS';
   const pkgSub = isStarter ? 'Landing page + admin panel' : 'Company profile + blog + admin panel';
-  const price = isStarter ? 'Rp 1.500.000' : 'Rp 3.000.000';
+  const price = data.promo_price || (isStarter ? 'Rp 1.500.000' : 'Rp 3.000.000');
   const originalPrice = isStarter ? 'Rp 5.000.000' : 'Rp 10.000.000';
   const features = isStarter
     ? ['Website Next.js custom', 'Admin panel', 'Mobile responsive + SEO', 'Lighthouse 90+ garansi', 'Domain .com 1 tahun']

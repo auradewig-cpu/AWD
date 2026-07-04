@@ -9,8 +9,10 @@ async function initTables() {
     id SERIAL PRIMARY KEY, name VARCHAR(100),
     package VARCHAR(50), quota INTEGER,
     deadline TIMESTAMP, active BOOLEAN DEFAULT true,
-    bonus_tiers JSONB
+    bonus_tiers JSONB,
+    promo_price VARCHAR(50)
   )`;
+  await sql`ALTER TABLE promos ADD COLUMN IF NOT EXISTS promo_price VARCHAR(50)`;
   await sql`CREATE TABLE IF NOT EXISTS registrants (
     id SERIAL PRIMARY KEY, slot_number VARCHAR(20) UNIQUE,
     promo_id INTEGER, name VARCHAR(100), wa VARCHAR(20),
@@ -203,13 +205,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST' && action === 'update') {
-    const { id, quota, deadline, active, bonus_tiers, password } = req.body;
+    const { id, quota, deadline, active, bonus_tiers, promo_price, password } = req.body;
     if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
-    if (bonus_tiers) {
-      await sql`UPDATE promos SET quota = ${quota}, deadline = ${deadline}, active = ${active}, bonus_tiers = ${JSON.stringify(bonus_tiers)}::jsonb WHERE id = ${id}`;
-    } else {
-      await sql`UPDATE promos SET quota = ${quota}, deadline = ${deadline}, active = ${active} WHERE id = ${id}`;
-    }
+    await sql`
+      UPDATE promos SET quota=${quota}, deadline=${deadline},
+        active=${active}, bonus_tiers=${JSON.stringify(bonus_tiers || { tiers: [] })}::jsonb,
+        promo_price=${promo_price || null}
+      WHERE id=${id}
+    `;
     return res.json({ success: true });
   }
 
