@@ -177,15 +177,26 @@ function Step2Screenshot({ formValues, setVal, onNext, onBack }: {
       </div>
 
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
-      <button onClick={() => fileInputRef.current?.click()} disabled={uploading} style={{
-        width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        background: hasScreenshot ? 'rgba(0,200,83,0.1)' : 'rgba(255,255,255,0.04)',
-        border: hasScreenshot ? '1px solid rgba(0,200,83,0.3)' : '1px dashed rgba(255,255,255,0.2)',
-        borderRadius: 10, padding: '24px 14px', cursor: uploading ? 'wait' : 'pointer',
-        fontFamily: 'Inter, sans-serif', fontSize: 13, color: hasScreenshot ? '#00C853' : 'rgba(255,255,255,0.5)',
-      }}>
-        {uploading ? 'Mengupload...' : hasScreenshot ? <><Check size={16} /> Screenshot terupload</> : <><Upload size={16} /> Upload screenshot bukti follow</>}
-      </button>
+      {uploading ? (
+        <div style={{ width: '100%', textAlign: 'center', padding: '24px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px dashed rgba(255,255,255,0.2)', fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>Mengupload...</div>
+      ) : hasScreenshot ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, border: '1px solid #2a5', borderRadius: 8 }}>
+          <img src={formValues.screenshot_medsos_url} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 6 }} />
+          <div>
+            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#7fdb7f', display: 'flex', alignItems: 'center', gap: 6 }}><Check size={14} /> Screenshot terupload</div>
+            <button onClick={() => { setVal('screenshot_medsos_url', ''); if (fileInputRef.current) fileInputRef.current.value = ''; }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', fontFamily: 'Inter, sans-serif', fontSize: 12, cursor: 'pointer', padding: '4px 0', textDecoration: 'underline', opacity: 0.7 }}>Ganti gambar</button>
+          </div>
+        </div>
+      ) : (
+        <button onClick={() => fileInputRef.current?.click()} style={{
+          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.2)',
+          borderRadius: 10, padding: '24px 14px', cursor: 'pointer',
+          fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.5)',
+        }}>
+          <Upload size={16} /> Upload screenshot bukti follow
+        </button>
+      )}
 
       <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
         <button onClick={onBack} style={{
