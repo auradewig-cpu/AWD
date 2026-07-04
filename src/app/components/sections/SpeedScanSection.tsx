@@ -23,9 +23,7 @@ export function SpeedScanSection() {
 
     try {
       const encodedUrl = encodeURIComponent(url.trim());
-      const res = await fetch(
-        `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodedUrl}&strategy=mobile`
-      );
+      const res = await fetch(`/api/pagespeed?url=${encodedUrl}`);
 
       if (!res.ok) {
         setError(prev => prev);
