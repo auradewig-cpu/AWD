@@ -12,20 +12,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const webpBuf = await sharp(buf).webp({ quality: 80 }).toBuffer();
 
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'dr0xe0tgr';
-    const apiKey = process.env.CLOUDINARY_API_KEY;
-    const apiSecret = process.env.CLOUDINARY_API_SECRET;
-
-    if (!apiKey || !apiSecret) {
-      return res.status(500).json({ error: 'Cloudinary not configured' });
-    }
-
     const formData = new FormData();
     formData.append('file', new Blob([webpBuf], { type: 'image/webp' }), 'upload.webp');
     formData.append('upload_preset', 'ml_default');
 
     const uploadRes = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      'https://api.cloudinary.com/v1_1/dr0xe0tgr/image/upload',
       { method: 'POST', body: formData }
     );
     const data = await uploadRes.json();
