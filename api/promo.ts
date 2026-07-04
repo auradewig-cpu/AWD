@@ -35,6 +35,7 @@ function generateReferralCode() {
 }
 
 function getEarlyBirdTier(slot: number, bonusTiers: any[]) {
+  if (!bonusTiers || !bonusTiers.length) return 1;
   for (let i = 0; i < bonusTiers.length; i++) {
     if (slot >= bonusTiers[i].min && slot <= bonusTiers[i].max) return i + 1;
   }
@@ -42,6 +43,7 @@ function getEarlyBirdTier(slot: number, bonusTiers: any[]) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  try {
   await initTables();
   const action = req.query.action as string;
 
@@ -83,15 +85,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     `;
     const registered = parseInt(count[0].count);
 
-    if (registered >= p.quota) {
+    if (registered >= (p.quota ?? 0)) {
       return res.status(400).json({ error: 'Slot penuh!' });
     }
 
     const slot = registered + 1;
     const slotNumber = generateSlotNumber(pkg, slot);
     const referralCode = generateReferralCode();
-    const earlyBirdTier = getEarlyBirdTier(slot, p.bonus_tiers.tiers);
-    const bonus = p.bonus_tiers.tiers[earlyBirdTier - 1]?.bonus || '';
+    const tiers = p.bonus_tiers?.tiers || [];
+    const earlyBirdTier = getEarlyBirdTier(slot, tiers);
+    const bonus = tiers[earlyBirdTier - 1]?.bonus || '';
 
     await sql`
       INSERT INTO registrants
@@ -252,4 +255,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   return res.status(405).json({ error: 'Method not allowed' });
+  } catch (err: any) {
+    console.error('[/api/promo] Unhandled error:', err?.stack || err);
+    return res.status(500).json({ error: 'Internal server error', detail: err?.message });
+  }
 }

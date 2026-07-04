@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ExternalLink, Check, Download, Search, Plus, Trash2, RotateCcw, AlertTriangle, X } from 'lucide-react';
+import { ExternalLink, Check, Download, Search, Plus, Trash2, RotateCcw, AlertTriangle, X, Eye, EyeOff } from 'lucide-react';
 import { AdminCard, AdminButton } from '@/admin/components';
+
+function maskPhone(phone: string): string {
+  if (!phone || phone.length <= 4) return phone || '';
+  return phone.slice(0, 4) + 'x'.repeat(phone.length - 4);
+}
 
 interface Registrant {
   id: number; slot_number: string; promo_id: number; name: string; wa: string;
@@ -142,7 +147,7 @@ export function AdminPromo() {
   function exportCsv() {
     const header = 'Nama,WA,Kota,Paket,Slot,Status,Kode Referral,Tanggal\n';
     const rows = registrants.map(r =>
-      `"${r.name}","${r.wa}","${r.city}","${r.package}","${r.slot_number}","${r.status}","${r.referral_code}","${new Date(r.created_at).toLocaleDateString('id-ID')}"`
+      `"${r.name}","${maskPhone(r.wa)}","${r.city}","${r.package}","${r.slot_number}","${r.status}","${r.referral_code}","${new Date(r.created_at).toLocaleDateString('id-ID')}"`
     ).join('\n');
     const blob = new Blob([header + rows], { type: 'text/csv' });
     const a = document.createElement('a');
@@ -345,7 +350,7 @@ export function AdminPromo() {
                 <tr key={r.id}>
                   <td style={{ padding: '10px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#C6FF4A', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{r.slot_number}</td>
                   <td style={{ padding: '10px 12px', fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#FAFAFA', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{r.name}</td>
-                  <td style={{ padding: '10px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'rgba(255,255,255,0.6)', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{r.wa}</td>
+                  <td style={{ padding: '10px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'rgba(255,255,255,0.6)', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{maskPhone(r.wa)}</td>
                   <td style={{ padding: '10px 12px', fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.6)', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{r.city}</td>
                   <td style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>
                     <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700, color: r.package === 'starter' ? '#C6FF4A' : '#00C853', background: r.package === 'starter' ? 'rgba(198,255,74,0.1)' : 'rgba(0,200,83,0.1)', borderRadius: 4, padding: '2px 8px', letterSpacing: '0.04em' }}>{r.package.toUpperCase()}</span>
