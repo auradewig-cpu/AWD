@@ -105,7 +105,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       `;
     }
 
-    const verifyUrl = `https://aldiwebdesigner.xyz/promo/status?code=${slotNumber}`;
+    const verifyUrl = `https://wa.me/6285286427559?text=Konfirmasi%20antrean%20${slotNumber}%20-%20${name}`;
     const qrDataUrl = await QRCode.toDataURL(verifyUrl, { width: 200 });
 
     return res.json({
