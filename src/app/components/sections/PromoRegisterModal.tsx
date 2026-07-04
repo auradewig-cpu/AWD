@@ -140,7 +140,18 @@ function Step2Screenshot({ formValues, setVal, onNext, onBack }: {
 }) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const hasScreenshot = !!formValues.screenshot_medsos_url;
+  const screenshots: string[] = formValues.screenshots ? JSON.parse(formValues.screenshots) : [];
+  const count = screenshots.length;
+  const maxScreenshots = 4;
+
+  function updateScreenshots(arr: string[]) {
+    setVal('screenshots', JSON.stringify(arr));
+  }
+
+  function removeScreenshot(idx: number) {
+    updateScreenshots(screenshots.filter((_, i) => i !== idx));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -154,7 +165,7 @@ function Step2Screenshot({ formValues, setVal, onNext, onBack }: {
         body: JSON.stringify({ image: webpDataUrl }),
       });
       const d = await r.json();
-      if (d.url) setVal('screenshot_medsos_url', d.url);
+      if (d.url) updateScreenshots([...screenshots, d.url]);
     } catch {} finally { setUploading(false); }
   }
 
@@ -177,25 +188,41 @@ function Step2Screenshot({ formValues, setVal, onNext, onBack }: {
       </div>
 
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
+
       {uploading ? (
         <div style={{ width: '100%', textAlign: 'center', padding: '24px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px dashed rgba(255,255,255,0.2)', fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>Mengupload...</div>
-      ) : hasScreenshot ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, border: '1px solid #2a5', borderRadius: 8 }}>
-          <img src={formValues.screenshot_medsos_url} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 6 }} />
-          <div>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#7fdb7f', display: 'flex', alignItems: 'center', gap: 6 }}><Check size={14} /> Screenshot terupload</div>
-            <button onClick={() => { setVal('screenshot_medsos_url', ''); if (fileInputRef.current) fileInputRef.current.value = ''; }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', fontFamily: 'Inter, sans-serif', fontSize: 12, cursor: 'pointer', padding: '4px 0', textDecoration: 'underline', opacity: 0.7 }}>Ganti gambar</button>
-          </div>
-        </div>
       ) : (
-        <button onClick={() => fileInputRef.current?.click()} style={{
-          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.2)',
-          borderRadius: 10, padding: '24px 14px', cursor: 'pointer',
-          fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.5)',
-        }}>
-          <Upload size={16} /> Upload screenshot bukti follow
-        </button>
+        <>
+          {count > 0 && (
+            <>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                {screenshots.map((url, i) => (
+                  <div key={i} style={{ position: 'relative', width: 60, height: 60 }}>
+                    <img src={url} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)' }} />
+                    <button onClick={() => removeScreenshot(i)} style={{
+                      position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%',
+                      background: '#EF4444', border: 'none', color: '#FAFAFA', fontSize: 11, fontWeight: 700,
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                    }}>✕</button>
+                  </div>
+                ))}
+              </div>
+              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#7fdb7f', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Check size={14} /> {count}/{maxScreenshots} screenshot terupload
+              </p>
+            </>
+          )}
+          {count < maxScreenshots && (
+            <button onClick={() => fileInputRef.current?.click()} style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.2)',
+              borderRadius: 10, padding: '16px 14px', cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.5)',
+            }}>
+              <Upload size={16} /> {count === 0 ? 'Upload screenshot bukti follow' : '+ Upload screenshot lagi'}
+            </button>
+          )}
+        </>
       )}
 
       <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
@@ -204,11 +231,11 @@ function Step2Screenshot({ formValues, setVal, onNext, onBack }: {
           color: 'rgba(255,255,255,0.6)', borderRadius: 10, padding: '14px', fontSize: 14,
           fontWeight: 600, fontFamily: 'Inter, sans-serif', cursor: 'pointer',
         }}>Kembali</button>
-        <button onClick={onNext} disabled={!hasScreenshot} style={{
-          flex: 1, background: hasScreenshot ? '#C6FF4A' : 'rgba(198,255,74,0.2)',
-          color: hasScreenshot ? '#07080A' : 'rgba(255,255,255,0.3)',
+        <button onClick={onNext} disabled={count < 1} style={{
+          flex: 1, background: count >= 1 ? '#C6FF4A' : 'rgba(198,255,74,0.2)',
+          color: count >= 1 ? '#07080A' : 'rgba(255,255,255,0.3)',
           border: 'none', borderRadius: 10, padding: '14px', fontSize: 14, fontWeight: 700,
-          fontFamily: 'Inter, sans-serif', cursor: hasScreenshot ? 'pointer' : 'not-allowed',
+          fontFamily: 'Inter, sans-serif', cursor: count >= 1 ? 'pointer' : 'not-allowed',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         }}>
           Lanjut <ChevronRight size={16} />
@@ -299,7 +326,7 @@ export default function PromoRegisterModal({ pkg, onClose, onSuccess }: PromoReg
         brand_name: formValues.brand_name?.trim() || undefined,
         bisnis_desc: formValues.bisnis_desc?.trim() || undefined,
         referensi_web: formValues.referensi_web?.trim() || undefined,
-        screenshot_medsos_url: formValues.screenshot_medsos_url || undefined,
+        screenshots: formValues.screenshots || undefined,
       };
       const r = await fetch('/api/promo?action=register', {
         method: 'POST',

@@ -84,7 +84,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST' && action === 'register') {
-    const { name, wa, city, email, package: pkg, referred_by, brand_name, bisnis_desc, referensi_web } = req.body;
+    const { name, wa, city, email, package: pkg, referred_by, brand_name, bisnis_desc, referensi_web, screenshots } = req.body;
     if (!name || !wa || !city || !pkg) {
       return res.status(400).json({ error: 'Semua field wajib diisi' });
     }
@@ -115,11 +115,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       INSERT INTO registrants
         (slot_number, promo_id, name, wa, city, package,
          referral_code, referred_by, early_bird_tier,
-         email, brand_name, bisnis_desc, referensi_web)
+         email, brand_name, bisnis_desc, referensi_web, screenshot_medsos_url)
       VALUES
         (${slotNumber}, ${p.id}, ${name}, ${wa}, ${city}, ${pkg},
          ${referralCode}, ${referred_by || null}, ${earlyBirdTier},
-         ${email || null}, ${brand_name || null}, ${bisnis_desc || null}, ${referensi_web || null})
+         ${email || null}, ${brand_name || null}, ${bisnis_desc || null}, ${referensi_web || null},
+         ${screenshots || null})
     `;
 
     if (referred_by) {
