@@ -74,10 +74,14 @@ export function DemoShowcase() {
   );
 }
 
+function optimizeCloudinary(url: string): string {
+  if (!url || !url.includes('cloudinary.com')) return url;
+  return url.replace('/upload/', '/upload/w_600,q_60,f_webp/');
+}
+
 function DemoCard({ demo }: { demo: DemoEntry }) {
   const color = tierColors[demo.tier] || '#C6FF4A';
   const [imgError, setImgError] = useState(false);
-  const imgSrc = demo.thumbnailUrl?.replace('/upload/', '/upload/w_600,q_60,f_webp/');
 
   return (
     <div style={{
@@ -96,7 +100,7 @@ function DemoCard({ demo }: { demo: DemoEntry }) {
         }}>
           {!imgError && imgSrc && (
             <img
-              src={imgSrc}
+              src={optimizeCloudinary(demo.thumbnailUrl)}
               alt={demo.name}
               loading="lazy"
               onError={() => setImgError(true)}
