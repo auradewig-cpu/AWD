@@ -4,6 +4,13 @@ import { X, Check, Gift, Share2, Clock, Users, Zap, ChevronRight } from 'lucide-
 const WA_NUMBER = '6285286427559';
 const DEADLINE = new Date('2026-07-31T23:59:59');
 
+const defaultSyarat = [
+  'Follow Semua Akun Medsos AWD (IG/TikTok/FB/YouTube), Like, Share & Save 3 post terbaru AWD di semua medsos. (⚠️ Pertahankan minimal 6 bulan agar paket tetap aktif)',
+  'Screenshot bukti dan kirim ke WA admin AWD',
+  'Wajib berikan ulasan Google positif sebelum website live',
+  'Post sosmed dengan template yang kami kirim via WA',
+];
+
 interface PromoData {
   id: number;
   name: string;
@@ -13,6 +20,7 @@ interface PromoData {
   active: boolean;
   bonus_tiers: { tiers: Array<{ min: number; max: number; bonus: string }> };
   promo_price?: string;
+  syarat?: string[];
   registered: number;
   remaining: number;
   latest: Array<{ name: string; city: string; package: string; created_at: string }>;
@@ -29,6 +37,7 @@ interface TicketData {
   referralLink: string;
   qrCode: string;
   verifyUrl: string;
+  syarat?: string[];
 }
 
 interface LiveEntry {
@@ -358,7 +367,7 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
         <div style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 12, padding: '16px', marginBottom: 20, textAlign: 'left' }}>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 700, color: '#EF4444', margin: '0 0 8px' }}>Syarat & Ketentuan:</p>
           <ol style={{ paddingLeft: 20, margin: 0, color: '#ffffff', listStyleType: 'decimal', fontFamily: 'Inter, sans-serif', fontSize: 11, lineHeight: 1.7 }}>
-            {['Follow Semua Akun Medsos AWD (IG/TikTok/FB/YouTube), Like, Share & Save 3 post terbaru AWD di semua medsos. (⚠️ Pertahankan minimal 6 bulan agar paket tetap aktif)', 'Screenshot bukti dan kirim ke WA admin AWD', 'Wajib berikan ulasan Google positif sebelum website live', 'Post sosmed dengan template yang kami kirim via WA'].map((s, i) => (
+            {(ticket.syarat || defaultSyarat).map((s, i) => (
               <li key={i} style={{ color: '#ffffff', marginBottom: 6 }}>{s}</li>
             ))}
           </ol>

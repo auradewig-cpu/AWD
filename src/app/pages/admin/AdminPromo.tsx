@@ -33,6 +33,7 @@ export function AdminPromo() {
   const [editActive, setEditActive] = useState(true);
   const [bonusTiers, setBonusTiers] = useState<Array<{min:number;max:number;bonus:string}>>([]);
   const [promoPrice, setPromoPrice] = useState('');
+  const [syarat, setSyarat] = useState<string[]>([]);
 
   const fetchAll = useCallback(async () => {
     try {
@@ -71,6 +72,12 @@ export function AdminPromo() {
     setEditActive(promo.active);
     setBonusTiers(promo.bonus_tiers?.tiers?.map((t: any) => ({ ...t })) || []);
     setPromoPrice((promo as any).promo_price || '');
+    setSyarat((promo as any).syarat || [
+      'Follow Semua Akun Medsos AWD (IG/TikTok/FB/YouTube), Like, Share & Save 3 post terbaru AWD di semua medsos. (⚠️ Pertahankan minimal 6 bulan agar paket tetap aktif)',
+      'Screenshot bukti dan kirim ke WA admin AWD',
+      'Wajib berikan ulasan Google positif sebelum website live',
+      'Post sosmed dengan template yang kami kirim via WA',
+    ]);
   }
 
   function updateTier(i: number, key: 'min' | 'max' | 'bonus', val: any) {
@@ -87,6 +94,7 @@ export function AdminPromo() {
       id: editPromo.id, quota: editQuota, deadline: editDeadline, active: editActive,
       bonus_tiers: { tiers: bonusTiers },
       promo_price: promoPrice,
+      syarat,
     });
     setEditPromo(null);
   }
@@ -275,6 +283,16 @@ export function AdminPromo() {
                   </div>
                 ))}
                 <button onClick={addTier} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', border: '1px solid rgba(198,255,74,0.2)', color: '#C6FF4A', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif', cursor: 'pointer' }}>+ Tambah Tier</button>
+              </div>
+              <div>
+                <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8, display: 'block' }}>Syarat & Ketentuan</label>
+                {syarat.map((s, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                    <input value={s} onChange={e => { const a = [...syarat]; a[i] = e.target.value; setSyarat(a); }} style={{ flex: 1, padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#FAFAFA', fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
+                    <button onClick={() => setSyarat(syarat.filter((_, idx) => idx !== i))} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', borderRadius: 8, cursor: 'pointer', padding: '8px 10px', fontSize: 13 }}>✕</button>
+                  </div>
+                ))}
+                <button onClick={() => setSyarat([...syarat, ''])} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', border: '1px solid rgba(198,255,74,0.2)', color: '#C6FF4A', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif', cursor: 'pointer', marginTop: 4 }}>+ Tambah S&K</button>
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                 <button onClick={saveEdit} style={{ background: '#C6FF4A', color: '#07080A', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 700, fontFamily: 'Inter, sans-serif', cursor: 'pointer' }}>Simpan</button>
