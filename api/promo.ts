@@ -142,13 +142,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'GET' && action === 'live') {
     const latest = await sql`
-      SELECT r.name, r.city, r.package, r.created_at, r.slot_number
+      SELECT r.name, r.city, r.package, r.created_at, r.slot_number, r.wa
       FROM registrants r
       JOIN promos p ON r.promo_id = p.id
       WHERE p.active = true
       ORDER BY r.created_at DESC LIMIT 5
     `;
-    return res.json({ latest });
+    const masked = latest.map((r: any) => ({ ...r, wa: maskPhone(r.wa) }));
+    return res.json({ latest: masked });
   }
 
   if (req.method === 'GET' && action === 'status') {

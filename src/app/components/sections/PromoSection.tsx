@@ -47,6 +47,7 @@ interface LiveEntry {
   package: string;
   created_at: string;
   slot_number: string;
+  wa: string;
 }
 
 function CountdownTimer() {
@@ -128,7 +129,7 @@ function LiveFeed() {
 
   const items = entries.map((e) => {
     const pkg = e.package === 'starter' ? 'STARTER' : 'BUSINESS';
-    return `🟢 Baru saja: ${e.name} dari ${e.city} daftar ${pkg} #${e.slot_number?.split('-').pop() || ''}`;
+    return `🟢 Baru saja: ${e.name} dari ${e.city} (${e.wa}) daftar ${pkg} #${e.slot_number?.split('-').pop() || ''}`;
   });
   const joined = items.join(' &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; ');
 
