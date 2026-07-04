@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Check, Gift, Share2, Clock, Users, Zap, ChevronRight, Copy } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import PromoRegisterModal from './PromoRegisterModal';
 
 const WA_NUMBER = '6285286427559';
@@ -250,7 +251,8 @@ function PromoForm(props: { pkg: string; fields?: Array<{id:string;label:string;
 function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => void }) {
   const [qrImg, setQrImg] = useState(ticket.qrCode || '');
   const [copiedCode, setCopiedCode] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!qrImg) {
@@ -266,71 +268,106 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
   const copyCode = () => {
     navigator.clipboard.writeText(ticket.referralCode).then(() => { setCopiedCode(true); setTimeout(() => setCopiedCode(false), 2000); });
   };
-  const copyLink = () => {
-    navigator.clipboard.writeText(refLink).then(() => { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); });
-  };
+
   const handleShare = async () => {
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Tiket AWD Promo', text: `Slot ${ticket.slotNumber} - ${ticket.name}`, url: refLink }); } catch {}
-    } else {
-      copyLink();
-    }
+    if (!cardRef.current) return;
+    setSharing(true);
+    try {
+      const canvas = await html2canvas(cardRef.current, { backgroundColor: '#0a0a0a', scale: 2 });
+      canvas.toBlob(async (blob) => {
+        if (!blob) { setSharing(false); return; }
+        const file = new File([blob], 'awd-ticket.png', { type: 'image/png' });
+        if (navigator.canShare?.({ files: [file] })) {
+          try { await navigator.share({ files: [file], title: 'Tiket Promo AWD' }); } catch {}
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = 'awd-ticket.png'; a.click();
+          URL.revokeObjectURL(url);
+        }
+        setSharing(false);
+      });
+    } catch { setSharing(false); }
   };
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
-      <div style={{ position: 'relative', background: '#0E120A', border: '1px solid rgba(198,255,74,0.25)', borderRadius: 20, padding: '32px 28px', maxWidth: 420, width: '100%', boxSizing: 'border-box', textAlign: 'center' }}>
-        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: 4 }}><X size={18} /></button>
+      <div style={{ position: 'relative', maxWidth: 440, width: '100%', boxSizing: 'border-box' }}>
 
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(198,255,74,0.1)', borderRadius: 999, padding: '4px 12px', marginBottom: 16 }}>
-          <Check size={12} color="#C6FF4A" strokeWidth={3} />
-          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 600, color: '#C6FF4A' }}>Pendaftaran Berhasil!</span>
-        </div>
-
-        <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 28, fontWeight: 700, color: '#FAFAFA', margin: '0 0 4px', letterSpacing: '-0.02em' }}>{ticket.slotNumber}</h2>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.45)', margin: '0 0 24px' }}>{ticket.name} &middot; {ticket.city}</p>
-
-        {qrImg && (
-          <div style={{ display: 'inline-flex', padding: 8, background: '#FAFAFA', borderRadius: 12, marginBottom: 20 }}>
-            <img src={qrImg} alt="QR Code" style={{ width: 140, height: 140, display: 'block' }} />
-          </div>
-        )}
-
-        <div style={{ background: 'rgba(198,255,74,0.06)', border: '1px solid rgba(198,255,74,0.15)', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'Inter, sans-serif', fontSize: 13, marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.5)' }}>Early Bird Bonus</span>
-            <span style={{ color: '#C6FF4A', fontWeight: 600 }}>Tier {ticket.earlyBirdTier}</span>
-          </div>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 700, color: '#FAFAFA', margin: 0 }}>{ticket.bonus}</p>
-        </div>
-
-        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>Kode Referral Kamu</span>
-            <button onClick={copyCode} style={{ background: 'transparent', border: 'none', color: '#C6FF4A', cursor: 'pointer', fontSize: 12, fontFamily: 'Inter, sans-serif', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Copy size={12} /> {copiedCode ? 'Tersalin!' : 'Salin'}
-            </button>
-          </div>
-          <code style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 18, fontWeight: 700, color: '#C6FF4A' }}>{ticket.referralCode}</code>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: '4px 0 0' }}>Bagikan kode ini ke temanmu</p>
-        </div>
-
-        <button onClick={handleShare} style={{
-          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          background: '#C6FF4A', color: '#07080A', border: 'none', borderRadius: 10, padding: '14px',
-          fontSize: 15, fontWeight: 700, fontFamily: 'Inter, sans-serif', cursor: 'pointer', marginBottom: 12,
+        <div ref={cardRef} style={{
+          background: 'linear-gradient(180deg, #0E120A 0%, #1a1f12 100%)',
+          border: '1px solid rgba(198,255,74,0.2)', borderRadius: 20,
+          padding: '36px 28px 28px', textAlign: 'center', position: 'relative', overflow: 'hidden',
         }}>
-          <Share2 size={16} /> {copiedLink ? 'Link Tersalin!' : 'Share ke Story'}
-        </button>
+          <div style={{
+            position: 'absolute', top: -40, right: -40, width: 160, height: 160,
+            background: 'radial-gradient(circle, rgba(198,255,74,0.06) 0%, transparent 70%)',
+            borderRadius: '50%',
+          }} />
+          <div style={{
+            position: 'absolute', bottom: -20, left: -20, width: 120, height: 120,
+            background: 'radial-gradient(circle, rgba(198,255,74,0.04) 0%, transparent 70%)',
+            borderRadius: '50%',
+          }} />
 
-        <a href={`https://wa.me/${WA_NUMBER}?text=${waShare}`} target="_blank" rel="noopener noreferrer" style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textDecoration: 'none',
-          background: 'transparent', border: '1px solid rgba(198,255,74,0.3)', color: '#C6FF4A',
-          borderRadius: 10, padding: '14px', fontSize: 15, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-        }}>
-          <Zap size={16} /> Bagikan via WhatsApp
-        </a>
+          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700, color: '#C6FF4A', letterSpacing: '0.15em', marginBottom: 8 }}>ALDIDESIGNER.XYZ</div>
+          <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'Inter Tight, sans-serif', color: '#FAFAFA', marginBottom: 4, letterSpacing: '-0.01em' }}>🎉 PROMO AWD JULI 2026</div>
+          <div style={{ fontSize: 12, color: '#C6FF4A', fontFamily: 'Inter, sans-serif', fontWeight: 600, marginBottom: 20, letterSpacing: '0.05em' }}>RESMI TERDAFTAR</div>
+
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(198,255,74,0.08)', borderRadius: 999, padding: '4px 12px', marginBottom: 14 }}>
+            <Check size={11} color="#C6FF4A" strokeWidth={3} />
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: '#C6FF4A' }}>Pendaftaran Berhasil</span>
+          </div>
+
+          <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 30, fontWeight: 700, color: '#FAFAFA', margin: '0 0 2px', letterSpacing: '-0.02em' }}>{ticket.slotNumber}</h2>
+          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: '0 0 20px' }}>{ticket.name} &middot; {ticket.city}</p>
+
+          {qrImg && (
+            <div style={{ display: 'inline-flex', padding: 6, background: '#FAFAFA', borderRadius: 10, marginBottom: 18 }}>
+              <img src={qrImg} alt="QR Code" style={{ width: 120, height: 120, display: 'block' }} />
+            </div>
+          )}
+
+          <div style={{ background: 'rgba(198,255,74,0.06)', border: '1px solid rgba(198,255,74,0.12)', borderRadius: 10, padding: '10px 14px', marginBottom: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'Inter, sans-serif', fontSize: 12, marginBottom: 2 }}>
+              <span style={{ color: 'rgba(255,255,255,0.4)' }}>Early Bird Bonus</span>
+              <span style={{ color: '#C6FF4A', fontWeight: 600 }}>Tier {ticket.earlyBirdTier}</span>
+            </div>
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 700, color: '#FAFAFA', margin: 0 }}>{ticket.bonus}</p>
+          </div>
+
+          <div style={{
+            fontFamily: 'Inter, sans-serif', fontSize: 10, fontStyle: 'italic',
+            color: 'rgba(255,255,255,0.2)', marginBottom: 6,
+          }}>
+            Website Profesional, Bukan Template
+          </div>
+          <div style={{
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 8, color: 'rgba(255,255,255,0.08)',
+            letterSpacing: '0.1em',
+          }}>
+            aldiwebdesigner.xyz
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+          <button onClick={handleShare} disabled={sharing} style={{
+            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            background: sharing ? 'rgba(198,255,74,0.3)' : '#C6FF4A', color: '#07080A',
+            border: 'none', borderRadius: 10, padding: '12px', fontSize: 14, fontWeight: 700,
+            fontFamily: 'Inter, sans-serif', cursor: sharing ? 'not-allowed' : 'pointer',
+          }}>
+            <Share2 size={15} /> {sharing ? 'Membuat gambar...' : 'Share ke Story'}
+          </button>
+          <button onClick={copyCode} style={{
+            flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
+            background: 'transparent', border: '1px solid rgba(198,255,74,0.3)', color: '#C6FF4A',
+            borderRadius: 10, padding: '12px 14px', fontSize: 13, fontWeight: 600,
+            fontFamily: 'Inter, sans-serif', cursor: 'pointer',
+          }}>
+            <Copy size={14} /> {copiedCode ? 'Tersalin' : 'Salin'}
+          </button>
+        </div>
       </div>
     </div>
   );
