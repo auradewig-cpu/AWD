@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, X, Gauge } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { STORAGE_KEYS, loadFromServer, type WhyContent } from '@/admin/storage';
 
 export const DEFAULT_WHY: WhyContent = {
@@ -17,9 +17,6 @@ export const DEFAULT_WHY: WhyContent = {
     { id: 'row-8', order: 8, label: 'Bebas Plugin Berbayar', awd: true, wordpress: false },
     { id: 'row-9', order: 9, label: 'Maintenance Mudah', awd: true, wordpress: false },
   ],
-  guaranteeTitle: 'Garansi Skor Lighthouse 90+',
-  guaranteeDescription: 'Setiap project diuji sungguhan — bukan angka statis. Performance, SEO, Accessibility, Best Practices. Janji yang bisa diverifikasi, bukan klaim kosong.',
-  guaranteeVisible: true,
 };
 
 export function WhyAWD() {
@@ -107,20 +104,6 @@ export function WhyAWD() {
           }
         });
 
-        const calloutStart = rowsBase + lastRowTextStart + iconOffset + 0.4 + 0.3;
-        tl.from('[data-why-callout]', {
-          opacity: 0, y: 16, scale: 0.97, duration: 0.5, ease: 'power2.out',
-        }, calloutStart);
-
-        tl.fromTo('[data-why-callout]',
-          { boxShadow: '0 0 0px rgba(198,255,74,0)' },
-          {
-            boxShadow: '0 0 16px rgba(198,255,74,0.5)',
-            duration: 0.6, ease: 'power2.inOut',
-            yoyo: true, repeat: 1,
-          },
-          '>',
-        );
       });
     }, sectionRef);
     };
@@ -380,62 +363,6 @@ export function WhyAWD() {
             </div>
           ))}
         </div>
-
-        {/* ── Lighthouse Guarantee ── */}
-        {content.guaranteeVisible && (
-          <div
-            data-why-callout
-            style={{
-              background: 'rgba(198,255,74,0.05)',
-              border: '1px solid rgba(198,255,74,0.2)',
-              borderRadius: 16,
-              padding: '24px 28px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 20,
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-            }}
-          >
-            <div
-              style={{
-                width: 52,
-                height: 52,
-                flexShrink: 0,
-                background: 'rgba(198,255,74,0.12)',
-                borderRadius: 14,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Gauge size={26} color="#C6FF4A" />
-            </div>
-            <div>
-              <p
-                style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: 17,
-                  fontWeight: 700,
-                  color: '#FAFAFA',
-                  marginBottom: 4,
-                }}
-              >
-                {content.guaranteeTitle}
-              </p>
-              <p
-                style={{
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: 14,
-                  color: 'rgba(255,255,255,0.55)',
-                  lineHeight: 1.5,
-                }}
-              >
-                {content.guaranteeDescription}
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );
