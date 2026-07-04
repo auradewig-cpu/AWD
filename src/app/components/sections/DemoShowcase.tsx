@@ -2,11 +2,15 @@ import { ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 
 const demos = [
-  { name: 'Demo Kira', category: 'STARTER', desc: 'Herbal brand landing page', url: 'https://demo-spark-two.vercel.app' },
-  { name: 'Lumina Hotel', category: 'BUSINESS', desc: 'Hotel company profile', url: 'https://lumina-hotel-demo.vercel.app' },
-  { name: 'Demo Forma', category: 'BUSINESS', desc: 'Architecture studio', url: 'https://demo-forma.vercel.app' },
-  { name: 'Graha V1', category: 'STARTER', desc: 'Property landing page', url: 'https://graha-v1.vercel.app' },
+  { name: 'Demo Kira', category: 'STARTER', desc: 'Herbal brand landing page', url: 'https://demo-kira.vercel.app' },
+  { name: 'Lumina Hotel', category: 'BUSINESS', desc: 'Hotel company profile', url: 'https://demo-lumina-hotel.vercel.app' },
+  { name: 'Demo Forma', category: 'BUSINESS', desc: 'Architecture studio', url: 'https://demo-forma-studio.vercel.app' },
+  { name: 'Fortis Law', category: 'BUSINESS', desc: 'Law firm company profile', url: 'https://fortis-law.vercel.app' },
+  { name: 'Graha V1', category: 'STARTER', desc: 'Property landing page', url: 'https://demo-graha.vercel.app' },
+  { name: 'Graha V2', category: 'STARTER', desc: 'Property dashboard', url: 'https://demo-graha-v2.vercel.app' },
+  { name: 'Graha V3', category: 'STORE', desc: 'Property full app', url: 'https://graha-v3.vercel.app' },
   { name: 'Rinjani Open Trip', category: 'STORE', desc: 'Open trip booking', url: 'https://rinjani-open-trip-v3.vercel.app' },
+  { name: 'Lume Klinik', category: 'BUSINESS', desc: 'Klinik company profile', url: 'https://demo-lume-klinik.vercel.app' },
 ];
 
 const categoryColors: Record<string, string> = {
