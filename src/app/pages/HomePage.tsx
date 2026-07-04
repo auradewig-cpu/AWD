@@ -6,7 +6,6 @@ import { DemoShowcase } from '../components/sections/DemoShowcase';
 import { ProcessSteps } from '../components/sections/ProcessSteps';
 import { BehindTheScenes } from '../components/sections/BehindTheScenes';
 import { PricingSection } from '../components/sections/PricingSection';
-import { SpeedScanSection } from '../components/sections/SpeedScanSection';
 import { WhyAWD } from '../components/sections/WhyAWD';
 import { FAQ } from '../components/sections/FAQ';
 import { Contact } from '../components/sections/Contact';
@@ -132,7 +131,6 @@ export function HomePage() {
         <PromoSection />
         <DemoShowcase />
         <PricingSection />
-        <SpeedScanSection />
         <ProcessSteps />
         <BehindTheScenes />
         <WhyAWD />
