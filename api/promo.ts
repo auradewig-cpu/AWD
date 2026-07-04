@@ -23,6 +23,15 @@ async function initTables() {
     early_bird_tier INTEGER, status VARCHAR(20) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT NOW()
   )`;
+  await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS testimoni_uploaded BOOLEAN DEFAULT false`;
+  await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS post_uploaded BOOLEAN DEFAULT false`;
+  await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS screenshot_medsos_url TEXT`;
+  await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS brand_name TEXT`;
+  await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS bisnis_desc TEXT`;
+  await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS referensi_web TEXT`;
+  await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS testimoni_wa_url TEXT`;
+  await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS post_sosmed_url TEXT`;
+  await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS email VARCHAR(100)`;
 }
 
 function generateSlotNumber(pkg: string, slot: number) {
@@ -75,7 +84,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST' && action === 'register') {
-    const { name, wa, city, package: pkg, referred_by } = req.body;
+    const { name, wa, city, email, package: pkg, referred_by, brand_name, bisnis_desc, referensi_web } = req.body;
     if (!name || !wa || !city || !pkg) {
       return res.status(400).json({ error: 'Semua field wajib diisi' });
     }
@@ -105,10 +114,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await sql`
       INSERT INTO registrants
         (slot_number, promo_id, name, wa, city, package,
-         referral_code, referred_by, early_bird_tier)
+         referral_code, referred_by, early_bird_tier,
+         email, brand_name, bisnis_desc, referensi_web)
       VALUES
         (${slotNumber}, ${p.id}, ${name}, ${wa}, ${city}, ${pkg},
-         ${referralCode}, ${referred_by || null}, ${earlyBirdTier})
+         ${referralCode}, ${referred_by || null}, ${earlyBirdTier},
+         ${email || null}, ${brand_name || null}, ${bisnis_desc || null}, ${referensi_web || null})
     `;
 
     if (referred_by) {
@@ -269,6 +280,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
     await sql`DELETE FROM registrants WHERE id = ${id}`;
     return res.json({ success: true });
+  }
+
+  if (req.method === 'GET' && action === 'closing') {
+    const { slot } = req.query;
+    const reg = await sql`
+      SELECT id, slot_number, name, city, package, early_bird_tier, status,
+             brand_name, bisnis_desc, referensi_web,
+             testimoni_uploaded, post_uploaded,
+             testimoni_wa_url, post_sosmed_url
+      FROM registrants WHERE slot_number = ${slot}
+    `;
+    if (!reg.length) return res.status(404).json({ error: 'Registrant not found' });
+    return res.json({ registrant: reg[0] });
+  }
+
+  if (req.method === 'POST' && action === 'update-closing') {
+    const { slot, password, testimoni_wa_url, post_sosmed_url } = req.body;
+    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    const setClauses = [];
+    const params: any[] = [];
+    if (testimoni_wa_url) { setClauses.push('testimoni_wa_url'); params.push(testimoni_wa_url); }
+    if (post_sosmed_url) { setClauses.push('post_sosmed_url'); params.push(post_sosmed_url); }
+    if (testimoni_wa_url) { setClauses.push('testimoni_uploaded'); params.push(true); }
+    if (post_sosmed_url) { setClauses.push('post_uploaded'); params.push(true); }
+    if (setClauses.length) {
+      const pairs = [];
+      for (let i = 0; i < setClauses.length; i += 2) {
+        pairs.push(`${setClauses[i]} = $${i/2 + 1}`);
+      }
+      params.push(slot);
+      await sql`
+        UPDATE registrants SET ${sql(pairs.join(', '))}
+        WHERE slot_number = ${slot}
+      `;
+    }
+    return res.json({ success: true });
+  }
+
+  if (req.method === 'POST' && action === 'mark-live') {
+    const { slot, password } = req.body;
+    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    await sql`UPDATE registrants SET status = 'live' WHERE slot_number = ${slot}`;
+    return res.json({ success: true, closingUrl: `${process.env.VERCEL_URL || 'https://awd-yss9.vercel.app'}/#/closing/${slot}` });
   }
 
   if (req.method === 'POST' && action === 'update-status') {

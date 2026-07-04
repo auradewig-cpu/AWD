@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Check, Gift, Share2, Clock, Users, Zap, ChevronRight } from 'lucide-react';
+import { X, Check, Gift, Share2, Clock, Users, Zap, ChevronRight, Copy } from 'lucide-react';
+import PromoRegisterModal from './PromoRegisterModal';
 
 const WA_NUMBER = '6285286427559';
 const DEADLINE = new Date('2026-07-31T23:59:59');
@@ -242,89 +243,14 @@ function PromoCard({ data, onDaftar }: { data: PromoData; onDaftar: () => void }
   );
 }
 
-function PromoForm({ pkg, fields, onClose, onSuccess }: { pkg: string; fields?: Array<{id:string;label:string;type:string;required:boolean}>; onClose: () => void; onSuccess: (ticket: TicketData) => void }) {
-  const defaultFields = fields || [
-    {id:'name',label:'Nama lengkap',type:'text',required:true},
-    {id:'wa',label:'No. WhatsApp',type:'text',required:true},
-    {id:'city',label:'Kota',type:'text',required:true},
-  ];
-  const [formValues, setFormValues] = useState<Record<string,string>>({});
-  const [referredBy, setReferredBy] = useState('');
-  const [agreed, setAgreed] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-
-  function setVal(id: string, val: string) {
-    setFormValues(prev => ({ ...prev, [id]: val }));
-  }
-
-  async function handleSubmit() {
-    setError('');
-    for (const f of defaultFields) {
-      if (f.required && !formValues[f.id]?.trim()) { setError(`Field "${f.label}" wajib diisi`); return; }
-    }
-    if (!agreed) { setError('Setujui syarat & ketentuan'); return; }
-    setSubmitting(true);
-    try {
-      const body: Record<string,any> = { package: pkg, referred_by: referredBy.trim() || undefined };
-      defaultFields.forEach(f => { body[f.id] = formValues[f.id]?.trim() || ''; });
-      const r = await fetch('/api/promo?action=register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const d = await r.json();
-      if (!r.ok) { setError(d.error || 'Gagal mendaftar'); setSubmitting(false); return; }
-      onSuccess(d.ticket);
-    } catch { setError('Gagal terhubung ke server'); setSubmitting(false); }
-  }
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%', boxSizing: 'border-box',
-    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 10, padding: '12px 14px', color: '#FAFAFA', fontSize: 14,
-    fontFamily: 'Inter, sans-serif', outline: 'none',
-  };
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
-      <div style={{ position: 'relative', background: '#0E120A', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 20, padding: '32px 28px', maxWidth: 440, width: '100%', boxSizing: 'border-box' }}>
-        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: 4 }}><X size={18} /></button>
-        <h3 style={{ fontFamily: 'Inter Tight, sans-serif', fontSize: 20, fontWeight: 700, color: '#FAFAFA', margin: '0 0 4px' }}>Daftar Promo Juli 2026</h3>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.45)', margin: '0 0 24px' }}>Paket: <strong style={{ color: '#EF4444', textTransform: 'uppercase' }}>{pkg}</strong></p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {defaultFields.map(f => (
-            f.type === 'textarea'
-              ? <textarea key={f.id} placeholder={f.label} required={f.required} value={formValues[f.id] || ''} onChange={e => setVal(f.id, e.target.value)} style={{ ...inputStyle, resize: 'vertical', minHeight: 60 }} />
-              : <input key={f.id} type={f.type} placeholder={`${f.label}${f.required ? ' *' : ''}`} value={formValues[f.id] || ''} onChange={e => setVal(f.id, e.target.value)} style={inputStyle} />
-          ))}
-          <div>
-            <input placeholder="Punya kode referral? (opsional)" value={referredBy} onChange={e => setReferredBy(e.target.value)} style={inputStyle} />
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: '4px 0 0' }}>Masukkan kode referral teman kamu</p>
-          </div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
-            <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ accentColor: '#C6FF4A' }} />
-            Saya setuju dengan syarat & ketentuan promo
-          </label>
-          {error && <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#EF4444', margin: 0 }}>{error}</p>}
-          <button onClick={handleSubmit} disabled={submitting} style={{
-            width: '100%', background: submitting ? 'rgba(239,68,68,0.5)' : '#EF4444', color: '#FAFAFA',
-            border: 'none', borderRadius: 10, padding: '14px', fontSize: 15, fontWeight: 700,
-            fontFamily: 'Inter, sans-serif', cursor: submitting ? 'not-allowed' : 'pointer',
-          }}>
-            {submitting ? 'Mendaftarkan...' : 'Daftar Sekarang'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+function PromoForm(props: { pkg: string; fields?: Array<{id:string;label:string;type:string;required:boolean}>; onClose: () => void; onSuccess: (ticket: TicketData) => void }) {
+  return <PromoRegisterModal {...props} />;
 }
 
 function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => void }) {
   const [qrImg, setQrImg] = useState(ticket.qrCode || '');
-  const [copied, setCopied] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   useEffect(() => {
     if (!qrImg) {
@@ -335,9 +261,20 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
   }, [ticket.verifyUrl, qrImg]);
 
   const waShare = `Halo%20Aldi%2C%20saya%20telah%20mendaftar%20promo%20Juli%202026.%0A%0ANomor%20Antrean%3A%20${ticket.slotNumber}%0ANama%3A%20${ticket.name}%0APaket%3A%20${ticket.package.toUpperCase()}%0ABonus%3A%20${ticket.bonus}%0A%0ABerikut%20tiket%20saya%3A%20${ticket.verifyUrl}`;
+  const refLink = `${window.location.origin}/#/closing/${ticket.slotNumber}`;
 
-  const copyRef = () => {
-    navigator.clipboard.writeText(ticket.referralCode).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+  const copyCode = () => {
+    navigator.clipboard.writeText(ticket.referralCode).then(() => { setCopiedCode(true); setTimeout(() => setCopiedCode(false), 2000); });
+  };
+  const copyLink = () => {
+    navigator.clipboard.writeText(refLink).then(() => { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); });
+  };
+  const handleShare = async () => {
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Tiket AWD Promo', text: `Slot ${ticket.slotNumber} - ${ticket.name}`, url: refLink }); } catch {}
+    } else {
+      copyLink();
+    }
   };
 
   return (
@@ -368,31 +305,31 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 700, color: '#FAFAFA', margin: 0 }}>{ticket.bonus}</p>
         </div>
 
-        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
+        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>Kode Referral Kamu</span>
-            <button onClick={copyRef} style={{ background: 'transparent', border: 'none', color: '#C6FF4A', cursor: 'pointer', fontSize: 12, fontFamily: 'Inter, sans-serif', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Share2 size={12} /> {copied ? 'Tersalin!' : 'Salin'}
+            <button onClick={copyCode} style={{ background: 'transparent', border: 'none', color: '#C6FF4A', cursor: 'pointer', fontSize: 12, fontFamily: 'Inter, sans-serif', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Copy size={12} /> {copiedCode ? 'Tersalin!' : 'Salin'}
             </button>
           </div>
           <code style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 18, fontWeight: 700, color: '#C6FF4A' }}>{ticket.referralCode}</code>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: '4px 0 0' }}>Bagikan kode ini ke temanmu</p>
         </div>
 
-        <div style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 12, padding: '16px', marginBottom: 20, textAlign: 'left' }}>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 700, color: '#EF4444', margin: '0 0 8px' }}>Syarat & Ketentuan:</p>
-          <ol style={{ paddingLeft: 20, margin: 0, color: '#ffffff', listStyleType: 'decimal', fontFamily: 'Inter, sans-serif', fontSize: 11, lineHeight: 1.7 }}>
-            {(ticket.syarat || defaultSyarat).map((s, i) => (
-              <li key={i} style={{ color: '#ffffff', marginBottom: 6 }}>{s}</li>
-            ))}
-          </ol>
-        </div>
+        <button onClick={handleShare} style={{
+          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          background: '#C6FF4A', color: '#07080A', border: 'none', borderRadius: 10, padding: '14px',
+          fontSize: 15, fontWeight: 700, fontFamily: 'Inter, sans-serif', cursor: 'pointer', marginBottom: 12,
+        }}>
+          <Share2 size={16} /> {copiedLink ? 'Link Tersalin!' : 'Share ke Story'}
+        </button>
 
         <a href={`https://wa.me/${WA_NUMBER}?text=${waShare}`} target="_blank" rel="noopener noreferrer" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textDecoration: 'none',
-          background: '#C6FF4A', color: '#07080A', borderRadius: 10, padding: '14px', fontSize: 15, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+          background: 'transparent', border: '1px solid rgba(198,255,74,0.3)', color: '#C6FF4A',
+          borderRadius: 10, padding: '14px', fontSize: 15, fontWeight: 700, fontFamily: 'Inter, sans-serif',
         }}>
-          <Zap size={16} /> Bagikan Tiket Ini
+          <Zap size={16} /> Bagikan via WhatsApp
         </a>
       </div>
     </div>

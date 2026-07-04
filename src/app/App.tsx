@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/admin/ProtectedRoute';
 import { AdminLayout } from '@/admin/AdminLayout';
 import { HomePage } from './pages/HomePage';
 import { AdminLogin } from './pages/AdminLogin';
+const ClosingPage = lazy(() => import('./pages/ClosingPage'));
 
 const DemoTierPage = lazy(() => import('./pages/DemoTierPage'));
 
@@ -31,6 +32,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/demo/:tier" element={<Suspense fallback={null}><DemoTierPage /></Suspense>} />
+        <Route path="/closing/:slotNumber" element={<Suspense fallback={null}><ClosingPage /></Suspense>} />
 
         {/* All admin routes share the AuthProvider */}
         <Route

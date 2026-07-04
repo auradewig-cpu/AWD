@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ExternalLink, Check, Download, Search, Plus, Trash2, RotateCcw, AlertTriangle, X, Eye, EyeOff, Lock } from 'lucide-react';
+import { ExternalLink, Check, Download, Search, Plus, Trash2, RotateCcw, AlertTriangle, X, Eye, EyeOff, Lock, Copy, CheckSquare } from 'lucide-react';
 import { AdminCard, AdminButton } from '@/admin/components';
 
 const CORE_FIELD_IDS = ['name', 'wa', 'city'];
@@ -13,6 +13,7 @@ interface Registrant {
   id: number; slot_number: string; promo_id: number; name: string; wa: string;
   city: string; package: string; referral_code: string; referred_by: string | null;
   early_bird_tier: number; status: string; created_at: string;
+  testimoni_uploaded?: boolean; post_uploaded?: boolean;
 }
 
 interface PromoRow {
@@ -20,9 +21,9 @@ interface PromoRow {
   deadline: string; active: boolean; bonus_tiers: any;
 }
 
-const STATUSES = ['pending', 'verified', 'completed', 'rejected'];
+const STATUSES = ['pending', 'verified', 'live', 'completed', 'rejected'];
 const STATUS_COLORS: Record<string, string> = {
-  pending: '#f97316', verified: '#C6FF4A', completed: '#00C853', rejected: '#EF4444',
+  pending: '#f97316', verified: '#C6FF4A', live: '#00C853', completed: '#00C853', rejected: '#EF4444',
 };
 
 export function AdminPromo() {
@@ -379,13 +380,15 @@ export function AdminPromo() {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
             <thead>
               <tr>
-                {['Slot', 'Nama', 'WA', 'Kota', 'Paket', 'Referral', 'Status', 'Tanggal', 'Aksi'].map(h => (
+                {['Slot', 'Nama', 'WA', 'Kota', 'Paket', 'Referral', 'Status', 'Closing', 'Tanggal', 'Aksi'].map(h => (
                   <th key={h} style={{ padding: '10px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase', borderBottom: '1px solid rgba(255,255,255,0.08)', textAlign: 'left', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.map(r => (
+              {filtered.map(r => {
+                const closingUrl = `https://awd-yss9.vercel.app/#/closing/${r.slot_number}`;
+                return (
                 <tr key={r.id}>
                   <td style={{ padding: '10px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#C6FF4A', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{r.slot_number}</td>
                   <td style={{ padding: '10px 12px', fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#FAFAFA', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{r.name}</td>
@@ -407,6 +410,29 @@ export function AdminPromo() {
                       ))}
                     </select>
                   </td>
+                  <td style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>
+                    {r.status === 'verified' && (
+                      <button onClick={() => api('mark-live', { slot: r.slot_number })} style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        background: 'rgba(0,200,83,0.1)', border: '1px solid rgba(0,200,83,0.2)',
+                        color: '#00C853', borderRadius: 6, padding: '4px 8px', fontSize: 10, fontWeight: 600,
+                        fontFamily: 'Inter, sans-serif', cursor: 'pointer', whiteSpace: 'nowrap',
+                      }}><ExternalLink size={10} /> Mark Live</button>
+                    )}
+                    {r.status === 'live' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <button onClick={() => { navigator.clipboard.writeText(closingUrl); }} style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 3,
+                          background: 'transparent', border: 'none', color: '#C6FF4A', cursor: 'pointer',
+                          fontSize: 10, fontFamily: 'Inter, sans-serif', whiteSpace: 'nowrap',
+                        }}><Copy size={10} /> Copy link</button>
+                        <div style={{ display: 'flex', gap: 6, fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: 'Inter, sans-serif' }}>
+                          {r.testimoni_uploaded ? <span style={{ color: '#00C853' }}>Testimoni ✅</span> : <span>Testimoni ❌</span>}
+                          {r.post_uploaded ? <span style={{ color: '#00C853' }}>Post ✅</span> : <span>Post ❌</span>}
+                        </div>
+                      </div>
+                    )}
+                  </td>
                   <td style={{ padding: '10px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.4)', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{new Date(r.created_at).toLocaleDateString('id-ID')}</td>
                   <td style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>
                     <div style={{ display: 'flex', gap: 4 }}>
@@ -426,7 +452,8 @@ export function AdminPromo() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {!filtered.length && (
                 <tr><td colSpan={9} style={{ padding: 24, textAlign: 'center', fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>Belum ada registrant</td></tr>
               )}
