@@ -34,6 +34,7 @@ export function AdminPromo() {
   const [bonusTiers, setBonusTiers] = useState<Array<{min:number;max:number;bonus:string}>>([]);
   const [promoPrice, setPromoPrice] = useState('');
   const [syarat, setSyarat] = useState<string[]>([]);
+  const [formFields, setFormFields] = useState<Array<{id:string;label:string;type:string;required:boolean}>>([]);
 
   const fetchAll = useCallback(async () => {
     try {
@@ -78,6 +79,11 @@ export function AdminPromo() {
       'Wajib berikan ulasan Google positif sebelum website live',
       'Post sosmed dengan template yang kami kirim via WA',
     ]);
+    setFormFields((promo as any).form_fields || [
+      {id:'name',label:'Nama lengkap',type:'text',required:true},
+      {id:'wa',label:'No. WhatsApp',type:'text',required:true},
+      {id:'city',label:'Kota',type:'text',required:true},
+    ]);
   }
 
   function updateTier(i: number, key: 'min' | 'max' | 'bonus', val: any) {
@@ -95,6 +101,7 @@ export function AdminPromo() {
       bonus_tiers: { tiers: bonusTiers },
       promo_price: promoPrice,
       syarat,
+      form_fields: formFields,
     });
     setEditPromo(null);
   }
@@ -283,6 +290,25 @@ export function AdminPromo() {
                   </div>
                 ))}
                 <button onClick={addTier} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', border: '1px solid rgba(198,255,74,0.2)', color: '#C6FF4A', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif', cursor: 'pointer' }}>+ Tambah Tier</button>
+              </div>
+              <div>
+                <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8, display: 'block' }}>Form Fields</label>
+                {formFields.map((f, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6, alignItems: 'center' }}>
+                    <input value={f.label} placeholder="Label" onChange={e => { const a = [...formFields]; a[i] = { ...a[i], label: e.target.value }; setFormFields(a); }} style={{ flex: 1, padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#FAFAFA', fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
+                    <select value={f.type} onChange={e => { const a = [...formFields]; a[i] = { ...a[i], type: e.target.value }; setFormFields(a); }} style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#FAFAFA', fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none', cursor: 'pointer' }}>
+                      <option value="text">Text</option>
+                      <option value="textarea">Textarea</option>
+                      <option value="select">Select</option>
+                      <option value="tel">Telepon</option>
+                    </select>
+                    <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                      <input type="checkbox" checked={f.required} onChange={e => { const a = [...formFields]; a[i] = { ...a[i], required: e.target.checked }; setFormFields(a); }} style={{ accentColor: '#C6FF4A' }} /> Wajib
+                    </label>
+                    <button onClick={() => setFormFields(formFields.filter((_, idx) => idx !== i))} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', borderRadius: 8, cursor: 'pointer', padding: '8px 10px', fontSize: 13 }}>✕</button>
+                  </div>
+                ))}
+                <button onClick={() => setFormFields([...formFields, { id: `field_${Date.now()}`, label: '', type: 'text', required: false }])} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', border: '1px solid rgba(198,255,74,0.2)', color: '#C6FF4A', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif', cursor: 'pointer', marginTop: 4 }}>+ Tambah Field</button>
               </div>
               <div>
                 <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8, display: 'block' }}>Syarat & Ketentuan</label>

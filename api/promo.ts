@@ -14,6 +14,7 @@ async function initTables() {
   )`;
   await sql`ALTER TABLE promos ADD COLUMN IF NOT EXISTS promo_price VARCHAR(50)`;
   await sql`ALTER TABLE promos ADD COLUMN IF NOT EXISTS syarat JSONB`;
+  await sql`ALTER TABLE promos ADD COLUMN IF NOT EXISTS form_fields JSONB`;
   await sql`CREATE TABLE IF NOT EXISTS registrants (
     id SERIAL PRIMARY KEY, slot_number VARCHAR(20) UNIQUE,
     promo_id INTEGER, name VARCHAR(100), wa VARCHAR(20),
@@ -125,6 +126,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         qrCode: qrDataUrl,
         verifyUrl,
         syarat: p.syarat,
+        form_fields: p.form_fields,
       }
     });
   }
@@ -207,13 +209,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST' && action === 'update') {
-    const { id, quota, deadline, active, bonus_tiers, promo_price, syarat, password } = req.body;
+    const { id, quota, deadline, active, bonus_tiers, promo_price, syarat, form_fields, password } = req.body;
     if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
     await sql`
       UPDATE promos SET quota=${quota}, deadline=${deadline},
         active=${active}, bonus_tiers=${JSON.stringify(bonus_tiers || { tiers: [] })}::jsonb,
         promo_price=${promo_price || null},
-        syarat=${JSON.stringify(syarat || [])}::jsonb
+        syarat=${JSON.stringify(syarat || [])}::jsonb,
+        form_fields=${JSON.stringify(form_fields || [])}::jsonb
       WHERE id=${id}
     `;
     return res.json({ success: true });

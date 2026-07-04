@@ -38,6 +38,7 @@ interface TicketData {
   qrCode: string;
   verifyUrl: string;
   syarat?: string[];
+  form_fields?: Array<{id:string;label:string;type:string;required:boolean}>;
 }
 
 interface LiveEntry {
@@ -240,25 +241,36 @@ function PromoCard({ data, onDaftar }: { data: PromoData; onDaftar: () => void }
   );
 }
 
-function PromoForm({ pkg, onClose, onSuccess }: { pkg: string; onClose: () => void; onSuccess: (ticket: TicketData) => void }) {
-  const [name, setName] = useState('');
-  const [wa, setWa] = useState('');
-  const [city, setCity] = useState('');
+function PromoForm({ pkg, fields, onClose, onSuccess }: { pkg: string; fields?: Array<{id:string;label:string;type:string;required:boolean}>; onClose: () => void; onSuccess: (ticket: TicketData) => void }) {
+  const defaultFields = fields || [
+    {id:'name',label:'Nama lengkap',type:'text',required:true},
+    {id:'wa',label:'No. WhatsApp',type:'text',required:true},
+    {id:'city',label:'Kota',type:'text',required:true},
+  ];
+  const [formValues, setFormValues] = useState<Record<string,string>>({});
   const [referredBy, setReferredBy] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  function setVal(id: string, val: string) {
+    setFormValues(prev => ({ ...prev, [id]: val }));
+  }
+
   async function handleSubmit() {
     setError('');
-    if (!name.trim() || !wa.trim() || !city.trim()) { setError('Semua field wajib diisi'); return; }
+    for (const f of defaultFields) {
+      if (f.required && !formValues[f.id]?.trim()) { setError(`Field "${f.label}" wajib diisi`); return; }
+    }
     if (!agreed) { setError('Setujui syarat & ketentuan'); return; }
     setSubmitting(true);
     try {
+      const body: Record<string,any> = { package: pkg, referred_by: referredBy.trim() || undefined };
+      defaultFields.forEach(f => { body[f.id] = formValues[f.id]?.trim() || ''; });
       const r = await fetch('/api/promo?action=register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), wa: wa.trim(), city: city.trim(), package: pkg, referred_by: referredBy.trim() || undefined }),
+        body: JSON.stringify(body),
       });
       const d = await r.json();
       if (!r.ok) { setError(d.error || 'Gagal mendaftar'); setSubmitting(false); return; }
@@ -282,9 +294,11 @@ function PromoForm({ pkg, onClose, onSuccess }: { pkg: string; onClose: () => vo
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.45)', margin: '0 0 24px' }}>Paket: <strong style={{ color: '#EF4444', textTransform: 'uppercase' }}>{pkg}</strong></p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <input placeholder="Nama lengkap" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
-          <input placeholder="No. WhatsApp" value={wa} onChange={e => setWa(e.target.value)} style={inputStyle} />
-          <input placeholder="Kota" value={city} onChange={e => setCity(e.target.value)} style={inputStyle} />
+          {defaultFields.map(f => (
+            f.type === 'textarea'
+              ? <textarea key={f.id} placeholder={f.label} required={f.required} value={formValues[f.id] || ''} onChange={e => setVal(f.id, e.target.value)} style={{ ...inputStyle, resize: 'vertical', minHeight: 60 }} />
+              : <input key={f.id} type={f.type} placeholder={`${f.label}${f.required ? ' *' : ''}`} value={formValues[f.id] || ''} onChange={e => setVal(f.id, e.target.value)} style={inputStyle} />
+          ))}
           <div>
             <input placeholder="Punya kode referral? (opsional)" value={referredBy} onChange={e => setReferredBy(e.target.value)} style={inputStyle} />
             <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: '4px 0 0' }}>Masukkan kode referral teman kamu</p>
@@ -436,7 +450,7 @@ export function PromoSection() {
         <LiveFeed />
 
         {selectedPkg && !ticket && (
-          <PromoForm pkg={selectedPkg} onClose={() => setSelectedPkg(null)} onSuccess={(t) => { setSelectedPkg(null); setTicket(t); }} />
+          <PromoForm pkg={selectedPkg} fields={promos.find(p => p.package === selectedPkg)?.form_fields} onClose={() => setSelectedPkg(null)} onSuccess={(t) => { setSelectedPkg(null); setTicket(t); }} />
         )}
         {ticket && (
           <PromoTicket ticket={ticket} onClose={() => setTicket(null)} />
