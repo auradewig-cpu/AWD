@@ -77,7 +77,7 @@ export function DemoShowcase() {
 function DemoCard({ demo }: { demo: DemoEntry }) {
   const color = tierColors[demo.tier] || '#C6FF4A';
   const [imgError, setImgError] = useState(false);
-  const imgSrc = demo.thumbnailUrl;
+  const imgSrc = demo.thumbnailUrl?.replace('/upload/', '/upload/w_600,q_60,f_webp/');
 
   return (
     <div style={{

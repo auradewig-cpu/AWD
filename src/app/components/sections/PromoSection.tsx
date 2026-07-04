@@ -103,7 +103,15 @@ function LiveFeed() {
     } catch {}
   }, []);
 
-  useEffect(() => { fetchLive(); const id = setInterval(fetchLive, 30000); return () => clearInterval(id); }, [fetchLive]);
+  useEffect(() => {
+    fetchLive();
+    let timer: ReturnType<typeof setInterval>;
+    function start() { timer = setInterval(fetchLive, 30000); }
+    function handler() { if (document.hidden) clearInterval(timer); else { clearInterval(timer); start(); } }
+    start();
+    document.addEventListener('visibilitychange', handler);
+    return () => { clearInterval(timer); document.removeEventListener('visibilitychange', handler); };
+  }, [fetchLive]);
 
   if (!entries.length) return null;
 
