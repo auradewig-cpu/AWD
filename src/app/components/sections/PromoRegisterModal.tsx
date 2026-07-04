@@ -26,10 +26,10 @@ interface TicketData {
 }
 
 const MEDSOS_PLATFORMS = [
-  { key: 'instagram', label: 'Instagram', icon: Instagram, color: '#E4405F' },
-  { key: 'tiktok', label: 'TikTok', icon: Music2, color: '#000000' },
-  { key: 'facebook', label: 'Facebook', icon: Facebook, color: '#1877F2' },
-  { key: 'youtube', label: 'YouTube', icon: Youtube, color: '#FF0000' },
+  { key: 'instagram', label: 'Instagram', icon: Instagram, color: '#E4405F', url: 'https://www.instagram.com/aldiwebdesigner/' },
+  { key: 'tiktok', label: 'TikTok', icon: Music2, color: '#000000', url: 'https://www.tiktok.com/@awd_010101' },
+  { key: 'facebook', label: 'Facebook', icon: Facebook, color: '#1877F2', url: 'https://www.facebook.com/profile.php?id=61590366697861' },
+  { key: 'youtube', label: 'YouTube', icon: Youtube, color: '#FF0000', url: 'https://www.youtube.com/@AldiWebDesigner' },
 ];
 
 function compressImage(file: File): Promise<string> {
@@ -165,7 +165,7 @@ function Step2Screenshot({ formValues, setVal, onNext, onBack }: {
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {MEDSOS_PLATFORMS.map(pl => (
-          <a key={pl.key} href={`https://${pl.key}.com/aldiwebdesigner`} target="_blank" rel="noopener noreferrer" style={{
+          <a key={pl.key} href={pl.url} target="_blank" rel="noopener noreferrer" style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             padding: '8px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: 8, color: pl.color, fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif',

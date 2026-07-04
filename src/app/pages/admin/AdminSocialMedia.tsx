@@ -13,10 +13,10 @@ export interface SocialContent {
 }
 
 export const DEFAULT_SOCIAL: SocialContent = {
-  instagram: 'https://instagram.com/aldiwebdesigner',
-  tiktok: 'https://tiktok.com/@aldiwebdesigner',
-  youtube: '',
-  facebook: '',
+  instagram: 'https://www.instagram.com/aldiwebdesigner/',
+  tiktok: 'https://www.tiktok.com/@awd_010101',
+  youtube: 'https://www.youtube.com/@AldiWebDesigner',
+  facebook: 'https://www.facebook.com/profile.php?id=61590366697861',
   whatsapp: '6285286427559',
 };
 
