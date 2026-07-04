@@ -52,7 +52,7 @@ export function Footer() {
           <div>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, textDecoration: 'none' }}>
               <img
-                src="https://res.cloudinary.com/dr0xe0tgr/image/upload/v1782787491/ChatGPT_Image_30_Jun_2026_09.44.03_zxx3bh.webp"
+                src="https://res.cloudinary.com/dr0xe0tgr/image/upload/w_800,q_60,f_webp/v1782787491/ChatGPT_Image_30_Jun_2026_09.44.03_zxx3bh.webp"
                 alt="AWD Logo"
                 style={{ height: 32, width: 'auto', display: 'block' }}
               />
