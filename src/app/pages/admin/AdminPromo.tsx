@@ -13,7 +13,8 @@ interface Registrant {
   id: number; slot_number: string; promo_id: number; name: string; wa: string;
   city: string; package: string; referral_code: string; referred_by: string | null;
   early_bird_tier: number; status: string; created_at: string;
-  testimoni_uploaded?: boolean; post_uploaded?: boolean;
+  email?: string; brand_name?: string; bisnis_desc?: string; referensi_web?: string;
+  screenshot_medsos_url?: string; testimoni_uploaded?: boolean; post_uploaded?: boolean;
 }
 
 interface PromoRow {
@@ -33,6 +34,7 @@ export function AdminPromo() {
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [confirmReset, setConfirmReset] = useState<number | null>(null);
+  const [selectedRegistrant, setSelectedRegistrant] = useState<Registrant | null>(null);
 
   const [form, setForm] = useState({ name: '', package: 'starter', quota: 50, deadline: '' });
   const [editPromo, setEditPromo] = useState<PromoRow | null>(null);
@@ -380,7 +382,7 @@ export function AdminPromo() {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
             <thead>
               <tr>
-                {['Slot', 'Nama', 'WA', 'Kota', 'Paket', 'Referral', 'Status', 'Closing', 'Tanggal', 'Aksi'].map(h => (
+                {['Slot', 'Nama', 'Email', 'WA', 'Kota', 'Paket', 'Referral', 'Status', 'Closing', 'Tanggal', 'Aksi'].map(h => (
                   <th key={h} style={{ padding: '10px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase', borderBottom: '1px solid rgba(255,255,255,0.08)', textAlign: 'left', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -391,7 +393,8 @@ export function AdminPromo() {
                 return (
                 <tr key={r.id}>
                   <td style={{ padding: '10px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#C6FF4A', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{r.slot_number}</td>
-                  <td style={{ padding: '10px 12px', fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#FAFAFA', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{r.name}</td>
+                  <td style={{ padding: '10px 12px', fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#C6FF4A', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(198,255,74,0.3)' }} onClick={() => setSelectedRegistrant(r)}>{r.name}</td>
+                  <td style={{ padding: '10px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{r.email || '-'}</td>
                   <td style={{ padding: '10px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'rgba(255,255,255,0.6)', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{maskPhone(r.wa)}</td>
                   <td style={{ padding: '10px 12px', fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.6)', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{r.city}</td>
                   <td style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>
@@ -455,12 +458,82 @@ export function AdminPromo() {
                 );
               })}
               {!filtered.length && (
-                <tr><td colSpan={9} style={{ padding: 24, textAlign: 'center', fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>Belum ada registrant</td></tr>
+                <tr><td colSpan={11} style={{ padding: 24, textAlign: 'center', fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>Belum ada registrant</td></tr>
               )}
             </tbody>
           </table>
         </div>
       </AdminCard>
+
+      {/* Detail Modal */}
+      {selectedRegistrant && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+          <div style={{ background: '#1a1d1a', border: '1px solid rgba(198,255,74,0.2)', borderRadius: 16, padding: '28px', maxWidth: 520, width: '100%', maxHeight: '90vh', overflowY: 'auto', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ fontFamily: 'Inter Tight, sans-serif', fontSize: 18, fontWeight: 700, color: '#FAFAFA', margin: 0 }}>{selectedRegistrant.name}</h3>
+              <button onClick={() => setSelectedRegistrant(null)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}><X size={18} /></button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontFamily: 'Inter, sans-serif', fontSize: 13 }}>
+              <div><span style={{ color: 'rgba(255,255,255,0.4)', display: 'inline-block', width: 100 }}>Slot</span><span style={{ color: '#C6FF4A', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace' }}>{selectedRegistrant.slot_number}</span></div>
+              <div><span style={{ color: 'rgba(255,255,255,0.4)', display: 'inline-block', width: 100 }}>Paket</span><span style={{ color: '#FAFAFA', textTransform: 'uppercase', fontWeight: 600 }}>{selectedRegistrant.package}</span></div>
+              <div><span style={{ color: 'rgba(255,255,255,0.4)', display: 'inline-block', width: 100 }}>Status</span><span style={{ color: STATUS_COLORS[selectedRegistrant.status] || '#FAFAFA', fontWeight: 600 }}>{selectedRegistrant.status}</span></div>
+              <div><span style={{ color: 'rgba(255,255,255,0.4)', display: 'inline-block', width: 100 }}>WA</span><span style={{ color: '#FAFAFA' }}>{selectedRegistrant.wa}</span></div>
+              <div><span style={{ color: 'rgba(255,255,255,0.4)', display: 'inline-block', width: 100 }}>Email</span><span style={{ color: '#FAFAFA' }}>{selectedRegistrant.email || '-'}</span></div>
+              <div><span style={{ color: 'rgba(255,255,255,0.4)', display: 'inline-block', width: 100 }}>Kota</span><span style={{ color: '#FAFAFA' }}>{selectedRegistrant.city}</span></div>
+              <div><span style={{ color: 'rgba(255,255,255,0.4)', display: 'inline-block', width: 100 }}>Referral</span><span style={{ color: '#C6FF4A', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{selectedRegistrant.referral_code}</span></div>
+              {selectedRegistrant.brand_name && <div><span style={{ color: 'rgba(255,255,255,0.4)', display: 'inline-block', width: 100 }}>Brand</span><span style={{ color: '#FAFAFA' }}>{selectedRegistrant.brand_name}</span></div>}
+              {selectedRegistrant.bisnis_desc && <div><span style={{ color: 'rgba(255,255,255,0.4)', display: 'inline-block', width: 100 }}>Deskripsi</span><span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>{selectedRegistrant.bisnis_desc}</span></div>}
+              {selectedRegistrant.referensi_web && <div><span style={{ color: 'rgba(255,255,255,0.4)', display: 'inline-block', width: 100 }}>Ref Web</span><a href={selectedRegistrant.referensi_web} target="_blank" rel="noopener noreferrer" style={{ color: '#C6FF4A', fontSize: 12 }}>{selectedRegistrant.referensi_web}</a></div>}
+
+              {selectedRegistrant.screenshot_medsos_url && (
+                <div style={{ marginTop: 8 }}>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, margin: '0 0 8px' }}>Screenshots</p>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {(() => {
+                      try { const urls = JSON.parse(selectedRegistrant.screenshot_medsos_url); return Array.isArray(urls) ? urls : [selectedRegistrant.screenshot_medsos_url]; } catch { return [selectedRegistrant.screenshot_medsos_url]; }
+                    })().map((url: string, i: number) => (
+                      <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                        <img src={url} alt={`screenshot ${i+1}`} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedRegistrant.status === 'live' && (
+                <div style={{ marginTop: 8, display: 'flex', gap: 6, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
+                  <span style={selectedRegistrant.testimoni_uploaded ? { color: '#00C853' } : {}}>Testimoni: {selectedRegistrant.testimoni_uploaded ? '✅' : '❌'}</span>
+                  <span style={selectedRegistrant.post_uploaded ? { color: '#00C853' } : {}}>Post: {selectedRegistrant.post_uploaded ? '✅' : '❌'}</span>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
+              <button onClick={() => { api('verify', { slotNumber: selectedRegistrant.slot_number }); setSelectedRegistrant(null); }} disabled={selectedRegistrant.status !== 'pending'} style={{
+                padding: '10px 16px', borderRadius: 8, border: 'none', cursor: selectedRegistrant.status === 'pending' ? 'pointer' : 'not-allowed',
+                background: selectedRegistrant.status === 'pending' ? '#C6FF4A' : 'rgba(255,255,255,0.05)', color: selectedRegistrant.status === 'pending' ? '#07080A' : 'rgba(255,255,255,0.3)',
+                fontWeight: 700, fontSize: 13, fontFamily: 'Inter, sans-serif',
+              }}>Approve</button>
+              <button onClick={() => { handleUpdateStatus(selectedRegistrant.id, 'rejected'); setSelectedRegistrant(null); }} disabled={selectedRegistrant.status !== 'pending'} style={{
+                padding: '10px 16px', borderRadius: 8, border: 'none', cursor: selectedRegistrant.status === 'pending' ? 'pointer' : 'not-allowed',
+                background: selectedRegistrant.status === 'pending' ? '#EF4444' : 'rgba(255,255,255,0.05)', color: selectedRegistrant.status === 'pending' ? '#FAFAFA' : 'rgba(255,255,255,0.3)',
+                fontWeight: 700, fontSize: 13, fontFamily: 'Inter, sans-serif',
+              }}>Reject</button>
+              <button onClick={() => { api('mark-live', { slot: selectedRegistrant.slot_number }); setSelectedRegistrant(null); }} disabled={selectedRegistrant.status !== 'verified'} style={{
+                padding: '10px 16px', borderRadius: 8, border: 'none', cursor: selectedRegistrant.status === 'verified' ? 'pointer' : 'not-allowed',
+                background: selectedRegistrant.status === 'verified' ? '#00C853' : 'rgba(255,255,255,0.05)', color: selectedRegistrant.status === 'verified' ? '#FAFAFA' : 'rgba(255,255,255,0.3)',
+                fontWeight: 700, fontSize: 13, fontFamily: 'Inter, sans-serif',
+              }}><ExternalLink size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} />Mark Live</button>
+              <button onClick={() => handleDeleteRegistrant(selectedRegistrant.id)} style={{
+                padding: '10px 16px', borderRadius: 8, border: '1px solid rgba(239,68,68,0.3)',
+                background: 'transparent', color: '#EF4444', cursor: 'pointer',
+                fontWeight: 600, fontSize: 13, fontFamily: 'Inter, sans-serif',
+              }}>Hapus</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
