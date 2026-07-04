@@ -1,25 +1,37 @@
 import { ExternalLink } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-const demos = [
-  { name: 'Demo Kira', category: 'STARTER', desc: 'Herbal brand landing page', url: 'https://demo-kira.vercel.app' },
-  { name: 'Lumina Hotel', category: 'BUSINESS', desc: 'Hotel company profile', url: 'https://demo-lumina-hotel.vercel.app' },
-  { name: 'Demo Forma', category: 'BUSINESS', desc: 'Architecture studio', url: 'https://demo-forma-studio.vercel.app' },
-  { name: 'Fortis Law', category: 'BUSINESS', desc: 'Law firm company profile', url: 'https://fortis-law.vercel.app' },
-  { name: 'Graha V1', category: 'STARTER', desc: 'Property landing page', url: 'https://demo-graha.vercel.app' },
-  { name: 'Graha V2', category: 'STARTER', desc: 'Property dashboard', url: 'https://demo-graha-v2.vercel.app' },
-  { name: 'Graha V3', category: 'STORE', desc: 'Property full app', url: 'https://graha-v3.vercel.app' },
-  { name: 'Rinjani Open Trip', category: 'STORE', desc: 'Open trip booking', url: 'https://rinjani-open-trip-v3.vercel.app' },
-  { name: 'Lume Klinik', category: 'BUSINESS', desc: 'Klinik company profile', url: 'https://demo-lume-klinik.vercel.app' },
-];
+interface DemoEntry {
+  id: string;
+  tier: string;
+  name: string;
+  category: string;
+  thumbnailUrl: string;
+  demoUrl: string;
+  description: string;
+  status: string;
+  order: number;
+}
 
-const categoryColors: Record<string, string> = {
-  STARTER: '#C6FF4A',
-  BUSINESS: '#00C853',
-  STORE: '#f97316',
+const tierColors: Record<string, string> = {
+  starter: '#C6FF4A',
+  business: '#00C853',
+  store: '#f97316',
+  pro: '#60A5FA',
 };
 
 export function DemoShowcase() {
+  const [entries, setEntries] = useState<DemoEntry[]>([]);
+
+  useEffect(() => {
+    fetch('/api/content?key=demo')
+      .then(r => r.json())
+      .then(d => { if (d.value?.entries) setEntries(d.value.entries.filter((e: DemoEntry) => e.status === 'active').sort((a: DemoEntry, b: DemoEntry) => a.order - b.order)); })
+      .catch(() => {});
+  }, []);
+
+  if (!entries.length) return null;
+
   return (
     <section style={{ padding: '100px 0', position: 'relative', overflow: 'hidden' }}>
       <div className="px-4 sm:px-6 lg:px-8" style={{ maxWidth: 1200, margin: '0 auto', width: '100%', boxSizing: 'border-box', position: 'relative', zIndex: 1 }}>
@@ -45,14 +57,14 @@ export function DemoShowcase() {
         </div>
 
         <div className="hidden md:grid grid-cols-3 gap-4">
-          {demos.map((demo, i) => (
-            <DemoCard key={i} demo={demo} />
+          {entries.map(demo => (
+            <DemoCard key={demo.id} demo={demo} />
           ))}
         </div>
 
         <div className="flex md:hidden gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          {demos.map((demo, i) => (
-            <div key={i} className="snap-start shrink-0" style={{ width: '80%', maxWidth: 320 }}>
+          {entries.map(demo => (
+            <div key={demo.id} className="snap-start shrink-0" style={{ width: '80%', maxWidth: 320 }}>
               <DemoCard demo={demo} />
             </div>
           ))}
@@ -62,43 +74,31 @@ export function DemoShowcase() {
   );
 }
 
-function DemoCard({ demo }: { demo: typeof demos[0] }) {
-  const color = categoryColors[demo.category] || '#C6FF4A';
+function DemoCard({ demo }: { demo: DemoEntry }) {
+  const color = tierColors[demo.tier] || '#C6FF4A';
   const [imgError, setImgError] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const screenshotUrl = `https://api.microlink.io?url=${encodeURIComponent(demo.url)}&screenshot=true&meta=false&embed=screenshot.url`;
-
-  useEffect(() => {
-    const el = cardRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setLoaded(true); observer.disconnect(); } },
-      { rootMargin: '200px' }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const imgSrc = demo.thumbnailUrl;
 
   return (
-    <div ref={cardRef} style={{
+    <div style={{
       background: 'rgba(10,12,10,0.75)',
       border: '1px solid rgba(255,255,255,0.08)',
       borderRadius: 16,
       overflow: 'hidden',
       display: 'flex', flexDirection: 'column',
     }}>
-      <a href={demo.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block' }}>
+      <a href={demo.demoUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block' }}>
         <div style={{
           width: '100%', height: 180, aspectRatio: '16/9',
           background: 'linear-gradient(135deg, rgba(198,255,74,0.05), rgba(0,0,0,0.4))',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           position: 'relative', overflow: 'hidden',
         }}>
-          {!imgError && (
+          {!imgError && imgSrc && (
             <img
-              src={loaded ? screenshotUrl : undefined}
+              src={imgSrc}
               alt={demo.name}
+              loading="lazy"
               onError={() => setImgError(true)}
               style={{
                 position: 'absolute', inset: 0,
@@ -137,7 +137,7 @@ function DemoCard({ demo }: { demo: typeof demos[0] }) {
             color, background: `${color}15`, borderRadius: 4, padding: '2px 8px',
             letterSpacing: '0.05em',
           }}>
-            {demo.category}
+            {demo.tier.toUpperCase()}
           </span>
         </div>
         <h3 style={{
@@ -150,9 +150,9 @@ function DemoCard({ demo }: { demo: typeof demos[0] }) {
           fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.5)',
           margin: '0 0 16px', lineHeight: 1.4, flex: 1,
         }}>
-          {demo.desc}
+          {demo.description}
         </p>
-        <a href={demo.url} target="_blank" rel="noopener noreferrer" style={{
+        <a href={demo.demoUrl} target="_blank" rel="noopener noreferrer" style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           color, fontSize: 13, fontWeight: 600, fontFamily: 'Inter, sans-serif',
           textDecoration: 'none', alignSelf: 'flex-start',
