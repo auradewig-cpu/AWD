@@ -11,19 +11,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const buf = Buffer.from(base64, 'base64');
 
     const webpBuf = await sharp(buf).webp({ quality: 80 }).toBuffer();
+    const webpBase64 = webpBuf.toString('base64');
+    const dataUrl = `data:image/webp;base64,${webpBase64}`;
 
-    const formData = new FormData();
-    formData.append('file', new Blob([webpBuf], { type: 'image/webp' }), 'upload.webp');
-    formData.append('upload_preset', 'ml_default');
-
-    const uploadRes = await fetch(
-      'https://api.cloudinary.com/v1_1/dr0xe0tgr/image/upload',
-      { method: 'POST', body: formData }
-    );
-    const data = await uploadRes.json();
-    if (!data.secure_url) return res.status(500).json({ error: 'Upload failed', detail: data });
-
-    return res.json({ url: data.secure_url });
+    return res.json({ url: dataUrl });
   } catch (err: any) {
     console.error('[/api/upload-screenshot] Error:', err?.stack || err);
     return res.status(500).json({ error: 'Upload failed', detail: err?.message });
