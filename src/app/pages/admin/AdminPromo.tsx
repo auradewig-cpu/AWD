@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ExternalLink, Check, Download, Search, Plus, Trash2, RotateCcw, AlertTriangle, X, Eye, EyeOff } from 'lucide-react';
+import { ExternalLink, Check, Download, Search, Plus, Trash2, RotateCcw, AlertTriangle, X, Eye, EyeOff, Lock } from 'lucide-react';
 import { AdminCard, AdminButton } from '@/admin/components';
+
+const CORE_FIELD_IDS = ['name', 'wa', 'city'];
 
 function maskPhone(phone: string): string {
   if (!phone || phone.length <= 4) return phone || '';
@@ -101,12 +103,20 @@ export function AdminPromo() {
 
   async function saveEdit() {
     if (!editPromo) return;
+    const coreDefaults: Record<string, {label:string;type:string;required:boolean}> = {
+      name: { label: 'Nama lengkap', type: 'text', required: true },
+      wa: { label: 'No. WhatsApp', type: 'text', required: true },
+      city: { label: 'Kota', type: 'text', required: true },
+    };
+    const existing = new Map(formFields.map(f => [f.id, f]));
+    const merged = CORE_FIELD_IDS.map(id => existing.get(id) || { id, ...coreDefaults[id] });
+    const extras = formFields.filter(f => !CORE_FIELD_IDS.includes(f.id));
     await api('update', {
       id: editPromo.id, quota: editQuota, deadline: editDeadline, active: editActive,
       bonus_tiers: { tiers: bonusTiers },
       promo_price: promoPrice,
       syarat,
-      form_fields: formFields,
+      form_fields: [...merged, ...extras],
     });
     setEditPromo(null);
   }
@@ -297,23 +307,52 @@ export function AdminPromo() {
                 <button onClick={addTier} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', border: '1px solid rgba(198,255,74,0.2)', color: '#C6FF4A', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif', cursor: 'pointer' }}>+ Tambah Tier</button>
               </div>
               <div>
-                <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8, display: 'block' }}>Form Fields</label>
-                {formFields.map((f, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6, alignItems: 'center' }}>
-                    <input value={f.label} placeholder="Label" onChange={e => { const a = [...formFields]; a[i] = { ...a[i], label: e.target.value }; setFormFields(a); }} style={{ flex: 1, padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#FAFAFA', fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
-                    <select value={f.type} onChange={e => { const a = [...formFields]; a[i] = { ...a[i], type: e.target.value }; setFormFields(a); }} style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#FAFAFA', fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none', cursor: 'pointer' }}>
-                      <option value="text">Text</option>
-                      <option value="textarea">Textarea</option>
-                      <option value="select">Select</option>
-                      <option value="tel">Telepon</option>
-                    </select>
-                    <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap', cursor: 'pointer' }}>
-                      <input type="checkbox" checked={f.required} onChange={e => { const a = [...formFields]; a[i] = { ...a[i], required: e.target.checked }; setFormFields(a); }} style={{ accentColor: '#C6FF4A' }} /> Wajib
-                    </label>
-                    <button onClick={() => setFormFields(formFields.filter((_, idx) => idx !== i))} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', borderRadius: 8, cursor: 'pointer', padding: '8px 10px', fontSize: 13 }}>✕</button>
-                  </div>
-                ))}
-                <button onClick={() => setFormFields([...formFields, { id: `field_${Date.now()}`, label: '', type: 'text', required: false }])} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', border: '1px solid rgba(198,255,74,0.2)', color: '#C6FF4A', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif', cursor: 'pointer', marginTop: 4 }}>+ Tambah Field</button>
+                <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, display: 'block' }}>Form Fields — Field Inti</label>
+                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.25)', margin: '0 0 8px' }}>Label bisa diganti. Id field (name/wa/city) tetap — mapping ke kolom database.</p>
+                {formFields.filter(f => CORE_FIELD_IDS.includes(f.id)).map((f, i) => {
+                  const origIdx = formFields.findIndex(x => x.id === f.id);
+                  return (
+                    <div key={f.id} style={{ display: 'flex', gap: 8, marginBottom: 6, alignItems: 'center' }}>
+                      <Lock size={12} color="rgba(255,255,255,0.2)" />
+                      <input value={f.label} placeholder="Label" onChange={e => { const a = [...formFields]; a[origIdx] = { ...a[origIdx], label: e.target.value }; setFormFields(a); }} style={{ flex: 1, padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#FAFAFA', fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
+                      <select value={f.type} onChange={e => { const a = [...formFields]; a[origIdx] = { ...a[origIdx], type: e.target.value }; setFormFields(a); }} style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#FAFAFA', fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none', cursor: 'pointer' }}>
+                        <option value="text">Text</option>
+                        <option value="textarea">Textarea</option>
+                        <option value="select">Select</option>
+                        <option value="tel">Telepon</option>
+                      </select>
+                      <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={f.required} onChange={e => { const a = [...formFields]; a[origIdx] = { ...a[origIdx], required: e.target.checked }; setFormFields(a); }} style={{ accentColor: '#C6FF4A' }} /> Wajib
+                      </label>
+                      <div style={{ width: 38 }} />
+                    </div>
+                  );
+                })}
+                {formFields.filter(f => !CORE_FIELD_IDS.includes(f.id)).length > 0 && (
+                  <>
+                    <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, marginTop: 12, display: 'block' }}>Field Tambahan</label>
+                    <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.25)', margin: '0 0 8px' }}>Field tambahan tidak disimpan ke database — hanya tampil di form.</p>
+                    {formFields.filter(f => !CORE_FIELD_IDS.includes(f.id)).map((f, i) => {
+                      const origIdx = formFields.findIndex(x => x.id === f.id);
+                      return (
+                        <div key={f.id} style={{ display: 'flex', gap: 8, marginBottom: 6, alignItems: 'center' }}>
+                          <input value={f.label} placeholder="Label" onChange={e => { const a = [...formFields]; a[origIdx] = { ...a[origIdx], label: e.target.value }; setFormFields(a); }} style={{ flex: 1, padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#FAFAFA', fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
+                          <select value={f.type} onChange={e => { const a = [...formFields]; a[origIdx] = { ...a[origIdx], type: e.target.value }; setFormFields(a); }} style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#FAFAFA', fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none', cursor: 'pointer' }}>
+                            <option value="text">Text</option>
+                            <option value="textarea">Textarea</option>
+                            <option value="select">Select</option>
+                            <option value="tel">Telepon</option>
+                          </select>
+                          <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                            <input type="checkbox" checked={f.required} onChange={e => { const a = [...formFields]; a[origIdx] = { ...a[origIdx], required: e.target.checked }; setFormFields(a); }} style={{ accentColor: '#C6FF4A' }} /> Wajib
+                          </label>
+                          <button onClick={() => setFormFields(formFields.filter((_, idx) => idx !== origIdx))} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', borderRadius: 8, cursor: 'pointer', padding: '8px 10px', fontSize: 13 }}>✕</button>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+                <button onClick={() => setFormFields([...formFields, { id: `extra_${Date.now()}`, label: '', type: 'text', required: false }])} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', border: '1px solid rgba(198,255,74,0.2)', color: '#C6FF4A', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif', cursor: 'pointer', marginTop: 4 }}>+ Tambah Field</button>
               </div>
               <div>
                 <label style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8, display: 'block' }}>Syarat & Ketentuan</label>

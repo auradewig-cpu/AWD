@@ -168,9 +168,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (password !== process.env.ADMIN_PASSWORD) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
+    await sql`DELETE FROM registrants`;
     await sql`DELETE FROM promos`;
+    const defaultFields = '[{"id":"name","label":"Nama lengkap","type":"text","required":true},{"id":"wa","label":"No. WhatsApp","type":"text","required":true},{"id":"city","label":"Kota","type":"text","required":true}]';
+    const defaultSyarat = '["Follow Semua Akun Medsos AWD (IG/TikTok/FB/YouTube), Like, Share \\u0026 Save 3 post terbaru AWD di semua medsos. (\\u26a0\\ufe0f Pertahankan minimal 6 bulan agar paket tetap aktif)","Screenshot bukti dan kirim ke WA admin AWD","Wajib berikan ulasan Google positif sebelum website live","Post sosmed dengan template yang kami kirim via WA"]';
     await sql`
-      INSERT INTO promos (name, package, quota, deadline, active, bonus_tiers)
+      INSERT INTO promos (name, package, quota, deadline, active, bonus_tiers, form_fields, syarat)
       VALUES
         ('Promo Juli 2026', 'starter', 100, '2026-07-31 23:59:59', true,
          '{"tiers":[
@@ -178,13 +181,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
            {"min":11,"max":30,"bonus":"Domain .com 1 tahun"},
            {"min":31,"max":50,"bonus":"Setup Google Business"},
            {"min":51,"max":100,"bonus":"Harga promo saja"}
-         ]}'::jsonb),
+         ]}'::jsonb,
+         ${defaultFields}::jsonb,
+         ${defaultSyarat}::jsonb),
         ('Promo Juli 2026', 'business', 50, '2026-07-31 23:59:59', true,
          '{"tiers":[
            {"min":1,"max":10,"bonus":"Domain .com 2 tahun"},
            {"min":11,"max":25,"bonus":"Domain .com 1 tahun"},
            {"min":26,"max":50,"bonus":"Harga promo saja"}
-         ]}'::jsonb)
+         ]}'::jsonb,
+         ${defaultFields}::jsonb,
+         ${defaultSyarat}::jsonb)
     `;
     return res.json({ success: true, message: 'Promo seeded' });
   }
