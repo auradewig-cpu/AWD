@@ -269,7 +269,7 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
 
   const handleShare = async () => {
     if (!ticketRef.current) return;
-    const canvas = await html2canvas(ticketRef.current, { backgroundColor: '#0a0a0a', scale: 2 });
+    const canvas = await html2canvas(ticketRef.current, { backgroundColor: '#0a0a0a', scale: 2, useCORS: true, foreignObjectRendering: true });
     canvas.toBlob(async (blob) => {
       if (!blob) return;
       const file = new File([blob], 'awd-ticket.png', { type: 'image/png' });
@@ -289,64 +289,62 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
       <div style={{ position: 'relative', maxWidth: 440, width: '100%', boxSizing: 'border-box' }}>
 
         <div ref={ticketRef} style={{
-          background: 'linear-gradient(145deg, #0E120A 0%, #1a1f12 50%, #0E120A 100%)',
-          border: '1px solid rgba(198,255,74,0.25)', borderRadius: 24,
-          padding: '40px 28px 32px', textAlign: 'center', position: 'relative', overflow: 'hidden',
+          background: 'linear-gradient(135deg, #0E120A 0%, #1a2210 40%, #0E120A 100%)',
+          border: '1px solid rgba(198,255,74,0.3)', borderRadius: 24,
+          padding: '44px 28px 32px', textAlign: 'center', position: 'relative', overflow: 'hidden',
         }}>
           <div style={{
-            position: 'absolute', top: -50, right: -50, width: 200, height: 200,
-            background: 'radial-gradient(circle, rgba(198,255,74,0.08) 0%, transparent 70%)',
-            borderRadius: '50%',
+            position: 'absolute', top: -60, right: -30, width: 280, height: 280,
+            background: 'radial-gradient(circle at 30% 40%, rgba(198,255,74,0.07) 0%, transparent 65%)',
           }} />
           <div style={{
-            position: 'absolute', bottom: -30, left: -30, width: 150, height: 150,
-            background: 'radial-gradient(circle, rgba(198,255,74,0.05) 0%, transparent 70%)',
-            borderRadius: '50%',
+            position: 'absolute', bottom: -40, left: -40, width: 200, height: 200,
+            background: 'radial-gradient(circle at 70% 60%, rgba(198,255,74,0.04) 0%, transparent 60%)',
           }} />
           <div style={{
-            position: 'absolute', top: '30%', left: -60, width: 100, height: 1,
-            background: 'linear-gradient(90deg, transparent, rgba(198,255,74,0.08), transparent)',
-            transform: 'rotate(-45deg)',
+            position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+            background: 'linear-gradient(90deg, transparent, #C6FF4A, transparent)',
+            opacity: 0.4,
+          }} />
+          <div style={{
+            position: 'absolute', bottom: 0, left: '20%', right: '20%', height: 1,
+            background: 'linear-gradient(90deg, transparent, rgba(198,255,74,0.15), transparent)',
           }} />
 
-          <div style={{ fontSize: 22, fontWeight: 700, fontFamily: 'Inter Tight, sans-serif', color: '#FAFAFA', marginBottom: 4, letterSpacing: '-0.01em' }}>🎉 PROMO AWD JULI 2026</div>
-          <div style={{ fontSize: 10, color: '#C6FF4A', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, letterSpacing: '0.15em', marginBottom: 20, textTransform: 'uppercase' }}>AldiWebDesigner.xyz</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 6 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C6FF4A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: '#C6FF4A', letterSpacing: '0.18em', textTransform: 'uppercase' }}>AldiWebDesigner.xyz</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C6FF4A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 800, fontFamily: 'Inter Tight, sans-serif', color: '#FAFAFA', marginBottom: 2, letterSpacing: '-0.02em' }}>PROMO AWD JULI 2026</div>
+          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontFamily: 'Inter, sans-serif', marginBottom: 16 }}>Website Profesional, Bukan Template</div>
 
-          <div style={{ width: 40, height: 2, background: 'rgba(198,255,74,0.2)', margin: '0 auto 18px', borderRadius: 1 }} />
+          <div style={{ width: 50, height: 2, background: 'rgba(198,255,74,0.25)', margin: '0 auto 16px', borderRadius: 1 }} />
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(198,255,74,0.1)', borderRadius: 999, padding: '4px 14px', marginBottom: 16 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(198,255,74,0.1)', borderRadius: 999, padding: '4px 16px', marginBottom: 16 }}>
             <Check size={12} color="#C6FF4A" strokeWidth={3} />
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: '#C6FF4A' }}>RESMI TERDAFTAR</span>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 700, color: '#C6FF4A', letterSpacing: '0.03em' }}>RESMI TERDAFTAR</span>
           </div>
 
-          <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 32, fontWeight: 700, color: '#FAFAFA', margin: '0 0 4px', letterSpacing: '-0.02em' }}>{ticket.slotNumber}</h2>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 24px' }}>{ticket.name} &middot; {ticket.city}</p>
+          <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 36, fontWeight: 800, color: '#FAFAFA', margin: '0 0 4px', letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(198,255,74,0.08)' }}>{ticket.slotNumber}</h2>
+          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.55)', margin: '0 0 20px' }}>{ticket.name} &middot; {ticket.city}</p>
 
           {qrImg && (
-            <div style={{ display: 'inline-flex', padding: 6, background: '#FAFAFA', borderRadius: 12, marginBottom: 20 }}>
+            <div style={{ display: 'inline-flex', padding: 6, background: '#FAFAFA', borderRadius: 14, marginBottom: 18, boxShadow: '0 0 0 1px rgba(198,255,74,0.1)' }}>
               <img src={qrImg} alt="QR Code" style={{ width: 130, height: 130, display: 'block' }} />
             </div>
           )}
 
-          <div style={{ background: 'rgba(198,255,74,0.06)', border: '1px solid rgba(198,255,74,0.12)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'Inter, sans-serif', fontSize: 12, marginBottom: 4 }}>
-              <span style={{ color: 'rgba(255,255,255,0.45)' }}>Early Bird Bonus</span>
+          <div style={{ background: 'linear-gradient(135deg, rgba(198,255,74,0.08), rgba(198,255,74,0.03))', border: '1px solid rgba(198,255,74,0.12)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'Inter, sans-serif', fontSize: 11, marginBottom: 4 }}>
+              <span style={{ color: 'rgba(255,255,255,0.4)' }}>Early Bird Bonus</span>
               <span style={{ color: '#C6FF4A', fontWeight: 700, fontSize: 11 }}>Tier {ticket.earlyBirdTier}</span>
             </div>
             <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 700, color: '#FAFAFA', margin: 0 }}>{ticket.bonus}</p>
           </div>
 
-          <div style={{
-            fontFamily: 'Inter, sans-serif', fontSize: 11, fontStyle: 'italic',
-            color: 'rgba(255,255,255,0.2)', marginBottom: 4,
-          }}>
-            "Website Profesional, Bukan Template"
-          </div>
-          <div style={{
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: 'rgba(255,255,255,0.1)',
-            letterSpacing: '0.08em',
-          }}>
-            aldiwebdesigner.xyz
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, alignItems: 'center', marginTop: 4 }}>
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 7, color: 'rgba(255,255,255,0.08)', letterSpacing: '0.06em' }}>aldiwebdesigner.xyz</span>
           </div>
         </div>
 
