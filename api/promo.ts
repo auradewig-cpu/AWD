@@ -25,7 +25,8 @@ async function initTables() {
   )`;
   await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS testimoni_uploaded BOOLEAN DEFAULT false`;
   await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS post_uploaded BOOLEAN DEFAULT false`;
-  await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS screenshot_medsos_url TEXT`;
+  await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS screenshots JSONB DEFAULT '[]'::jsonb`;
+  await sql`ALTER TABLE registrants DROP COLUMN IF EXISTS screenshot_medsos_url`;
   await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS brand_name TEXT`;
   await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS bisnis_desc TEXT`;
   await sql`ALTER TABLE registrants ADD COLUMN IF NOT EXISTS referensi_web TEXT`;
@@ -95,33 +96,55 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!promo.length) return res.status(404).json({ error: 'Promo tidak ditemukan' });
 
     const p = promo[0];
-    const count = await sql`
-      SELECT COUNT(*) as count FROM registrants WHERE promo_id = ${p.id}
-    `;
-    const registered = parseInt(count[0].count);
 
-    if (registered >= (p.quota ?? 0)) {
-      return res.status(400).json({ error: 'Slot penuh!' });
+    let slotNumber: string;
+    let referralCode: string;
+    let earlyBirdTier: number;
+    let bonus: string;
+    let inserted = false;
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const count = await sql`
+        SELECT COUNT(*) as count FROM registrants WHERE promo_id = ${p.id}
+      `;
+      const registered = parseInt(count[0].count);
+
+      if (registered >= (p.quota ?? 0) && attempt === 0) {
+        return res.status(400).json({ error: 'Slot penuh!' });
+      }
+
+      const slot = registered + 1 + attempt;
+      slotNumber = generateSlotNumber(pkg, slot);
+      referralCode = generateReferralCode();
+      const tiers = p.bonus_tiers?.tiers || [];
+      earlyBirdTier = getEarlyBirdTier(slot, tiers);
+      bonus = tiers[earlyBirdTier - 1]?.bonus || '';
+
+      try {
+        await sql`
+          INSERT INTO registrants
+            (slot_number, promo_id, name, wa, city, package,
+             referral_code, referred_by, early_bird_tier,
+             email, brand_name, bisnis_desc, referensi_web, screenshots)
+          VALUES
+            (${slotNumber}, ${p.id}, ${name}, ${wa}, ${city}, ${pkg},
+             ${referralCode}, ${referred_by || null}, ${earlyBirdTier},
+             ${email || null}, ${brand_name || null}, ${bisnis_desc || null}, ${referensi_web || null},
+             ${JSON.stringify(screenshots || [])})
+        `;
+        inserted = true;
+        break;
+      } catch (e: any) {
+        if (attempt < 2 && e?.message?.includes('duplicate key')) {
+          continue;
+        }
+        throw e;
+      }
     }
 
-    const slot = registered + 1;
-    const slotNumber = generateSlotNumber(pkg, slot);
-    const referralCode = generateReferralCode();
-    const tiers = p.bonus_tiers?.tiers || [];
-    const earlyBirdTier = getEarlyBirdTier(slot, tiers);
-    const bonus = tiers[earlyBirdTier - 1]?.bonus || '';
-
-    await sql`
-      INSERT INTO registrants
-        (slot_number, promo_id, name, wa, city, package,
-         referral_code, referred_by, early_bird_tier,
-         email, brand_name, bisnis_desc, referensi_web, screenshot_medsos_url)
-      VALUES
-        (${slotNumber}, ${p.id}, ${name}, ${wa}, ${city}, ${pkg},
-         ${referralCode}, ${referred_by || null}, ${earlyBirdTier},
-         ${email || null}, ${brand_name || null}, ${bisnis_desc || null}, ${referensi_web || null},
-         ${screenshots || null})
-    `;
+    if (!inserted) {
+      return res.status(500).json({ error: 'Gagal mendaftar, coba lagi' });
+    }
 
     if (referred_by) {
       await sql`

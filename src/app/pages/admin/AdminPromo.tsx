@@ -14,7 +14,7 @@ interface Registrant {
   city: string; package: string; referral_code: string; referred_by: string | null;
   early_bird_tier: number; status: string; created_at: string;
   email?: string; brand_name?: string; bisnis_desc?: string; referensi_web?: string;
-  screenshot_medsos_url?: string; testimoni_uploaded?: boolean; post_uploaded?: boolean;
+  screenshots?: string[]; testimoni_uploaded?: boolean; post_uploaded?: boolean;
 }
 
 interface PromoRow {
@@ -486,13 +486,11 @@ export function AdminPromo() {
               {selectedRegistrant.bisnis_desc && <div><span style={{ color: 'rgba(255,255,255,0.4)', display: 'inline-block', width: 100 }}>Deskripsi</span><span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>{selectedRegistrant.bisnis_desc}</span></div>}
               {selectedRegistrant.referensi_web && <div><span style={{ color: 'rgba(255,255,255,0.4)', display: 'inline-block', width: 100 }}>Ref Web</span><a href={selectedRegistrant.referensi_web} target="_blank" rel="noopener noreferrer" style={{ color: '#C6FF4A', fontSize: 12 }}>{selectedRegistrant.referensi_web}</a></div>}
 
-              {selectedRegistrant.screenshot_medsos_url && (
+              {selectedRegistrant.screenshots?.length > 0 && (
                 <div style={{ marginTop: 8 }}>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, margin: '0 0 8px' }}>Screenshots</p>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {(() => {
-                      try { const urls = JSON.parse(selectedRegistrant.screenshot_medsos_url); return Array.isArray(urls) ? urls : [selectedRegistrant.screenshot_medsos_url]; } catch { return [selectedRegistrant.screenshot_medsos_url]; }
-                    })().map((url: string, i: number) => (
+                    {selectedRegistrant.screenshots.map((url: string, i: number) => (
                       <a key={i} href={url} target="_blank" rel="noopener noreferrer">
                         <img src={url} alt={`screenshot ${i+1}`} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }} />
                       </a>
