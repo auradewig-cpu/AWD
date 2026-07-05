@@ -262,7 +262,7 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
 
   const handleShare = async () => {
     if (!ticketRef.current) return;
-    await new Promise(r => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 400));
     const canvas = await html2canvas(ticketRef.current, { backgroundColor: '#0a0a0a', scale: 2, useCORS: true, allowTaint: true });
     canvas.toBlob(async (blob) => {
       if (!blob) return;
