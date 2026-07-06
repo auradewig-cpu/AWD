@@ -307,6 +307,11 @@ export default function PromoRegisterModal({ pkg, onClose, onSuccess }: PromoReg
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   function setVal(id: string, val: string) {
     setFormValues(prev => ({ ...prev, [id]: val }));
   }
@@ -340,7 +345,7 @@ export default function PromoRegisterModal({ pkg, onClose, onSuccess }: PromoReg
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
       <div style={{ position: 'relative', background: '#0E120A', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 20, padding: '32px 28px', maxWidth: 440, width: '100%', boxSizing: 'border-box', maxHeight: '90vh', overflowY: 'auto' }}>
         <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: 4 }}><X size={18} /></button>
