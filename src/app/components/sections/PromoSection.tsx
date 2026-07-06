@@ -262,12 +262,15 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
 
   const handleShare = async () => {
     if (!ticketRef.current) return;
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await new Promise(r => setTimeout(r, 600));
 
     const qrCanvas = ticketRef.current.querySelector('.qr-wrapper canvas') as HTMLCanvasElement | null;
     const qrRect = qrCanvas?.getBoundingClientRect();
     const ticketRect = ticketRef.current.getBoundingClientRect();
     console.log('[share] QR canvas found:', qrCanvas, qrRect);
+    const qrDataUrl = qrCanvas?.toDataURL();
+    console.log('[share] QR data length:', qrDataUrl?.length);
 
     const canvas = await html2canvas(ticketRef.current, {
       backgroundColor: '#0a0a0a', scale: 2, useCORS: true, allowTaint: true,
