@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Check, Gift, Share2, Clock, Users, Zap, ChevronRight, Copy } from 'lucide-react';
 import html2canvas from 'html2canvas';
-import QRCode from 'qrcode';
+import { QRCodeCanvas } from 'qrcode.react';
 import PromoRegisterModal from './PromoRegisterModal';
 
 const WA_NUMBER = '6285286427559';
@@ -251,15 +251,10 @@ function PromoForm(props: { pkg: string; fields?: Array<{id:string;label:string;
 
 function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => void }) {
   const [copiedCode, setCopiedCode] = useState(false);
-  const [qrImg, setQrImg] = useState('');
   const ticketRef = useRef<HTMLDivElement>(null);
 
   const verifyUrl = `https://wa.me/6285286427559?text=Konfirmasi%20antrean%20${ticket.slotNumber}%20-%20${ticket.name}`;
   const waShare = `Halo%20Aldi%2C%20saya%20telah%20mendaftar%20promo%20Juli%202026.%0A%0ANomor%20Antrean%3A%20${ticket.slotNumber}%0ANama%3A%20${ticket.name}%0APaket%3A%20${ticket.package.toUpperCase()}%0ABonus%3A%20${ticket.bonus}%0A%0ABerikut%20tiket%20saya%3A%20${ticket.verifyUrl}`;
-
-  useEffect(() => {
-    QRCode.toDataURL(verifyUrl, { width: 130 }).then(setQrImg);
-  }, [verifyUrl]);
 
   const copyCode = () => {
     navigator.clipboard.writeText(ticket.referralCode).then(() => { setCopiedCode(true); setTimeout(() => setCopiedCode(false), 2000); });
@@ -269,7 +264,18 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
     if (!ticketRef.current) return;
     const canvas = await html2canvas(ticketRef.current, {
       backgroundColor: '#0a0a0a', scale: 2, useCORS: true, allowTaint: true,
+      ignoreElements: (el) => el.tagName === 'CANVAS',
     });
+    const ctx = canvas.getContext('2d');
+    const qrCanvas = ticketRef.current.querySelector('.qr-wrapper canvas') as HTMLCanvasElement | null;
+    if (ctx && qrCanvas) {
+      const qrDataUrl = qrCanvas.toDataURL('image/png');
+      const qrImg = new Image();
+      await new Promise<void>((resolve, reject) => { qrImg.onload = () => resolve(); qrImg.onerror = reject; qrImg.src = qrDataUrl; });
+      const qrRect = qrCanvas.getBoundingClientRect();
+      const ticketRect = ticketRef.current.getBoundingClientRect();
+      ctx.drawImage(qrImg, (qrRect.left - ticketRect.left) * 2, (qrRect.top - ticketRect.top) * 2, qrRect.width * 2, qrRect.height * 2);
+    }
     canvas.toBlob(async (blob) => {
       if (!blob) return;
       const file = new File([blob], 'awd-ticket.png', { type: 'image/png' });
@@ -329,11 +335,9 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
           <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 36, fontWeight: 800, color: '#FAFAFA', margin: '0 0 4px', letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(198,255,74,0.08)' }}>{ticket.slotNumber}</h2>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.55)', margin: '0 0 20px' }}>{ticket.name} &middot; {ticket.city}</p>
 
-          {qrImg && (
-            <div style={{ display: 'inline-flex', padding: 6, background: '#FAFAFA', borderRadius: 14, marginBottom: 18, boxShadow: '0 0 0 1px rgba(198,255,74,0.1)' }}>
-              <img src={qrImg} width={130} height={130} alt="QR" />
-            </div>
-          )}
+          <div className="qr-wrapper" style={{ display: 'inline-flex', padding: 6, background: '#FAFAFA', borderRadius: 14, marginBottom: 18, boxShadow: '0 0 0 1px rgba(198,255,74,0.1)' }}>
+            <QRCodeCanvas value={verifyUrl} size={130} bgColor="#ffffff" fgColor="#000000" />
+          </div>
 
           <div style={{ background: 'linear-gradient(135deg, rgba(198,255,74,0.08), rgba(198,255,74,0.03))', border: '1px solid rgba(198,255,74,0.12)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'Inter, sans-serif', fontSize: 11, marginBottom: 4 }}>
