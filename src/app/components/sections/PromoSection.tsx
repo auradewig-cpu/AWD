@@ -263,7 +263,30 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
   const handleShare = async () => {
     if (!ticketRef.current) return;
     await new Promise(r => setTimeout(r, 400));
-    const canvas = await html2canvas(ticketRef.current, { backgroundColor: '#0a0a0a', scale: 2, useCORS: true, allowTaint: true });
+
+    const qrCanvas = ticketRef.current.querySelector('.qr-wrapper canvas') as HTMLCanvasElement | null;
+    console.log('[share] QR canvas found:', qrCanvas);
+
+    const canvas = await html2canvas(ticketRef.current, {
+      backgroundColor: '#0a0a0a', scale: 2, useCORS: true, allowTaint: true,
+      ignoreElements: (el) => el.tagName === 'CANVAS' && !!el.closest('.qr-wrapper'),
+    });
+
+    if (qrCanvas && qrCanvas.width > 0) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const qrRect = qrCanvas.getBoundingClientRect();
+        const ticketRect = ticketRef.current.getBoundingClientRect();
+        ctx.drawImage(
+          qrCanvas,
+          (qrRect.left - ticketRect.left) * 2,
+          (qrRect.top - ticketRect.top) * 2,
+          qrRect.width * 2,
+          qrRect.height * 2,
+        );
+      }
+    }
+
     canvas.toBlob(async (blob) => {
       if (!blob) return;
       const file = new File([blob], 'awd-ticket.png', { type: 'image/png' });
@@ -323,7 +346,7 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
           <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 36, fontWeight: 800, color: '#FAFAFA', margin: '0 0 4px', letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(198,255,74,0.08)' }}>{ticket.slotNumber}</h2>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.55)', margin: '0 0 20px' }}>{ticket.name} &middot; {ticket.city}</p>
 
-          <div style={{ display: 'inline-flex', padding: 6, background: '#FAFAFA', borderRadius: 14, marginBottom: 18, boxShadow: '0 0 0 1px rgba(198,255,74,0.1)' }}>
+          <div className="qr-wrapper" style={{ display: 'inline-flex', padding: 6, background: '#FAFAFA', borderRadius: 14, marginBottom: 18, boxShadow: '0 0 0 1px rgba(198,255,74,0.1)' }}>
             <QRCodeCanvas value={verifyUrl} size={130} bgColor="#ffffff" fgColor="#000000" />
           </div>
 
