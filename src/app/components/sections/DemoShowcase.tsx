@@ -98,7 +98,7 @@ function DemoCard({ demo }: { demo: DemoEntry }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           position: 'relative', overflow: 'hidden',
         }}>
-          {!imgError && imgSrc && (
+          {!imgError && demo.thumbnailUrl && (
             <img
               src={optimizeCloudinary(demo.thumbnailUrl)}
               alt={demo.name}
