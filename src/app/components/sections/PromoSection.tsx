@@ -265,18 +265,18 @@ function PromoTicket({ ticket, onClose }: { ticket: TicketData; onClose: () => v
     await new Promise(r => setTimeout(r, 400));
 
     const qrCanvas = ticketRef.current.querySelector('.qr-wrapper canvas') as HTMLCanvasElement | null;
-    console.log('[share] QR canvas found:', qrCanvas);
+    const qrRect = qrCanvas?.getBoundingClientRect();
+    const ticketRect = ticketRef.current.getBoundingClientRect();
+    console.log('[share] QR canvas found:', qrCanvas, qrRect);
 
     const canvas = await html2canvas(ticketRef.current, {
       backgroundColor: '#0a0a0a', scale: 2, useCORS: true, allowTaint: true,
       ignoreElements: (el) => el.tagName === 'CANVAS' && !!el.closest('.qr-wrapper'),
     });
 
-    if (qrCanvas && qrCanvas.width > 0) {
+    if (qrCanvas && qrCanvas.width > 0 && qrRect) {
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        const qrRect = qrCanvas.getBoundingClientRect();
-        const ticketRect = ticketRef.current.getBoundingClientRect();
         ctx.drawImage(
           qrCanvas,
           (qrRect.left - ticketRect.left) * 2,
