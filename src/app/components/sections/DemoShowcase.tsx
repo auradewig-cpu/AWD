@@ -42,14 +42,14 @@ export function DemoShowcase() {
             color: '#C6FF4A', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 16,
           }}>
             <div style={{ width: 20, height: 1, background: '#C6FF4A' }} />
-            PORTFOLIO
+            DEMO WEBSITE
             <div style={{ width: 20, height: 1, background: '#C6FF4A' }} />
           </div>
           <h2 style={{
             fontFamily: 'Inter Tight, sans-serif', fontSize: 'clamp(28px, 4vw, 40px)',
             fontWeight: 700, color: '#FAFAFA', letterSpacing: '-0.02em', marginBottom: 12,
           }}>
-            Hasil Kerja Nyata
+            Contoh Hasil Kerja Kami
           </h2>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 16, color: 'rgba(255,255,255,0.55)', maxWidth: 500, margin: '0 auto', lineHeight: 1.6 }}>
             Demo langsung, bisa dicoba sendiri
