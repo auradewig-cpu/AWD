@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Trash2, ArrowUp, ArrowDown, ExternalLink } from 'lucide-react';
 import {
   AdminCard,
@@ -11,7 +11,8 @@ import {
 } from '@/admin/components';
 import {
   STORAGE_KEYS,
-  loadDemoData,
+  loadFromServer,
+  saveToServer,
   saveToStorage,
   resetStorage,
   DEMO_CATEGORIES,
@@ -71,9 +72,17 @@ function newEntry(tier: DemoTier, order: number): DemoEntry {
 }
 
 export function AdminDemo() {
-  const [data, setData] = useState<DemoData>(() => loadDemoData());
+  const [data, setData] = useState<DemoData>(() => ({ entries: [] }));
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadFromServer<DemoData>(STORAGE_KEYS.DEMO, { entries: [] }).then((d) => {
+      setData(d);
+      setLoading(false);
+    });
+  }, []);
 
   function mutate(updater: (entries: DemoEntry[]) => DemoEntry[]) {
     setData((prev) => ({ entries: updater(prev.entries) }));
@@ -117,10 +126,12 @@ export function AdminDemo() {
     });
   }
 
-  function handleSave() {
-    saveToStorage(STORAGE_KEYS.DEMO, data);
-    setDirty(false);
-    setSaved(true);
+  async function handleSave() {
+    const ok = await saveToServer(STORAGE_KEYS.DEMO, data, 'awd123');
+    if (ok) {
+      setDirty(false);
+      setSaved(true);
+    }
   }
 
   function handleReset() {
@@ -129,6 +140,8 @@ export function AdminDemo() {
     setDirty(false);
     setSaved(false);
   }
+
+  if (loading) return <div style={{ padding: 40, textAlign: 'center', fontFamily: 'Inter, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>Memuat data...</div>;
 
   return (
     <div>
