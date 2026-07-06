@@ -11,7 +11,7 @@ export const DEFAULT_PRICING: PricingContent = {
       id: 'starter',
       name: 'STARTER',
       subtitle: 'Landing page + admin panel',
-      price: 'Rp 2.500.000',
+      price: 'Rp 3.500.000',
       originalPrice: 'Rp 5.000.000',
       recommended: false,
       showDemoButton: false,

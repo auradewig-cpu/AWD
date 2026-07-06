@@ -64,7 +64,7 @@ export function AdminPricingTierEditor({ tier, open, onToggleOpen, onChange, onR
           <AdminInput label="Subtitle" value={tier.subtitle} onChange={(v) => set('subtitle', v)} />
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <AdminInput label="Harga" value={tier.price} onChange={(v) => set('price', v)} placeholder="Rp 2.500.000" />
+            <AdminInput label="Harga" value={tier.price} onChange={(v) => set('price', v)} placeholder="Rp 3.500.000" />
             <AdminInput label="Harga Coret" value={tier.originalPrice} onChange={(v) => set('originalPrice', v)} placeholder="Rp 5.000.000" />
           </div>
 
