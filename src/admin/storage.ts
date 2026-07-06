@@ -13,7 +13,7 @@ export const STORAGE_KEYS = {
   CONTACT: 'awd_content_contact',
   TRUST: 'awd_content_trust',
   WHY: 'awd_content_why',
-  DEMO: 'awd_demo_data',
+  DEMO: 'demo',
   SOCIAL: 'awd_social_media',
 } as const;
 
