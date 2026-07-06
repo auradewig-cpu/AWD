@@ -10,7 +10,7 @@ export const DEFAULT_HERO: HeroContent = {
   headlineHighlight: 'SeMAHAL',
   headlineHighlightColor: '#C6FF4A',
   headlineLine2: 'Kualitas Bisnismu.',
-  subheadline: 'Website profesional mulai Rp999rb. Cepat, aman, desain custom — tanpa beban harga agency besar.',
+  subheadline: 'Website profesional mulai dari harga terjangkau. Cepat, aman, desain custom — tanpa beban harga agency besar.',
   ctaPrimaryText: 'Konsultasi Gratis →',
   ctaPrimaryWaNumber: '6285286427559',
   ctaSecondaryText: 'Lihat Paket Harga',
