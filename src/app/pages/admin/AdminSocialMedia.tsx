@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ExternalLink, Instagram, Music2, Youtube, Facebook, MessageCircle } from 'lucide-react';
 import { AdminCard, AdminInput, AdminButton, AdminSaveBar } from '@/admin/components';
 import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage } from '@/admin/storage';
-import { ADMIN_CREDENTIALS } from '@/admin/config';
 
 export interface SocialContent {
   instagram: string;
@@ -49,7 +48,7 @@ export function AdminSocialMedia() {
   async function handleSave() {
     setSaving(true);
     setSaveError(null);
-    const ok = await saveToServer(STORAGE_KEYS.SOCIAL, form, ADMIN_CREDENTIALS.password);
+    const ok = await saveToServer(STORAGE_KEYS.SOCIAL, form);
     if (ok) {
       saveToStorage(STORAGE_KEYS.SOCIAL, form);
       window.dispatchEvent(new Event('awd-social-updated'));

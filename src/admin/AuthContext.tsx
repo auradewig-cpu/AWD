@@ -1,10 +1,17 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { ADMIN_CREDENTIALS } from './config';
-import { STORAGE_KEYS, saveToStorage, resetStorage } from './storage';
+import {
+  STORAGE_KEYS,
+  saveToStorage,
+  resetStorage,
+  getAdminToken,
+  setAdminToken,
+  clearAdminToken,
+} from './storage';
 
 interface AuthContextValue {
   isAuthenticated: boolean;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -13,23 +20,41 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(STORAGE_KEYS.ADMIN_AUTH) === 'true';
+      // A live session requires BOTH the flag and a token.
+      return (
+        localStorage.getItem(STORAGE_KEYS.ADMIN_AUTH) === 'true' &&
+        !!getAdminToken()
+      );
     } catch {
       return false;
     }
   });
 
-  function login(email: string, password: string): boolean {
-    if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+  // Verifies the password server-side (POST /api/auth) and stores the returned
+  // session token. The password itself is never persisted client-side.
+  async function login(email: string, password: string): Promise<boolean> {
+    if (email !== ADMIN_CREDENTIALS.email) return false;
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      if (!data?.token) return false;
+      setAdminToken(data.token);
       saveToStorage(STORAGE_KEYS.ADMIN_AUTH, true);
       setIsAuthenticated(true);
       return true;
+    } catch {
+      return false;
     }
-    return false;
   }
 
   function logout() {
     resetStorage(STORAGE_KEYS.ADMIN_AUTH);
+    clearAdminToken();
     setIsAuthenticated(false);
   }
 

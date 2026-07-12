@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { neon } from '@neondatabase/serverless';
+import { isAuthorized } from './_auth';
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -27,8 +28,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST') {
-    const { value, password } = req.body;
-    if (password !== process.env.ADMIN_PASSWORD) {
+    const { value } = req.body;
+    if (!isAuthorized(req)) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     if (value === null || (value?.tiers && value.tiers.length === 0)) {

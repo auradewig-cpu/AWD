@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ExternalLink, Check, Download, Search, Plus, Trash2, RotateCcw, AlertTriangle, X, Eye, EyeOff, Lock, Copy, CheckSquare } from 'lucide-react';
 import { AdminCard, AdminButton } from '@/admin/components';
+import { authHeaders, getAdminToken } from '@/admin/storage';
 
 const CORE_FIELD_IDS = ['name', 'wa', 'city'];
 
@@ -49,7 +50,7 @@ export function AdminPromo() {
   const fetchAll = useCallback(async () => {
     try {
       const [r1, r2] = await Promise.all([
-        fetch('/api/promo?action=registrants&password=awd123').then(r => r.json()),
+        fetch(`/api/promo?action=registrants&token=${encodeURIComponent(getAdminToken() || '')}`).then(r => r.json()),
         fetch('/api/promo?action=promos').then(r => r.json()),
       ]);
       if (r1.registrants) setRegistrants(r1.registrants);
@@ -61,8 +62,8 @@ export function AdminPromo() {
 
   async function api(action: string, body: any) {
     const r = await fetch(`/api/promo?action=${action}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...body, password: 'awd123' }),
+      method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({ ...body }),
     });
     const d = await r.json();
     if (d.success) fetchAll();

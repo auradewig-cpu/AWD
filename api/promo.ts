@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { neon } from '@neondatabase/serverless';
 import QRCode from 'qrcode';
+import { isAuthorized } from './_auth';
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -201,7 +202,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'POST' && action === 'seed') {
     const { password } = req.body;
-    if (password !== process.env.ADMIN_PASSWORD) {
+    if (!isAuthorized(req)) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     await sql`DELETE FROM registrants`;
@@ -233,8 +234,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST' && action === 'verify') {
-    const { slotNumber, password } = req.body;
-    if (password !== process.env.ADMIN_PASSWORD) {
+    const { slotNumber } = req.body;
+    if (!isAuthorized(req)) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     await sql`UPDATE registrants SET status = 'verified' WHERE slot_number = ${slotNumber}`;
@@ -242,7 +243,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'GET' && action === 'registrants') {
-    const isAdmin = req.query.password === process.env.ADMIN_PASSWORD;
+    const isAdmin = isAuthorized(req);
     if (isAdmin) {
       const rows = await sql`SELECT * FROM registrants ORDER BY created_at DESC`;
       return res.json({ registrants: rows });
@@ -262,7 +263,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'POST' && action === 'create') {
     const { name, package: pkg, quota, deadline, password } = req.body;
-    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
     await sql`
       INSERT INTO promos (name, package, quota, deadline, active, bonus_tiers)
       VALUES (${name}, ${pkg}, ${quota}, ${deadline}, true, '{"tiers":[]}'::jsonb)
@@ -272,7 +273,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'POST' && action === 'update') {
     const { id, quota, deadline, active, bonus_tiers, promo_price, syarat, form_fields, password } = req.body;
-    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
     await sql`
       UPDATE promos SET quota=${quota}, deadline=${deadline},
         active=${active}, bonus_tiers=${JSON.stringify(bonus_tiers || { tiers: [] })}::jsonb,
@@ -286,7 +287,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'POST' && action === 'delete') {
     const { id, password } = req.body;
-    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
     await sql`DELETE FROM registrants WHERE promo_id = ${id}`;
     await sql`DELETE FROM promos WHERE id = ${id}`;
     return res.json({ success: true });
@@ -294,14 +295,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'POST' && action === 'reset-registrants') {
     const { promoId, password } = req.body;
-    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
     await sql`DELETE FROM registrants WHERE promo_id = ${promoId}`;
     return res.json({ success: true });
   }
 
   if (req.method === 'POST' && action === 'delete-registrant') {
     const { id, password } = req.body;
-    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
     await sql`DELETE FROM registrants WHERE id = ${id}`;
     return res.json({ success: true });
   }
@@ -320,38 +321,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST' && action === 'update-closing') {
-    const { slot, password, testimoni_wa_url, post_sosmed_url } = req.body;
-    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
-    const setClauses = [];
-    const params: any[] = [];
-    if (testimoni_wa_url) { setClauses.push('testimoni_wa_url'); params.push(testimoni_wa_url); }
-    if (post_sosmed_url) { setClauses.push('post_sosmed_url'); params.push(post_sosmed_url); }
-    if (testimoni_wa_url) { setClauses.push('testimoni_uploaded'); params.push(true); }
-    if (post_sosmed_url) { setClauses.push('post_uploaded'); params.push(true); }
-    if (setClauses.length) {
-      const pairs = [];
-      for (let i = 0; i < setClauses.length; i += 2) {
-        pairs.push(`${setClauses[i]} = $${i/2 + 1}`);
-      }
-      params.push(slot);
-      await sql`
-        UPDATE registrants SET ${sql(pairs.join(', '))}
-        WHERE slot_number = ${slot}
-      `;
+    // Self-service: a registrant submits proof (testimoni/post URL) for their own
+    // slot. No admin token required, but only the whitelisted proof columns can be
+    // written, and each update is parameterized (no dynamic SQL string building).
+    const { slot, testimoni_wa_url, post_sosmed_url } = req.body;
+    if (!slot) return res.status(400).json({ error: 'Missing slot' });
+    if (testimoni_wa_url) {
+      await sql`UPDATE registrants SET testimoni_wa_url = ${testimoni_wa_url}, testimoni_uploaded = true WHERE slot_number = ${slot}`;
+    }
+    if (post_sosmed_url) {
+      await sql`UPDATE registrants SET post_sosmed_url = ${post_sosmed_url}, post_uploaded = true WHERE slot_number = ${slot}`;
     }
     return res.json({ success: true });
   }
 
   if (req.method === 'POST' && action === 'mark-live') {
     const { slot, password } = req.body;
-    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
     await sql`UPDATE registrants SET status = 'live' WHERE slot_number = ${slot}`;
     return res.json({ success: true, closingUrl: `${process.env.VERCEL_URL || 'https://awd-yss9.vercel.app'}/#/closing/${slot}` });
   }
 
   if (req.method === 'POST' && action === 'update-status') {
     const { id, status, password } = req.body;
-    if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
     await sql`UPDATE registrants SET status = ${status} WHERE id = ${id}`;
     return res.json({ success: true });
   }

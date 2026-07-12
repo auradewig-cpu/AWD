@@ -9,7 +9,6 @@ import {
   AdminSaveBar,
 } from '@/admin/components';
 import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage, type HeroContent } from '@/admin/storage';
-import { ADMIN_CREDENTIALS } from '@/admin/config';
 import { DEFAULT_HERO } from '@/app/components/sections/Hero';
 
 export function AdminHero() {
@@ -29,7 +28,7 @@ export function AdminHero() {
   async function handleSave() {
     setSaving(true);
     setSaveError(null);
-    const ok = await saveToServer(STORAGE_KEYS.HERO, form, ADMIN_CREDENTIALS.password);
+    const ok = await saveToServer(STORAGE_KEYS.HERO, form);
     if (ok) {
       saveToStorage(STORAGE_KEYS.HERO, form);
       window.dispatchEvent(new Event('awd-hero-updated'));

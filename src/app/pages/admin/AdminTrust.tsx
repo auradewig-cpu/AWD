@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { AdminCard, AdminTextarea, AdminButton, AdminToggle, AdminSaveBar } from '@/admin/components';
 import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage, type TrustContent } from '@/admin/storage';
-import { ADMIN_CREDENTIALS } from '@/admin/config';
 import { DEFAULT_TRUST } from '@/app/components/sections/TrustBar';
 
 export function AdminTrust() {
@@ -22,7 +21,7 @@ export function AdminTrust() {
   async function handleSave() {
     setSaving(true);
     setSaveError(null);
-    const ok = await saveToServer(STORAGE_KEYS.TRUST, form, ADMIN_CREDENTIALS.password);
+    const ok = await saveToServer(STORAGE_KEYS.TRUST, form);
     if (ok) {
       saveToStorage(STORAGE_KEYS.TRUST, form);
       window.dispatchEvent(new Event('awd-trust-updated'));

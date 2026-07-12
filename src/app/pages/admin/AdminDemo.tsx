@@ -127,7 +127,7 @@ export function AdminDemo() {
   }
 
   async function handleSave() {
-    const ok = await saveToServer(STORAGE_KEYS.DEMO, data, 'awd123');
+    const ok = await saveToServer(STORAGE_KEYS.DEMO, data);
     if (ok) {
       setDirty(false);
       setSaved(true);

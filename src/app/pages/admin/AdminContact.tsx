@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ExternalLink, Plus, X } from 'lucide-react';
 import { AdminCard, AdminInput, AdminTextarea, AdminButton, AdminSaveBar } from '@/admin/components';
 import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage, type ContactContent } from '@/admin/storage';
-import { ADMIN_CREDENTIALS } from '@/admin/config';
 import { DEFAULT_CONTACT } from '@/app/components/sections/Contact';
 
 export function AdminContact() {
@@ -50,7 +49,7 @@ export function AdminContact() {
   async function handleSave() {
     setSaving(true);
     setSaveError(null);
-    const ok = await saveToServer(STORAGE_KEYS.CONTACT, form, ADMIN_CREDENTIALS.password);
+    const ok = await saveToServer(STORAGE_KEYS.CONTACT, form);
     if (ok) {
       saveToStorage(STORAGE_KEYS.CONTACT, form);
       window.dispatchEvent(new Event('awd-contact-updated'));

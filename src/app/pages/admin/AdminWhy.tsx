@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ExternalLink, Plus, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { AdminCard, AdminInput, AdminTextarea, AdminButton, AdminToggle, AdminSaveBar } from '@/admin/components';
 import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage, type WhyContent, type WhyRow } from '@/admin/storage';
-import { ADMIN_CREDENTIALS } from '@/admin/config';
 import { DEFAULT_WHY } from '@/app/components/sections/WhyAWD';
 
 function withSequentialOrder(rows: WhyRow[]): WhyRow[] {
@@ -63,7 +62,7 @@ export function AdminWhy() {
     setSaving(true);
     setSaveError(null);
     const data = { ...form, rows: withSequentialOrder(form.rows) };
-    const ok = await saveToServer(STORAGE_KEYS.WHY, data, ADMIN_CREDENTIALS.password);
+    const ok = await saveToServer(STORAGE_KEYS.WHY, data);
     if (ok) {
       saveToStorage(STORAGE_KEYS.WHY, data);
       window.dispatchEvent(new Event('awd-why-updated'));

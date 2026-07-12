@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ExternalLink, Plus, ChevronUp, ChevronDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { AdminCard, AdminInput, AdminTextarea, AdminButton, AdminToggle, AdminSaveBar } from '@/admin/components';
 import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage, type ProcessContent, type ProcessStep } from '@/admin/storage';
-import { ADMIN_CREDENTIALS } from '@/admin/config';
 import { DEFAULT_PROCESS, PROCESS_ICON_MAP } from '@/app/components/sections/ProcessSteps';
 
 const ICON_NAMES = Object.keys(PROCESS_ICON_MAP);
@@ -69,7 +68,7 @@ export function AdminProcess() {
     setSaving(true);
     setSaveError(null);
     const content: ProcessContent = { steps: withSequentialOrder(steps) };
-    const ok = await saveToServer(STORAGE_KEYS.PROCESS, content, ADMIN_CREDENTIALS.password);
+    const ok = await saveToServer(STORAGE_KEYS.PROCESS, content);
     if (ok) {
       saveToStorage(STORAGE_KEYS.PROCESS, content);
       window.dispatchEvent(new Event('awd-process-updated'));

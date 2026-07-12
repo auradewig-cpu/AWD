@@ -6,6 +6,7 @@ import { DEMO_DATA, DEMO_DATA_VERSION } from '@/data/demoData';
 
 export const STORAGE_KEYS = {
   ADMIN_AUTH: 'awd_admin_auth',
+  ADMIN_TOKEN: 'awd_admin_token',
   HERO: 'awd_content_hero',
   PRICING: 'awd_content_pricing',
   PROCESS: 'awd_content_process',
@@ -71,12 +72,40 @@ export async function loadFromServer<T>(key: string, fallback: T): Promise<T> {
   }
 }
 
-export async function saveToServer<T>(key: string, value: T, password: string): Promise<boolean> {
+// ─── Admin session token (never the password) ────────────────────────────────
+
+export function getAdminToken(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN);
+  } catch {
+    return null;
+  }
+}
+
+export function setAdminToken(token: string): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.ADMIN_TOKEN, token);
+  } catch {}
+}
+
+export function clearAdminToken(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.ADMIN_TOKEN);
+  } catch {}
+}
+
+// Standard auth header for any admin-guarded API call.
+export function authHeaders(): Record<string, string> {
+  const token = getAdminToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export async function saveToServer<T>(key: string, value: T): Promise<boolean> {
   try {
     const res = await fetch(`/api/content?key=${key}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ value, password }),
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({ value }),
     });
     const data = await res.json();
     if (data.success) {

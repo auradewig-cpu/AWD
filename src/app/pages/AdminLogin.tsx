@@ -18,18 +18,22 @@ export function AdminLogin() {
     if (isAuthenticated) navigate('/admin/dashboard', { replace: true });
   }, [isAuthenticated, navigate]);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
-    setTimeout(() => {
-      if (login(email, password)) {
+    try {
+      const ok = await login(email, password);
+      if (ok) {
         navigate('/admin/dashboard');
       } else {
         setError('Email atau password tidak cocok.');
         setLoading(false);
       }
-    }, 800);
+    } catch {
+      setError('Gagal terhubung ke server. Coba lagi.');
+      setLoading(false);
+    }
   }
 
   const inputStyle: React.CSSProperties = {
@@ -184,8 +188,7 @@ export function AdminLogin() {
           paddingTop: 16, textAlign: 'center',
         }}>
           <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.25)', lineHeight: 1.7 }}>
-            Demo: admin@awd.com / awd123<br />
-            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.15)' }}>Placeholder mockup — ganti dengan autentikasi asli di production</span>
+            Akses terbatas — hubungi admin untuk kredensial.
           </p>
         </div>
       </motion.div>

@@ -130,18 +130,26 @@ function LiveFeed() {
 
   if (!entries.length) return null;
 
+  // Render as plain React text (never dangerouslySetInnerHTML) so registrant-
+  // supplied name/city cannot inject HTML/script (stored XSS). Phone numbers are
+  // never shown publicly.
   const items = entries.map((e) => {
     const pkg = e.package === 'starter' ? 'STARTER' : 'BUSINESS';
-    return `🟢 Baru saja: ${e.name} dari ${e.city} (${e.wa}) daftar ${pkg} #${e.slot_number?.split('-').pop() || ''}`;
+    const slot = e.slot_number?.split('-').pop() || '';
+    return `🟢 Baru saja: ${e.name} dari ${e.city} daftar ${pkg} #${slot}`;
   });
-  const joined = items.join(' &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; ');
 
   return (
     <div style={{ marginTop: 32, overflow: 'hidden', position: 'relative' }}>
       <div style={{ background: 'rgba(0,200,83,0.06)', border: '1px solid rgba(0,200,83,0.15)', borderRadius: 12, padding: '10px 0', overflow: 'hidden' }}>
         <div style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
           <div style={{ display: 'inline-block', paddingLeft: '100%', animation: 'promo-ticker 20s linear infinite', fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
-            <span dangerouslySetInnerHTML={{ __html: joined }} />
+            {items.map((text, i) => (
+              <span key={i}>
+                {i > 0 && <span style={{ opacity: 0.4 }}>{'   •   '}</span>}
+                {text}
+              </span>
+            ))}
           </div>
         </div>
       </div>

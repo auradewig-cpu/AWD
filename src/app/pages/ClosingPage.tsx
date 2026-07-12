@@ -48,7 +48,7 @@ export function ClosingPage() {
       const res = await fetch('/api/promo?action=update-closing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slot: slotNumber, password: 'awd123', testimoni_wa_url: testimoniUrl, post_sosmed_url: postUrl }),
+        body: JSON.stringify({ slot: slotNumber, testimoni_wa_url: testimoniUrl, post_sosmed_url: postUrl }),
       });
       const d = await res.json();
       if (d.success) setSubmitted(true);

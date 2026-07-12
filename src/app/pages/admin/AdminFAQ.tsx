@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ExternalLink, Plus, ChevronUp, ChevronDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { AdminInput, AdminTextarea, AdminButton, AdminToggle, AdminSaveBar } from '@/admin/components';
 import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, resetStorage, type FaqContent, type FaqItem } from '@/admin/storage';
-import { ADMIN_CREDENTIALS } from '@/admin/config';
 import { DEFAULT_FAQ } from '@/app/components/sections/FAQ';
 
 function withSequentialOrder(items: FaqItem[]): FaqItem[] {
@@ -59,7 +58,7 @@ export function AdminFAQ() {
     setSaving(true);
     setSaveError(null);
     const content: FaqContent = { items: withSequentialOrder(items) };
-    const ok = await saveToServer(STORAGE_KEYS.FAQ, content, ADMIN_CREDENTIALS.password);
+    const ok = await saveToServer(STORAGE_KEYS.FAQ, content);
     if (ok) {
       saveToStorage(STORAGE_KEYS.FAQ, content);
       window.dispatchEvent(new Event('awd-faq-updated'));

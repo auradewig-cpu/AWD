@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ExternalLink, RotateCcw } from 'lucide-react';
 import { AdminButton, AdminSaveBar } from '@/admin/components';
-import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, loadFromServer, resetStorage, type PricingContent, type PricingTier } from '@/admin/storage';
-import { ADMIN_CREDENTIALS } from '@/admin/config';
+import { STORAGE_KEYS, loadFromStorage, saveToStorage, saveToServer, loadFromServer, resetStorage, authHeaders, type PricingContent, type PricingTier } from '@/admin/storage';
 import { DEFAULT_PRICING } from '@/app/components/sections/PricingSection';
 import { AdminPricingTierEditor } from './AdminPricingTierEditor';
 
@@ -49,7 +48,7 @@ export function AdminPricing() {
   async function handleSave() {
     setSaving(true);
     setSaveError(null);
-    const ok = await saveToServer(STORAGE_KEYS.PRICING, form, ADMIN_CREDENTIALS.password);
+    const ok = await saveToServer(STORAGE_KEYS.PRICING, form);
     if (ok) {
       saveToStorage(STORAGE_KEYS.PRICING, form);
       window.dispatchEvent(new Event('awd-pricing-updated'));
@@ -74,15 +73,15 @@ export function AdminPricing() {
     try {
       await fetch('/api/content?key=pricing', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: null, password: 'Surakarta93' }),
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ value: null }),
       });
     } catch {}
     location.reload();
   }
 
   async function resetPricingToDefault() {
-    const ok = await saveToServer(STORAGE_KEYS.PRICING, DEFAULT_PRICING, ADMIN_CREDENTIALS.password);
+    const ok = await saveToServer(STORAGE_KEYS.PRICING, DEFAULT_PRICING);
     if (ok) {
       saveToStorage(STORAGE_KEYS.PRICING, DEFAULT_PRICING);
       setForm(DEFAULT_PRICING);
